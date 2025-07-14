@@ -2,6 +2,7 @@ const Router = require('express')
 const router = new Router()
 const userController = require('../controllers/userController')
 const { rateLimit } = require('express-rate-limit')
+const authMiddleware = require('../middleware/authMiddleware')
 
 const smsRateLimit = rateLimit({
 	windowMs: 2 * 60 * 1000, // 2 minutes
@@ -20,6 +21,6 @@ router.post('/send-code', smsRateLimit, userController.sendCode)
 router.post('/registration', userController.registration)
 router.post('/login', userController.login)
 router.post('/logout', userController.logout)
-router.get('/auth', userController.check)
+router.get('/auth', authMiddleware, userController.check)
 
 module.exports = router

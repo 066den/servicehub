@@ -145,9 +145,10 @@ class AuthService {
 			attempts: verificationCode.attempts + 1,
 		})
 
-		let user = await User.findOne({
+		const user = await User.findOne({
 			where: { phoneNormalized: normalizedPhone },
 		})
+
 		if (!user) {
 			user = await User.create({
 				phone: phone,

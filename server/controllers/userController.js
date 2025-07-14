@@ -2,6 +2,7 @@ const { User } = require('../models/models')
 const i18n = require('../utils/i18n')
 const { validatePhoneNumber } = require('../utils/phoneUtils')
 const authService = require('../services/authService')
+const authMiddleware = require('../middleware/authMiddleware')
 
 class UserController {
 	async sendCode(req, res) {
