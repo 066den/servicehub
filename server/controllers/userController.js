@@ -42,6 +42,8 @@ class UserController {
 				.json({ error: i18n.t('errors.first_name_required') })
 		}
 
+		// Проверка на наличие пользователя в базе данных
+
 		try {
 			const result = await authService.verifyCode(
 				phone,
