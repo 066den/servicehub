@@ -41,12 +41,37 @@ const VerificationCode = sequelize.define('verification_code', {
 
 const Session = sequelize.define('session', {
 	id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-	userId: { type: DataTypes.INTEGER, references: { model: User, key: 'id' } },
+	userId: {
+		type: DataTypes.INTEGER,
+		references: { model: User, key: 'id' },
+		field: 'user_id',
+	},
 	token: { type: DataTypes.STRING, allowNull: false },
-	refreshToken: { type: DataTypes.STRING, allowNull: false },
-	ipAddress: { type: DataTypes.STRING(45) },
-	userAgent: { type: DataTypes.STRING(255) },
+	refreshToken: {
+		type: DataTypes.STRING,
+		allowNull: false,
+		field: 'refresh_token',
+	},
+	deviceInfo: { type: DataTypes.TEXT, field: 'device_info' },
+	ipAddress: { type: DataTypes.STRING(45), field: 'ip_address' },
+	userAgent: { type: DataTypes.TEXT, field: 'user_agent' },
+	isActive: { type: DataTypes.BOOLEAN, defaultValue: true, field: 'is_active' },
 	expiresAt: { type: DataTypes.DATE, allowNull: false },
+	lastActivityAt: {
+		type: DataTypes.DATE,
+		defaultValue: DataTypes.NOW,
+		field: 'last_activity_at',
+	},
+	deactivatedReason: {
+		type: DataTypes.ENUM(
+			'manual_logout',
+			'session_limit_exceeded',
+			'replaced_by_new_session',
+			'expired',
+			'security_logout'
+		),
+		field: 'deactivated_reason',
+	},
 	createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
 	updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
 })

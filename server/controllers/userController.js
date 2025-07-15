@@ -94,7 +94,24 @@ class UserController {
 	}
 
 	async check(req, res) {
-		const { phone } = req.body
+		if (req.user) {
+			res.json({
+				user: {
+					id: req.user.id,
+					phone: req.user.phone,
+					phoneNormalized: req.user.phoneNormalized,
+					isVerified: req.user.isVerified,
+				},
+				session: {
+					id: req.session.id,
+					token: req.session.token,
+					lastActivityAt: req.session.lastActivityAt,
+					expiresAt: req.session.expiresAt,
+				},
+			})
+		} else {
+			res.status(401).json({ error: 'Unauthorized' })
+		}
 	}
 }
 

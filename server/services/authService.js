@@ -13,10 +13,6 @@ const {
 } = require('../utils/phoneUtils')
 const TurboSMSService = require('./turboSmsService')
 
-const verifyToken = token => {
-	return jwt.verify(token, process.env.JWT_SECRET)
-}
-
 class AuthService {
 	async sendVerificationCode(phone, ipAddress, language = 'uk') {
 		// validate phone
