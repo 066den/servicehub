@@ -1,0 +1,51 @@
+$color-primary: #2563eb;
+$color-primary-hover: #1d4ed8;
+$color-primary-light: #1e40af;
+$color-accent: #f59e0b;
+$color-accent-hover: #d97706;
+$color-light-gray: #f8fafc;
+$color-gray: #94a3b8;
+$color-dark-gray: #1f2937;
+$color-success: #10b981;
+$color-error: #ef4444;
+$color-error-light: #fef2f2;
+$color-black: #070708;
+$color-white: #ffffff;
+$color-text-light: #d1d5db;
+$color-text-secondary: #6b7280;
+$color-text-tertiary: #374151;
+$color-input-background: #fafafa;
+$color-input-border: #e5e7eb;
+$color-input-placeholder: #9ca3af;
+
+:root {
+	--color-text: #{$color-dark-gray};
+
+	--theme-background-color: #{$color-light-gray};
+	--color-primary: #{$color-primary};
+	--color-primary-hover: #{$color-primary-hover};
+	--color-primary-light: #{$color-primary-light};
+	--color-accent: #{$color-accent};
+	--color-accent-hover: #{$color-accent-hover};
+	--color-light-gray: #{$color-light-gray};
+	--color-gray: #{$color-gray};
+	--color-dark-gray: #{$color-dark-gray};
+	--color-success: #{$color-success};
+	--color-error: #{$color-error};
+	--color-error-light: #{$color-error-light};
+	--color-black: #{$color-black};
+	--color-white: #{$color-white};
+	--color-text-light: #{$color-text-light};
+	--color-text-secondary: #{$color-text-secondary};
+	--color-links: #{$color-text-secondary};
+
+	--color-text-label: #{$color-text-tertiary};
+	--color-input-border: #{$color-input-border};
+	--color-input-background: #{$color-input-background};
+	--color-input-placeholder: #{$color-input-placeholder};
+
+	--color-primary-shadow: #{rgba($color-primary, 0.3)};
+	--color-accent-shadow: #{rgba($color-accent, 0.3)};
+	--color-default-shadow: rgba(0, 0, 0, 0.1);
+}
+
