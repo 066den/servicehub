@@ -28,12 +28,6 @@ const CodeDigits = ({ field, form: { setFieldValue } }: FieldProps) => {
 		}
 
 		setFieldValue(name, newCode.join(''))
-
-		// if (newCode.every(digit => digit !== '')) {
-		// 	setTimeout(() => {
-		// 		onSubmit(newCode.join(''))
-		// 	}, 300)
-		// }
 	}
 
 	const handleKeyDown = (

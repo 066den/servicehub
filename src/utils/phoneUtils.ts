@@ -13,7 +13,7 @@ const UKRAINE_MOBILE_CODE = [
 	'099',
 ]
 
-const normalizePhone = (phone: string) => {
+export const normalizePhone = (phone: string) => {
 	const cleaned = phone.replace(/\D/g, '')
 	if (cleaned.startsWith('380') && cleaned.length === 12) {
 		return '+' + cleaned
@@ -25,7 +25,7 @@ const normalizePhone = (phone: string) => {
 	return '+' + cleaned
 }
 
-const validatePhone = (phone: string) => {
+export const validatePhone = (phone: string) => {
 	const normalizedPhone = normalizePhone(phone)
 
 	if (!/^\+380\d{9}$/.test(normalizedPhone)) {
@@ -36,4 +36,23 @@ const validatePhone = (phone: string) => {
 	return UKRAINE_MOBILE_CODE.includes(operatorCode)
 }
 
-export { validatePhone, normalizePhone }
+export const getUkrainianOperator = (phoneNumber: string) => {
+	const normalized = normalizePhone(phoneNumber)
+	const operatorCode = normalized.slice(3, 6)
+
+	const operators = {
+		'050': 'Kyivstar',
+		'063': 'Vodafone',
+		'066': 'Kyivstar',
+		'067': 'Kyivstar',
+		'068': 'Kyivstar',
+		'073': 'Lifecell',
+		'093': 'Lifecell',
+		'095': 'МТС Украина',
+		'096': 'Київстар',
+		'097': 'Київстар',
+		'098': 'Київстар',
+		'099': 'МТС Украина',
+	} as Record<string, string>
+	return operators[operatorCode] ?? 'Неизвестный оператор'
+}

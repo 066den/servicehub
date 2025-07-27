@@ -1,0 +1,18 @@
+.user-avatar {
+	width: 40px;
+	height: 40px;
+	background: var(--color-avatar-background);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-size: 0.95em;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+	&:hover {
+		box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+	}
+}

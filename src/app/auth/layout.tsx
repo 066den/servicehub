@@ -16,25 +16,27 @@ export default function AuthLayout({
 						<div className='logo white'>
 							Service<div className='hub-icon'></div>Hub
 						</div>
-						<p className='auth-visual-text'>{t('authVisual.title')}</p>
-						<div className='auth-stats'>
-							{/* <div className='stat-item'>
-								<span className='stat-number'>15K+</span>
-								<div className='stat-label'>Исполнителей</div>
-							</div>
-							<div className='stat-item'>
-								<span className='stat-number'>50K+</span>
-								<div className='stat-label'>Клиентов</div>
-							</div> */}
-							<div className='stat-item'>
-								<span className='stat-number'>99.9%</span>
-								<div className='stat-label'>{t('authStats.security')}</div>
-							</div>
-							<div className='stat-item'>
-								<span className='stat-number'>5 сек</span>
-								<div className='stat-label'>{t('authStats.loginTime')}</div>
-							</div>
-						</div>
+						<h2>{t('authVisual.title')}</h2>
+						<p className='auth-visual-text'>{t('authVisual.subtitle')}</p>
+
+						<ul className='features-list'>
+							<li>
+								<div className='feature-icon'>✨</div>
+								<span>Перевірені фахівці</span>
+							</li>
+							<li>
+								<div className='feature-icon'>🛡️</div>
+								<span>Безпечні платежі</span>
+							</li>
+							<li>
+								<div className='feature-icon'>⭐</div>
+								<span>Система рейтингів</span>
+							</li>
+							<li>
+								<div className='feature-icon'>📱</div>
+								<span>Зручний інтерфейс</span>
+							</li>
+						</ul>
 					</div>
 					<div className='auth-form'>{children}</div>
 				</div>

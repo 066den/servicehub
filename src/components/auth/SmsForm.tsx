@@ -1,6 +1,6 @@
 'use client'
-
-import { Formik } from 'formik'
+import { useRef } from 'react'
+import { Formik, FormikProps } from 'formik'
 import { Field, Form } from 'formik'
 import { useTranslations } from 'next-intl'
 import * as Yup from 'yup'
@@ -8,52 +8,78 @@ import Button from '../ui/Button'
 import Link from 'next/link'
 import CodeDigits from '../ui/inputs/CodeDigits'
 import Input from '../ui/inputs/Input'
-import { SendResult } from '@/app/auth/sign-in/page'
 import { formatPhoneNumber } from '@/utils/phoneNumber'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import { containerVariants } from '../ui/animate/variants'
+import { useAuthStore } from '@/stores/authStore'
+import { useSession } from 'next-auth/react'
+import Notification from '../ui/Notification'
+import { useResendTimer } from '@/hooks/useResendTimer'
 
 const initialValues = {
 	code: '',
 	firstName: '',
+	lastName: '',
 }
 
-type Props = {
-	sendResult: SendResult
-	setSendResult: (sendResult: SendResult) => void
-}
+const SmsForm = () => {
+	const t = useTranslations()
 
-const SmsForm = ({ sendResult, setSendResult }: Props) => {
-	const t = useTranslations('Auth')
 	const tMain = useTranslations()
+	const formikRef = useRef<FormikProps<typeof initialValues>>(null)
+	const { setStep, verifyCode, error, isLoading, clearError } = useAuthStore()
+	const { canResend, formattedTime, resendCode } = useResendTimer()
+	const { data: session } = useSession()
 
-	const { normalizedPhone } = sendResult
+	const isRegistered = session?.user?.id && session?.user?.id > 0
 
 	const validationSchema = Yup.object().shape({
-		firstName: Yup.string().required(t('smsForm.firstNameRequired')),
-		code: Yup.string().required(t('smsForm.codeRequired')),
+		firstName: Yup.string().when([], {
+			is: () => isRegistered,
+			then: schema => schema.notRequired(),
+			otherwise: schema => schema.required(t('Form.firstNameRequired')),
+		}),
+		code: Yup.string()
+			.matches(/^\d{4}$/, t('Auth.smsForm.codeInvalid'))
+			.required(t('Form.codeRequired')),
 	})
 
 	const onSubmit = (values: typeof initialValues) => {
-		console.log(values)
+		verifyCode(values.code, values.firstName, values.lastName)
+	}
+
+	const handleResendCode = async () => {
+		formikRef.current?.setFieldValue('code', '')
+		try {
+			clearError()
+			await resendCode()
+		} catch (error) {
+			console.error('Ошибка повторной отправки:', error)
+		}
 	}
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.3 }}
+			variants={containerVariants}
+			initial='hidden'
+			animate='visible'
+			exit='hidden'
 		>
-			<Button className='back-button' onClick={() => setSendResult({})} isLink>
-				← Изменить номер
+			<Button className='back-button' onClick={() => setStep('phone')} isLink>
+				← {t('Auth.phoneForm.back')}
 			</Button>
-			<h2 className='form-title'>{t('smsForm.title')}</h2>
+			<h2 className='form-title'>{t('Auth.smsForm.title')}</h2>
 			<p className='form-subtitle'>
-				{t('smsForm.subtitle')}
+				{t('Auth.smsForm.subtitle')}
 				<br />
-				<strong>{formatPhoneNumber(normalizedPhone || '')}</strong>
+				<strong>
+					{formatPhoneNumber(session?.user.phoneNormalized || '')}
+				</strong>
 			</p>
-			<div className='error-message' id='phone-error'></div>
-			<div className='success-message' id='phone-success'></div>
+
+			<AnimatePresence>
+				{error && <Notification message={t('Error.' + error)} type='error' />}
+			</AnimatePresence>
 
 			<Formik
 				initialValues={initialValues}
@@ -62,43 +88,55 @@ const SmsForm = ({ sendResult, setSendResult }: Props) => {
 			>
 				{({ isValid, dirty, isSubmitting, errors }) => (
 					<Form>
-						<Field
-							component={Input}
-							name='firstName'
-							label={t('smsForm.firstName')}
-							placeholder={t('smsForm.firstName')}
-							errorMessage={errors.firstName}
-							className={errors.firstName ? 'error' : ''}
-						/>
-
-						<Field
-							component={Input}
-							name='lastName'
-							label={t('smsForm.lastName')}
-							placeholder={t('smsForm.lastName')}
-						/>
+						{session && !isRegistered && (
+							<>
+								<Field
+									component={Input}
+									name='firstName'
+									label={t('Form.firstName')}
+									placeholder={t('Form.firstName')}
+									errorMessage={errors.firstName}
+									className={errors.firstName ? 'error' : ''}
+								/>
+								<Field
+									component={Input}
+									name='lastName'
+									label={t('Form.lastName')}
+									placeholder={t('Form.lastName')}
+								/>
+							</>
+						)}
 						<Field component={CodeDigits} name='code' />
 
 						<div className='resend-timer'>
-							{t('smsForm.resendTimer')} <span id='timer'>60</span> сек
-							<br />
-							<Button isText onClick={() => {}}>
-								{t('smsForm.resend')}
-							</Button>
+							{canResend ? (
+								<Button isText onClick={handleResendCode}>
+									{t('Auth.smsForm.resend')}
+								</Button>
+							) : (
+								<>
+									{t('Auth.smsForm.resendTimer')} <span>{formattedTime}</span>{' '}
+									сек
+								</>
+							)}
 						</div>
 						<Button
 							fullWidth
+							color='primary'
 							size='md'
 							type='submit'
 							disabled={isSubmitting || !isValid || !dirty}
+							loading={isLoading}
 							className='mt-3 mb-4'
 						>
-							{t('smsForm.confirm')}
+							{t('Auth.smsForm.confirm')}
 						</Button>
 						<div className='form-footer'>
-							{t('phoneForm.termsInfo', { action: t('smsForm.confirm') })}{' '}
-							<Link href='#'>{t('phoneForm.terms')}</Link> {tMain('And')}{' '}
-							<Link href='#'>{t('phoneForm.privacy')}</Link>.
+							{t('Auth.phoneForm.termsInfo', {
+								action: t('Auth.smsForm.confirm'),
+							})}
+							<Link href='#'>{t('Auth.phoneForm.terms')}</Link> {tMain('And')}{' '}
+							<Link href='#'>{t('Auth.phoneForm.privacy')}</Link>.
 						</div>
 					</Form>
 				)}

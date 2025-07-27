@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google'
 
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getTranslations } from 'next-intl/server'
+import { AuthProvider } from '@/components/providers/AuthProvider'
+import NotificationSystem from '@/components/main/NotificationSystem'
 
 import '../styles/globals.scss'
 
@@ -29,8 +31,14 @@ export default async function RootLayout({
 
 	return (
 		<html lang={locale}>
-			<body className={inter.variable}>
-				<NextIntlClientProvider>{children}</NextIntlClientProvider>
+			<body className={`${inter.variable} custom-scroll`}>
+				<div id='portal_root' />
+				<AuthProvider>
+					<NextIntlClientProvider>
+						{children}
+						<NotificationSystem />
+					</NextIntlClientProvider>
+				</AuthProvider>
 			</body>
 		</html>
 	)

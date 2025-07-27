@@ -1,10 +1,20 @@
+@keyframes float {
+	0%,
+	100% {
+		transform: translateY(0px) rotate(0deg);
+	}
+	50% {
+		transform: translateY(-20px) rotate(180deg);
+	}
+}
+
 .auth-content {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	padding: 1.25rem;
 	min-height: 100vh;
-	background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+	background: var(--theme-background-color-secondary);
 }
 
 .auth-container {
@@ -13,7 +23,7 @@
 	min-height: 37.5rem;
 	max-width: 56.25rem;
 	background-color: var(--color-white);
-	border-radius: 1.25rem;
+	border-radius: var(--border-radius-default-bigger);
 	overflow: hidden;
 	box-shadow: 0 1.25rem 3.75rem var(--color-default-shadow);
 }
@@ -44,12 +54,48 @@
 			height: 0.875rem;
 		}
 	}
+	h2 {
+		font-weight: 800;
+	}
+	&::before {
+		content: '';
+		position: absolute;
+		top: -50%;
+		right: -50%;
+		width: 160%;
+		height: 160%;
+		background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="1" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="1" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+		animation: float 20s ease-in-out infinite;
+	}
 }
 
 .auth-visual-text {
 	font-size: 1.25rem;
 	line-height: 1.6;
 	margin-bottom: 1.875rem;
+}
+
+.features-list {
+	list-style: none;
+	position: relative;
+	li {
+		display: flex;
+		align-items: center;
+		gap: 1.25rem;
+		margin-bottom: 1.25rem;
+		font-size: 1em;
+		opacity: 0.9;
+	}
+	.feature-icon {
+		width: 1.875rem;
+		height: 1.875rem;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
 }
 
 .auth-stats {
@@ -78,20 +124,6 @@
 	padding: 3rem 2.5rem;
 }
 
-.info-message {
-	background: #eff6ff;
-	color: var(--color-primary);
-	padding: 0.75rem 1rem;
-	border-radius: 0.5rem;
-	border-left: 0.25rem solid var(--color-primary);
-	margin-bottom: 1.25rem;
-	font-size: 0.875em;
-	display: flex;
-	align-items: center;
-	gap: 0.625rem;
-	line-height: 1.4;
-}
-
 .Button.is-link {
 	font-size: 0.875rem;
 }
@@ -115,7 +147,7 @@
 		order: 2;
 	}
 
-	.auth-forms {
+	.auth-form {
 		padding: 2.5rem 1.875rem;
 		order: 1;
 	}
@@ -150,7 +182,7 @@
 		border-radius: 0.9375rem;
 	}
 
-	.auth-forms {
+	.auth-form {
 		padding: 1.875rem 1.25rem;
 	}
 

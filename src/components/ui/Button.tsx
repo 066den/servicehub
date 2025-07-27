@@ -1,16 +1,9 @@
 'use client'
 
-import React, {
-	ReactNode,
-	RefObject,
-	useCallback,
-	useRef,
-	useState,
-} from 'react'
+import React, { ReactNode, RefObject, useCallback, useRef } from 'react'
 
 import classNames from 'classnames'
-
-const CLICK_DURATION = 400
+import LoadingSpinner from './LoadingSpinner'
 
 type OwnProps = {
 	elRef?: RefObject<HTMLButtonElement>
@@ -27,13 +20,19 @@ type OwnProps = {
 		| 'light'
 		| 'dark'
 		| 'link'
+		| 'outline-white'
+		| 'white'
+		| 'translucent'
+	round?: boolean
 	outline?: boolean
 	fullWidth?: boolean
 	href?: string
 	isLink?: boolean
 	isText?: boolean
+	loading?: boolean
 	disabled?: boolean
 	className?: string
+	ariaLabel?: string
 	allowDisabledClick?: boolean
 	shouldStopPropagation?: boolean
 	withoutTransform?: boolean
@@ -47,29 +46,31 @@ const Button = ({
 	type = 'button',
 	className,
 	size,
-	color = 'primary',
+	color,
 	outline,
 	fullWidth,
 	disabled,
+	loading,
 	isLink,
 	isText,
+	round,
 	allowDisabledClick,
 	shouldStopPropagation,
 	withoutTransform,
 	onClick,
 	elRef,
+	ariaLabel,
 }: OwnProps) => {
 	let elementRef = useRef<HTMLButtonElement>(null)
 	if (elRef) {
 		elementRef = elRef
 	}
 
-	const [isClicked, setIsClicked] = useState(false)
-
 	const fullClassName = classNames('Button', className, size, color, {
 		disabled,
-		clicked: isClicked,
 		outline,
+		loading,
+		round,
 		'not-transformable': withoutTransform,
 		'full-width': fullWidth,
 		'is-link': isLink,
@@ -84,11 +85,6 @@ const Button = ({
 			if (shouldStopPropagation) {
 				event.stopPropagation()
 			}
-
-			setIsClicked(true)
-			setTimeout(() => {
-				setIsClicked(false)
-			}, CLICK_DURATION)
 		},
 		[allowDisabledClick, disabled, onClick, shouldStopPropagation]
 	)
@@ -100,8 +96,10 @@ const Button = ({
 			type={type}
 			disabled={disabled}
 			onClick={handleClick}
+			aria-label={ariaLabel}
 		>
 			{children}
+			{loading && <LoadingSpinner />}
 		</button>
 	)
 }

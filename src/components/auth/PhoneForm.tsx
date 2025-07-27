@@ -6,44 +6,44 @@ import * as Yup from 'yup'
 import InputPhone from '../ui/inputs/InputPhone'
 import Button from '../ui/Button'
 import Link from 'next/link'
-import { SendResult } from '@/app/auth/sign-in/page'
-import { sendCode } from '@/services/methods/auth'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
+
+import Notification from '../ui/Notification'
+import { containerVariants } from '../ui/animate/variants'
+import { useAuthStore } from '@/stores/authStore'
 
 const initialValues = {
 	phone: '',
 }
 
-type Props = {
-	setSendResult: (sendResult: SendResult) => void
-}
-
-const PhoneForm = ({ setSendResult }: Props) => {
-	const t = useTranslations('Auth')
+const PhoneForm = () => {
+	const t = useTranslations()
+	const { setPhone, sendCode, error } = useAuthStore()
 	const tMain = useTranslations()
 
 	const validationSchema = Yup.object().shape({
 		phone: Yup.string()
-			.required(t('phoneForm.phoneRequired'))
-			.matches(/^\d{10}$/, t('phoneForm.phoneFormat')),
+			.required(t('Form.phoneRequired'))
+			.matches(/^\d{10}$/, t('Form.phoneFormat')),
 	})
 
 	const onSubmit = async (values: typeof initialValues) => {
-		const result = await sendCode(values.phone)
-		console.log(values, result)
-		setSendResult(result)
+		setPhone(values.phone)
+		await sendCode(values.phone)
 	}
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.3 }}
+			variants={containerVariants}
+			initial='hidden'
+			animate='visible'
+			exit='hidden'
 		>
-			<h2 className='form-title'>{t('phoneForm.title')}</h2>
-			<p className='form-subtitle'>{t('phoneForm.subtitle')}</p>
-			<div className='error-message' id='phone-error'></div>
-			<div className='success-message' id='phone-success'></div>
+			<h2 className='form-title'>{t('Auth.phoneForm.title')}</h2>
+			<p className='form-subtitle'>{t('Auth.phoneForm.subtitle')}</p>
+			<AnimatePresence>
+				{error && <Notification message={t('Error.' + error)} type='error' />}
+			</AnimatePresence>
 
 			<Formik
 				initialValues={initialValues}
@@ -55,21 +55,25 @@ const PhoneForm = ({ setSendResult }: Props) => {
 						<Field component={InputPhone} name='phone' autoComplete='off' />
 						<div className='info-message'>
 							<span>📱</span>
-							{t('phoneForm.info')}
+							{t('Auth.phoneForm.info')}
 						</div>
+
 						<Button
 							fullWidth
+							color='primary'
 							size='md'
 							type='submit'
 							disabled={isSubmitting || !isValid || !dirty}
 							className='mt-3 mb-4'
 						>
-							{t('phoneForm.getCode')}
+							{t('Auth.phoneForm.getCode')}
 						</Button>
 						<div className='form-footer'>
-							{t('phoneForm.termsInfo', { action: t('phoneForm.getCode') })}{' '}
-							<Link href='#'>{t('phoneForm.terms')}</Link> {tMain('And')}{' '}
-							<Link href='#'>{t('phoneForm.privacy')}</Link>.
+							{t('Auth.phoneForm.termsInfo', {
+								action: t('Auth.phoneForm.getCode'),
+							})}
+							<Link href='#'>{t('Auth.phoneForm.terms')}</Link> {tMain('And')}{' '}
+							<Link href='#'>{t('Auth.phoneForm.privacy')}</Link>.
 						</div>
 					</Form>
 				)}

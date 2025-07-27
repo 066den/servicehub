@@ -12,6 +12,7 @@
 	border: none;
 	transition: all 0.3s ease;
 	cursor: pointer;
+	position: relative;
 	&:hover {
 		text-decoration: none;
 		transform: translateY(-2px);
@@ -39,13 +40,56 @@
 			box-shadow: 0 0.5rem 1.5625rem var(--color-accent-shadow);
 		}
 	}
+	&.danger {
+		background-color: var(--color-error);
+		color: #fff;
+		&:hover {
+			background-color: var(--color-error-hover);
+		}
+	}
+	&.white {
+		background-color: var(--color-white);
+		color: var(--color-primary);
+		&:hover {
+			background-color: var(--color-light-gray);
+			box-shadow: 0 8px 25px var(--color-opacity-white-30);
+		}
+	}
 	&.outline {
 		background-color: transparent;
 		color: var(--color-primary);
-		border: 2px solid var(--color-primary);
+		border: 2px solid var(--color-opacity-primary-30);
 		&:hover {
-			background-color: var(--color-primary);
-			color: #fff;
+			background-color: var(--color-opacity-primary-10);
+			border-color: var(--color-primary);
+		}
+		&.danger {
+			color: var(--color-error);
+			border-color: var(--color-error);
+		}
+	}
+	&.outline-white {
+		background-color: transparent;
+		color: var(--color-white);
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		&:hover {
+			background-color: rgba(255, 255, 255, 0.1);
+			border-color: var(--color-white);
+			transform: none;
+		}
+	}
+	&.light {
+		background-color: var(--color-light-gray);
+		color: var(--color-primary);
+		&:hover {
+			background-color: var(--color-light-gray-hover);
+		}
+	}
+	&.translucent {
+		background-color: transparent;
+		color: var(--color-primary);
+		&:hover {
+			background-color: var(--color-light-gray-hover);
 		}
 	}
 	&.md {
@@ -95,10 +139,56 @@
 	}
 	&.disabled {
 		cursor: not-allowed;
-		opacity: 0.85;
+		opacity: 0.75;
 		&:hover {
 			transform: none;
 			box-shadow: none;
+		}
+		&.loading {
+			color: transparent;
+			background-color: var(--color-input-placeholder);
+		}
+	}
+
+	&.round {
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 50%;
+		padding: 0;
+		&:hover {
+			transform: none;
+		}
+	}
+
+	&.location-selector {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		border-radius: 0.75rem;
+		border: 2px solid var(--color-input-border);
+		background-color: var(--color-light-gray);
+		transition: var(--hover-transition);
+		&:hover {
+			background-color: var(--color-light-gray-hover);
+			border-color: var(--color-primary);
+			transform: none;
+		}
+		.location-city {
+			font-size: 0.875rem;
+			font-weight: 600;
+			text-align: left;
+			color: var(--color-dark-gray);
+		}
+	}
+
+	&.value-clear {
+		position: absolute;
+		right: 0.25rem;
+		top: 50%;
+		transform: translateY(-50%);
+		&:hover {
+			transform: translateY(-50%);
 		}
 	}
 }

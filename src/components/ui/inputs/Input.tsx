@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 
 import { FieldProps } from 'formik'
 import classNames from 'classnames'
+import { motion, Variants } from 'motion/react'
+import { shakeVariants } from '../animate/variants'
 
 type OwnProps = {
 	label?: string
@@ -40,22 +42,24 @@ const Input = ({
 	}, [errors, errorMessage, name])
 
 	return (
-		<div className='form-group'>
+		<div className={classNames('form-group', className)}>
 			{label && (
-				<label className='form-label' htmlFor='profile-name'>
+				<label className='form-label' htmlFor={name}>
 					{label}
 				</label>
 			)}
-			<input
+			<motion.input
+				variants={shakeVariants as Variants}
+				animate={error ? 'medium' : 'static'}
 				ref={inputRef}
 				{...field}
 				placeholder={placeholder}
 				onChange={handleChange}
 				onBlur={handleBlur}
-				className={classNames('form-input', className)}
+				className='form-input'
 			/>
 			{error && (
-				<div className='error-message' id={`${name}Error`}>
+				<div className='form-input-error' id={`${name}Error`}>
 					{error}
 				</div>
 			)}
