@@ -46,7 +46,7 @@ export interface DropdownMenuProps {
 	className?: string
 	menuClassName?: string
 	itemClassName?: string
-	width?: 'auto' | 'trigger' | number
+	width?: 'auto' | 'trigger' | number | 'full'
 	maxHeight?: number
 	searchable?: boolean
 	searchPlaceholder?: string

@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import classNames from 'classnames'
 
 import './Modal.scss'
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
 
 type Props = {
 	children: ReactNode
@@ -16,9 +17,11 @@ type Props = {
 	subtitle?: string
 	isOpen: boolean
 	header?: ReactNode
+	footer?: ReactNode
 	onClose?: NoneToVoidFunction
 	className?: string
 	headerColor?: 'default' | 'primary'
+	position?: 'center' | 'top'
 }
 
 const Modal = ({
@@ -27,10 +30,14 @@ const Modal = ({
 	subtitle,
 	isOpen,
 	header,
+	footer,
 	onClose,
 	className,
 	headerColor = 'default',
+	position = 'center',
 }: Props) => {
+	useBodyScrollLock(isOpen)
+
 	function renderHeader() {
 		if (header || title) {
 			return (
@@ -53,8 +60,14 @@ const Modal = ({
 		<Portal>
 			<AnimatePresence>
 				{isOpen && (
-					<>
+					<div
+						className={classNames('modal', `modal-${position}`)}
+						role='dialog'
+						aria-modal='true'
+						tabIndex={-1}
+					>
 						<motion.div
+							onClick={onClose}
 							className='modal-overlay'
 							variants={overlayVariants}
 							initial='hidden'
@@ -62,33 +75,31 @@ const Modal = ({
 							exit='exit'
 						/>
 						<motion.div
-							onClick={onClose}
-							className='modal'
-							role='dialog'
-							aria-modal='true'
-							tabIndex={-1}
 							variants={modalVariants}
 							initial='hidden'
 							animate='visible'
 							exit='exit'
+							className='modal-content'
 						>
-							<div className='modal-content'>
-								<Button
-									round
-									color='translucent'
-									size='sm'
-									ariaLabel='Close'
-									className='modal-close'
-									onClick={onClose}
-								>
-									<IconSvg name='close' />
-								</Button>
-								{renderHeader()}
-								<div className='modal-body'>{children}</div>
-								<div className='modal-footer'></div>
+							<Button
+								round
+								color='translucent'
+								size='sm'
+								ariaLabel='Close'
+								className='modal-close'
+								onClick={onClose}
+							>
+								<IconSvg name='close' />
+							</Button>
+							{renderHeader()}
+							<div className='modal-body'>
+								{children}
+								{footer && (
+									<div className='modal-actions-container'>{footer}</div>
+								)}
 							</div>
 						</motion.div>
-					</>
+					</div>
 				)}
 			</AnimatePresence>
 		</Portal>

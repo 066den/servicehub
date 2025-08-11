@@ -15,7 +15,7 @@ export default function UserLayout({
 			<div className='container'>
 				<div className='dashboard-layout'>
 					<Sidebar />
-					{children}
+					<main className='main-content'>{children}</main>
 				</div>
 			</div>
 			<Footer />

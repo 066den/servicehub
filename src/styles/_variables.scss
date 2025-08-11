@@ -1,6 +1,7 @@
 $color-primary: #2563eb;
 $color-primary-hover: #1d4ed8;
-$color-primary-light: #1e40af;
+$color-primary-light: #8b5cf6;
+$color-primary-dark: #1e40af;
 $color-accent: #f59e0b;
 $color-accent-hover: #d97706;
 $color-light-gray: #f8fafc;
@@ -40,6 +41,7 @@ $color-input-placeholder: #9ca3af;
 	--color-primary: #{$color-primary};
 	--color-primary-hover: #{$color-primary-hover};
 	--color-primary-light: #{$color-primary-light};
+	--color-primary-dark: #{$color-primary-dark};
 	--color-accent: #{$color-accent};
 	--color-accent-hover: #{$color-accent-hover};
 	--color-light-gray: #{$color-light-gray};
@@ -56,19 +58,26 @@ $color-input-placeholder: #9ca3af;
 	--color-text-light: #{$color-text-light};
 	--color-text-secondary: #{$color-text-secondary};
 	--color-links: #{$color-text-secondary};
+	--color-text-title: #{$color-dark-gray};
 
 	--color-opacity-primary-10: #{rgba($color-primary, 0.1)};
+	--color-opacity-primary-15: #{rgba($color-primary, 0.15)};
 	--color-opacity-primary-20: #{rgba($color-primary, 0.2)};
 	--color-opacity-primary-30: #{rgba($color-primary, 0.3)};
 
 	--color-opacity-white-10: #{rgba($color-white, 0.1)};
+	--color-opacity-white-20: #{rgba($color-white, 0.2)};
 	--color-opacity-white-30: #{rgba($color-white, 0.3)};
 	--color-opacity-white-95: #{rgba($color-white, 0.95)};
 
 	--color-opacity-black-10: #{rgba($color-black, 0.1)};
-	--color-opacity-black-6: #{rgba($color-black, 0.06)};
+	--color-opacity-black-15: #{rgba($color-black, 0.15)};
+	--color-opacity-black-20: #{rgba($color-black, 0.2)};
+	--color-opacity-black-06: #{rgba($color-black, 0.06)};
 
 	--color-opacity-input-border-15: #{rgba($color-input-border, 0.15)};
+
+	--color-opacity-error-10: #{rgba($color-error, 0.1)};
 
 	--color-text-label: #{$color-text-tertiary};
 	--color-input-border: #{$color-input-border};

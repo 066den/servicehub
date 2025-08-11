@@ -1,33 +1,23 @@
+'use client'
 import { useState } from 'react'
 
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import useEffectOnce from '@/hooks/useEffectOnce'
-import { AnimatePresence, motion, Variants } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import { sloganVariants } from '../ui/animate/variants'
+import classNames from 'classnames'
 
 const SLOGAN_LENGTH = 6
 
-const sloganVariants: Variants = {
-	initial: { opacity: 0, y: 10, filter: 'blur(4px)' },
-	animate: {
-		opacity: 1,
-		y: 0,
-		filter: 'blur(0px)',
-		transition: {
-			ease: 'easeOut',
-		},
-	},
-	exit: {
-		opacity: 0,
-		y: -10,
-		filter: 'blur(2px)',
-		transition: {
-			ease: 'easeIn',
-		},
-	},
+type Props = {
+	color?: 'default' | 'white'
+	withSlogan?: boolean
+	size?: 'sm' | 'md' | 'lg'
+	isLink?: boolean
 }
 
-const Logo = () => {
+const Logo = ({ color = 'default', withSlogan, size, isLink }: Props) => {
 	const t = useTranslations()
 	const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -38,26 +28,34 @@ const Logo = () => {
 		return () => clearInterval(interval)
 	})
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const Wrapper: any = isLink ? Link : 'div'
+
 	return (
-		<Link href='/' className='link logo'>
-			<div className='logo-main sm'>
+		<Wrapper
+			{...(isLink ? { href: '/' } : {})}
+			className={classNames('logo', color, size, { link: isLink })}
+		>
+			<div className='logo-main'>
 				Service
 				<div className='hub-icon' />
 				Hub
 			</div>
-			<AnimatePresence mode='wait'>
-				<motion.div
-					key={currentIndex}
-					className='logo-slogan'
-					variants={sloganVariants}
-					initial='initial'
-					animate='animate'
-					exit='exit'
-				>
-					{t(`Logo.slogan-${currentIndex + 1}`)}
-				</motion.div>
-			</AnimatePresence>
-		</Link>
+			{withSlogan && (
+				<AnimatePresence mode='wait'>
+					<motion.div
+						key={currentIndex}
+						className='logo-slogan'
+						variants={sloganVariants}
+						initial='initial'
+						animate='animate'
+						exit='exit'
+					>
+						{t(`Logo.slogan-${currentIndex + 1}`)}
+					</motion.div>
+				</AnimatePresence>
+			)}
+		</Wrapper>
 	)
 }
 

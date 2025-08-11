@@ -4,9 +4,11 @@ import { Inter } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { AuthProvider } from '@/components/providers/AuthProvider'
-import NotificationSystem from '@/components/main/NotificationSystem'
 
 import '../styles/globals.scss'
+import { GoogleMapsProvider } from '@/components/providers/GoogleMapsProvider'
+import { Notifications } from '@/components/main/Notifications'
+import LoadingPage from '@/components/main/LoadingPage'
 
 const t = await getTranslations('home')
 
@@ -33,14 +35,17 @@ export default async function RootLayout({
 		<html lang={locale}>
 			<body className={`${inter.variable} custom-scroll`}>
 				<div id='portal_root' />
+
 				<AuthProvider>
 					<NextIntlClientProvider>
-						{children}
-						<NotificationSystem />
+						<GoogleMapsProvider>{children}</GoogleMapsProvider>
+						<Notifications />
+						<LoadingPage />
 					</NextIntlClientProvider>
 				</AuthProvider>
 			</body>
 		</html>
+		
 	)
 }
 

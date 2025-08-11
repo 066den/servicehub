@@ -1,25 +1,49 @@
+'use client'
+
+import useNotifications from '@/hooks/storeHooks/useNotifications'
 import Button from '../ui/Button'
 import './ProfileHero.scss'
+import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+import { formatDateToString } from '@/utils/dateFormat'
+import { Avatar } from '../common/Avatar'
 
 const ProfileHero = () => {
+	const { showSuccess } = useNotifications()
+	const { user } = useUserProfile()
+
+	const { displayName, createdAt, isVerified, location } = user || {}
+
+	const handleEditProfile = () => {
+		showSuccess({
+			title: 'Профіль оновлено',
+			message: 'Профіль успішно оновлено',
+			persistent: true,
+		})
+	}
+
 	return (
 		<section className='profile-hero'>
 			<div className='container'>
 				<div className='hero-content'>
-					<div className='profile-avatar-large'>
-						ОП
-						<div className='avatar-upload' title='Змінити фото'>
-							📷
-						</div>
-					</div>
+					<Avatar size='lg' icon='📷' />
 
 					<div className='profile-info'>
-						<h1>Олексій Петренко</h1>
+						<h1>{displayName}</h1>
 
 						<div className='profile-meta'>
-							<div className='meta-item'>📍 Київ, Україна</div>
-							<div className='meta-item'>📅 На платформі з 2023 року</div>
-							<div className='meta-item'>✅ Підтверджений профіль</div>
+							{location?.city && (
+								<div className='meta-item'>📍 {location.city}</div>
+							)}
+							<div className='meta-item'>
+								📅 На платформі з{' '}
+								{createdAt ? formatDateToString(createdAt) : '—'}
+							</div>
+
+							<div className='meta-item'>
+								{isVerified
+									? '✅ Підтверджений профіль'
+									: '❌ Непідтверджений профіль'}
+							</div>
 						</div>
 
 						<div className='profile-stats'>
@@ -39,7 +63,9 @@ const ProfileHero = () => {
 					</div>
 
 					<div className='btn-column'>
-						<Button color='white'>✏️ Редагувати профіль</Button>
+						<Button color='white' onClick={handleEditProfile}>
+							✏️ Редагувати профіль
+						</Button>
 						<Button color='outline-white'>⚙️ Налаштування</Button>
 					</div>
 				</div>

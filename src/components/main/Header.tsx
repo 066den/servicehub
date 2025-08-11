@@ -5,7 +5,7 @@ import Navigation from '../common/Navigation'
 import { useTranslations } from 'next-intl'
 import { useAuthStore } from '@/stores/authStore'
 import { motion } from 'framer-motion'
-import { bounceVariants, headerVariants } from '../ui/animate/variants'
+import { bounceVariants } from '../ui/animate/variants'
 import { Avatar } from '../common/Avatar'
 import { useRouter } from 'next/navigation'
 import Modal from '../modals/Modal'
@@ -14,6 +14,7 @@ import { signOut } from 'next-auth/react'
 import useFlag from '@/hooks/useFlag'
 import LocationSelector from '../common/LocationSelector'
 import Logo from '../common/Logo'
+import { ERoutes } from '@/types/enum'
 
 import './Header.scss'
 
@@ -35,7 +36,7 @@ const Header = () => {
 			href: '/contact',
 		},
 	]
-	const { user, isLoading } = useAuthStore()
+	const { user } = useAuthStore()
 
 	const [isModalProfileOpen, openModalProfile, closeModalProfile] = useFlag()
 
@@ -50,27 +51,21 @@ const Header = () => {
 
 	const handleLogout = () => {
 		signOut()
-		closeModalProfile()
 	}
 
 	return (
-		<motion.header
-			className='header'
-			variants={headerVariants}
-			initial='hidden'
-			animate={isLoading ? 'hidden' : 'visible'}
-		>
+		<header className='header'>
 			<div className='container'>
 				<div className='header-content'>
 					<div className='header-left'>
-						<Logo />
+						<Logo withSlogan isLink size='sm' />
 						<LocationSelector />
 					</div>
 
 					<Navigation items={navigationItems} />
 					<div className='header-buttons'>
 						{!user || !user.isVerified ? (
-							<Link href='/auth/signin' className='Button outline md'>
+							<Link href='/auth/signin' className='Button outline'>
 								Увійти
 							</Link>
 						) : (
@@ -91,8 +86,8 @@ const Header = () => {
 							</>
 						)}
 
-						<Link href='/auth/signup' className='Button accent md'>
-							Стати виконавцем
+						<Link href={ERoutes.PROVIDER} className='Button accent'>
+							{t('becomeProvider')}
 						</Link>
 					</div>
 				</div>
@@ -112,7 +107,7 @@ const Header = () => {
 					</div>
 				</Modal>
 			</div>
-		</motion.header>
+		</header>
 	)
 }
 

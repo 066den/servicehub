@@ -6,7 +6,7 @@ export const useDropdownPosition = (
 	menuRef: React.RefObject<HTMLElement | null>,
 	isOpen: boolean,
 	position: string = 'bottom-left',
-	offset: { x: number; y: number } = { x: 0, y: 4 }
+	offset: { x: number; y: number } = { x: 0, y: 0 }
 ) => {
 	const [dropdownPosition, setDropdownPosition] = useState<DropdownPosition>({})
 
@@ -24,21 +24,18 @@ export const useDropdownPosition = (
 			minWidth: trigger.width,
 		}
 
-		// Автоматичне визначення позиції
 		if (position === 'auto') {
 			const spaceBelow = viewport.height - trigger.bottom
 			const spaceAbove = trigger.top
 			const spaceRight = viewport.width - trigger.left
 			const spaceLeft = trigger.right
 
-			// Вертикальне позиціонування
 			if (spaceBelow >= menu.height || spaceBelow >= spaceAbove) {
 				newPosition.top = trigger.bottom + offset.y
 			} else {
 				newPosition.bottom = viewport.height - trigger.top + offset.y
 			}
 
-			// Горизонтальне позиціонування
 			if (spaceRight >= menu.width || spaceRight >= spaceLeft) {
 				newPosition.left = trigger.left + offset.x
 			} else {

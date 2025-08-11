@@ -3,3 +3,5 @@ export interface WindowWithTimer extends Window {
 }
 
 type NoneToVoidFunction = () => void
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any

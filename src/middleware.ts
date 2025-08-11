@@ -6,6 +6,13 @@ export default withAuth(
 		const token = request.nextauth.token
 		const { pathname } = request.nextUrl
 
+		// Приклад: доступ до /admin тільки для ADMIN
+		if (pathname.startsWith('/admin')) {
+			if (!token || token.role !== 'ADMIN') {
+				return NextResponse.redirect(new URL('/', request.url))
+			}
+		}
+
 		// Логика для защищенных маршрутов
 		if (pathname.startsWith('/dashboard') || pathname.startsWith('/profile')) {
 			if (!token || !token.isVerified) {
@@ -15,7 +22,7 @@ export default withAuth(
 
 		//Если пользователь авторизован и заходит на страницу входа
 		if (pathname.startsWith('/auth/signin') && token && token.isVerified) {
-			return NextResponse.redirect(new URL('/', request.url))
+			return NextResponse.redirect(new URL('/profile', request.url))
 		}
 
 		return NextResponse.next()
@@ -25,13 +32,14 @@ export default withAuth(
 			authorized: ({ token, req }) => {
 				const { pathname } = req.nextUrl
 
-				if (pathname.startsWith('/api/auth/')) {
+				if (
+					pathname.startsWith('/api/auth/') ||
+					pathname === '/' ||
+					pathname.startsWith('/auth')
+				) {
 					return true
 				}
 
-				if (pathname === '/' || pathname.startsWith('/auth')) {
-					return true
-				}
 				// Защищенные маршруты требуют токен
 				return !!token
 			},

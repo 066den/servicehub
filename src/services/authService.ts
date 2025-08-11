@@ -236,6 +236,7 @@ class AuthService {
 				lastName: user.lastName,
 				isVerified: user.isVerified,
 				createdAt: user.createdAt,
+				role: user.role,
 			},
 			tokens,
 			message: 'success_login',

@@ -2,18 +2,21 @@
 import { useEffect } from 'react'
 
 import { useAuthStore } from '@/stores/authStore'
-import { SessionProvider } from 'next-auth/react'
+import { SessionProvider, useSession } from 'next-auth/react'
 
 interface AuthProviderProps {
 	children: React.ReactNode
 }
 
 function AuthInitializer({ children }: { children: React.ReactNode }) {
-	const { initialize } = useAuthStore()
+	const { status } = useSession()
+	const { initialize, isInitialized, user } = useAuthStore()
 
 	useEffect(() => {
-		initialize()
-	}, [initialize])
+		if (status !== 'loading' && !isInitialized) {
+			initialize()
+		}
+	}, [initialize, status, isInitialized, user])
 
 	return <>{children}</>
 }

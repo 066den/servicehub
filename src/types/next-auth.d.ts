@@ -10,6 +10,7 @@ declare module 'next-auth' {
 			lastName: string
 			phoneNormalized: string
 			isVerified: boolean
+			role?: Role
 		} & DefaultSession['user']
 		accessToken?: string
 		refreshToken?: string
@@ -21,6 +22,7 @@ declare module 'next-auth' {
 		phone: string
 		phoneNormalized: string
 		isVerified: boolean
+		role?: Role
 		error?: string
 		status?: EStatus
 		accessToken?: string
@@ -34,6 +36,7 @@ declare module 'next-auth/jwt' {
 		phone: string
 		phoneNormalized: string
 		isVerified: boolean
+		role?: Role
 		accessToken?: string
 		refreshToken?: string
 		accessTokenExpires?: number

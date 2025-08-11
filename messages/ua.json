@@ -21,9 +21,14 @@
 		"profile_title": "Мій профіль",
 		"logout": "Вийти",
 		"myOrders": "Мої замовлення",
+		"myRecords": "Мої записи",
 		"settings": "Налаштування",
 		"account": "Акаунт",
-		"help": "Допомога"
+		"help": "Допомога",
+		"dashboard": "Панель управління",
+		"home": "Головна",
+		"favorites": "Обрані послуги",
+		"myReviews": "Мої відгуки"
 	},
 	"Form": {
 		"phone": "Номер телефону",
@@ -35,7 +40,9 @@
 		"phoneFormat": "Неправильний формат номера телефону",
 		"firstNameRequired": "Ім'я обов'язкове",
 		"codeRequired": "Код обов'язковий",
-		"locationPlaceholder": "Почніть вводити назву міста..."
+		"locationPlaceholder": "Почніть вводити назву міста...",
+		"noResultsFound": "Нічого не знайдено",
+		"phoneDisabled": "Телефон який ви використали при реєстрації. Його не можна змінити"
 	},
 	"Auth": {
 		"phoneForm": {
@@ -83,5 +90,38 @@
 		"refresh_token_not_found": "Немає refresh token",
 		"refresh_token_error": "Помилка обновлення токену",
 		"invalid_code_or_expired": "Не вірний код або код застарів"
+	},
+	"Notification": {
+		"location_not_selected": "Ви можете вибрати місцезнаходження пізніше"
+	},
+	"getCurrentLocation": "Визначити автоматично",
+	"skip": "Поки що пропустити",
+	"confirm": "Підтвердити",
+	"chooseLocation": "Виберіть ваше місто",
+	"chooseLocationHelper": "Це допоможе знайти виконавців поблизу",
+	"becomeProvider": "Стати виконавцем",
+	"Categories": {
+		"title": "Категорії",
+		"description": "Виберіть категорію, яка вас цікавить",
+		"home-master": "Домашній майстер",
+		"repair": "Ремонт та будівництво",
+		"car-rental": "Кур'єрські послуги",
+		"transport": "Транспортні послуги",
+		"cleaning": "Прибирання та допомога по господарству",
+		"repeater": "Репетиторство",
+		"car-repair": "Ремонт автотранспорту",
+		"beauty": "Краса та здоров'я",
+		"computer-repair": "Ремонт цифрової техніки",
+		"computer-support": "Комп'ютерна допомога",
+		"pets": "Уход за тваринами",
+		"accounting": "Бухгалтерські послуги",
+		"legal-services": "Юридичні послуги",
+		"marketing": "Маркетинг та реклама",
+		"events": "Події",
+		"design": "Дизайн",
+		"programming": "Програмування",
+		"photo-video": "Фото та відео",
+		"food": "Приготування їжі",
+		"other": "Інше"
 	}
 }

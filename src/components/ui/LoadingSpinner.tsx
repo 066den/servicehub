@@ -2,11 +2,16 @@
 
 import { motion } from 'motion/react'
 
-function LoadingSpinner() {
+interface LoadingSpinnerProps {
+	color?: 'primary' | 'secondary' | 'accent' | 'error' | 'warning' | 'success'
+	size?: 'sm' | 'md' | 'lg'
+}
+
+function LoadingSpinner({ color, size }: LoadingSpinnerProps) {
 	return (
 		<div className='spinner-container'>
 			<motion.div
-				className='spinner'
+				className={`spinner ${color} ${size}`}
 				animate={{ rotate: 360 }}
 				transition={{
 					duration: 1,

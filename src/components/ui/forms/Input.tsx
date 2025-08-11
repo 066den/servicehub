@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { FieldProps } from 'formik'
 import classNames from 'classnames'
-import { motion, Variants } from 'motion/react'
+import { motion } from 'motion/react'
 import { shakeVariants } from '../animate/variants'
 
 type OwnProps = {
@@ -11,6 +11,10 @@ type OwnProps = {
 	required?: boolean
 	className?: string
 	errorMessage?: string
+	wwithClear?: boolean
+	helperText?: string
+	disabled?: boolean
+	type?: string
 }
 
 const Input = ({
@@ -20,9 +24,12 @@ const Input = ({
 	className,
 	errorMessage,
 	placeholder,
+	wwithClear,
+	helperText,
+	disabled,
+	required,
+	type,
 }: OwnProps & FieldProps) => {
-	const inputRef = useRef<HTMLInputElement>(null)
-
 	const { name, onBlur } = field
 
 	const [error, setError] = useState<string | null>(null)
@@ -42,26 +49,34 @@ const Input = ({
 	}, [errors, errorMessage, name])
 
 	return (
-		<div className={classNames('form-group', className)}>
+		<div
+			className={classNames('form-group', className, {
+				'with-clear': wwithClear,
+			})}
+		>
 			{label && (
-				<label className='form-label' htmlFor={name}>
+				<label
+					className={classNames('form-label', { required })}
+					htmlFor={name}
+				>
 					{label}
 				</label>
 			)}
 			<motion.input
-				variants={shakeVariants as Variants}
+				variants={shakeVariants}
 				animate={error ? 'medium' : 'static'}
-				ref={inputRef}
 				{...field}
 				placeholder={placeholder}
 				onChange={handleChange}
 				onBlur={handleBlur}
 				className='form-input'
+				disabled={disabled}
+				type={type}
 			/>
-			{error && (
-				<div className='form-input-error' id={`${name}Error`}>
-					{error}
-				</div>
+
+			{error && <div className='form-input-error'>{error}</div>}
+			{helperText && !error && (
+				<div className='form-input-helper'>{helperText}</div>
 			)}
 		</div>
 	)

@@ -7,21 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  CLIENT
-  PROVIDER
-  ADMIN
-}
-
 model User {
   id                     Int       @id @default(autoincrement())
   phone                  String    @unique
   phoneNormalized        String?   @unique
   email                  String?   @unique
+  emailVerifiedAt        DateTime?
+  isEmailVerified        Boolean   @default(false)
+  password               String? 
+  passwordUpdatedAt      DateTime?
   firstName              String
   lastName               String?
   avatar                 String?
-  address                Json?
+  location               Json?
   role                   Role    @default(CLIENT)
   isVerified             Boolean   @default(false)
   lastLoginAt            DateTime?
@@ -36,32 +34,121 @@ model User {
   providers              Provider[]
   verificationCodes   VerificationCode[]
   refreshTokens       RefreshToken[]
+  @@index([phone])
+  @@index([email])
+  @@index([role])
 }
 
 model Provider {
   id                    Int      @id @default(autoincrement())
   user                  User?    @relation(fields: [userId], references: [id])
-  userId                Int
-  businesName           String
+  userId                Int      @unique
+  type                  ProviderType    @default(INDIVIDUAL)                 
+  businessName          String
   description           String?
-  status                String   @default("PENDING")
+  avatar                String?
+  status                ProviderStatus   @default(PENDING)
   rating                Float    @default(0)
   reviewCount           Int      @default(0)
+  companyInfo           CompanyInfo?    @relation(fields: [companyInfoId], references: [id])
+  companyInfoId         Int?            @unique
+  employees             Employee[]
   workingHours          Json?
   serviceAreas          Json?
   documents             Json?
   isActive              Boolean  @default(true)
   isDeleted             Boolean  @default(false)
-  subscriptionPlan      String   @default("BASIC")
+  subscriptionPlan      SubscriptionPlan   @default(FREE)
   subscriptionExpiresAt DateTime?
   location              Json?
-  instagram             String   @default("https://www.instagram.com")
-  facebook              String   @default("https://www.facebook.com")
+  email                 String?
+  phone                 String?
+  instagram             String?   
+  facebook              String?   
+  telegram              String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+  deletedAt             DateTime?
   orders                Order[]
   reviews               Review[]
   services              Service[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([rating])
+  @@index([subscriptionExpiresAt])
+  @@index([deletedAt])
+}
+
+model CompanyInfo {
+  id                Int      @id @default(autoincrement())
+  // Юридична інформація
+  legalName         String   // Юридична назва
+  registrationNumber String? // ЄДРПОУ
+  taxNumber         String?  // Податковий номер
+  legalAddress      String?  // Юридична адреса
+  // Контактна інформація
+  website           String?
+  email             String?
+  phone             String?
+  // Банківські дані
+  bankDetails       Json?    // IBAN, МФО, банк
+  // Ліцензії та сертифікати
+  licenses          Json?    // Масив ліцензій
+  certificates      Json?    // Сертифікати якості
+  // Статистика
+  foundedYear       Int?
+  employeeCount     Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  provider          Provider?
+}
+
+// Співробітники компанії
+model Employee {
+  id            Int            @id @default(autoincrement())
+  provider      Provider       @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  providerId    Int
+  firstName     String
+  lastName      String
+  phone         String?
+  role          EmployeeRole   @default(WORKER)
+  status        EmployeeStatus @default(ACTIVE)
+  position      String?        // Посада
+  department    String?        // Відділ
+  specialization String?       // Спеціалізація
+  experience    Int?           // Досвід в роках
+  workingHours  Json?          // Індивідуальний графік
+  avatar        String?        // Фото профілю
+  hireDate      DateTime       @default(now())
+  terminationDate DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+   
+  assignedOrders OrderEmployee[]  // Замовлення, які виконує співробітник
+  
+  @@index([providerId])
+  @@index([status])
+  @@index([role])
+}
+
+model OrderEmployee {
+  id         Int      @id @default(autoincrement())
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId    Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId Int
+  startTime  DateTime?
+  endTime    DateTime?
+  hoursWorked Float?  @default(0)
+  payment    Float? // Оплата
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@unique([orderId, employeeId])
+  @@index([orderId])
+  @@index([employeeId])
 }
 
 model Service {
@@ -77,14 +164,39 @@ model Service {
   price           Float?
   duration        Int?
   pricingOptions  Json?
-  tags            String[]
-  photos          String[]
+  location        Json?
+  photos          ServicePhoto[]
   requirements    Json?
   isActive        Boolean  @default(true)
-  isDeleted       Boolean  @default(false)
+  isFeatured      Boolean @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
   orders          Order[]
+  serviceTags     ServiceTag[]
+
+  @@index([categoryId])
+  @@index([typeId])
+  @@index([providerId])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@index([isFeatured])
+
+  @@unique([providerId, name])
+}
+
+model ServicePhoto {
+  id        Int      @id @default(autoincrement())
+  service   Service  @relation(fields: [serviceId], references: [id])
+  serviceId Int
+  url       String  
+  alt       String? 
+  order     Int      @default(0)
+  isMain    Boolean  @default(false) 
+  photoType PhotoType @default(GALLERY) 
+
+  @@index([serviceId])
+  @@index([photoType])
 }
 
 model Order {
@@ -95,7 +207,7 @@ model Order {
   providerId     Int
   service        Service  @relation(fields: [serviceId], references: [id])
   serviceId      Int
-  status         String   @default("CREATED")
+  status         OrderStatus   @default(CREATED)
   scheduledAt    DateTime?
   startedAt      DateTime?
   completedAt    DateTime?
@@ -105,26 +217,69 @@ model Order {
   providerNotes  String?
   totalAmount    Float?
   platformFee    Float?
-  paymentStatus  String   @default("PENDING")
+  paymentStatus  PaymentStatus @default(PENDING)
   photos         String[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
   reviews        Review[]
+  assignedEmployees OrderEmployee[]  // Призначені співробітники
+  estimatedHours   Float?           // Планований час виконання
+  actualHours      Float?           // Фактичний час виконання
+  teamNotes        String?          // Нотатки команди
+  workLog          Json?            // Лог роботи (час початку/закінчення для кожного співробітника)
+  @@index([clientId])
+  @@index([providerId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([deletedAt])
+ 
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
-  name     String
-  services Service[]
-  types    Type[]
+  id          Int       @id @default(autoincrement())
+  name        String
+  slug        String? @unique
+  icon        String?
+  image       String?
+  description String?  
+  services    Service[]
+  types       Type[]
+
+  @@index([slug])
 }
 
 model Type {
-  id         Int       @id @default(autoincrement())
-  name       String
-  categoryId Int
-  category   Category  @relation(fields: [categoryId], references: [id])
-  services   Service[]
+  id          Int       @id @default(autoincrement())
+  name        String
+  slug        String? @unique
+  image       String?
+  icon        String?
+  description String?
+  categoryId  Int
+  category    Category  @relation(fields: [categoryId], references: [id])
+  services    Service[]
+
+  @@index([slug])
+  @@index([categoryId])
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  services ServiceTag[]
+}
+
+model ServiceTag {
+  serviceId Int
+  tagId     Int
+  service   Service @relation(fields: [serviceId], references: [id])
+  tag       Tag     @relation(fields: [tagId], references: [id])
+
+  @@id([serviceId, tagId])
+  @@index([serviceId])
+  @@index([tagId])
 }
 
 model Review {
@@ -140,6 +295,12 @@ model Review {
   photos     String[]
   response   String?
   createdAt  DateTime @default(now())
+
+  @@index([providerId])
+  @@index([clientId])
+  @@index([rating])
+
+  @@unique([orderId])
 }
 
 model Session {
@@ -172,6 +333,8 @@ model VerificationCode {
   ipAddress   String?
   userId      Int? 
   user        User? @relation(fields: [userId], references: [id])
+
+  @@index([phone, codeType, isUsed, expiresAt])
 }
 
 model SmsLog {
@@ -200,9 +363,67 @@ model RefreshToken {
   userAgent String? @map("user_agent")
   deviceId  String? @map("device_id")
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
- 
 }
 
 
+enum Role {
+  CLIENT
+  PROVIDER
+  ADMIN
+}
 
+enum ProviderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PRO
+  PREMIUM
+}
+
+enum OrderStatus {
+  CREATED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PhotoType {
+  GALLERY  
+  BEFORE  
+  AFTER  
+}
+
+enum ProviderType {
+  INDIVIDUAL  
+  COMPANY  
+}
+
+enum EmployeeRole {
+  OWNER   
+  MANAGER   
+  WORKER     
+  SPECIALIST  
+  ADMIN     
+}
+
+enum EmployeeStatus {
+  ACTIVE      
+  INACTIVE     
+  ON_VACATION  
+  SUSPENDED    
+}

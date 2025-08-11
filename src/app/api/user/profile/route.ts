@@ -3,6 +3,16 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/authOptions'
 import { prisma } from '@/lib/prisma'
+import { z } from 'zod'
+
+const updateProfileSchema = z.object({
+	firstName: z.string().min(1).max(50).optional(),
+	lastName: z.string().max(50).optional(),
+	email: z.email().optional(),
+	avatar: z.url().optional(),
+	phoneNormalized: z.string().optional(),
+	phone: z.string().optional(),
+})
 
 export async function GET() {
 	const session = await getServerSession(authOptions)
@@ -73,6 +83,86 @@ export async function GET() {
 	}
 
 	return NextResponse.json({ success: true, user: profileData })
+}
+
+export async function PUT(req: Request) {
+	const session = await getServerSession(authOptions)
+
+	if (!session?.user?.id) {
+		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+	}
+
+	const body = await req.json().catch(() => ({}))
+
+	const validationResult = updateProfileSchema.safeParse(body)
+
+	if (!validationResult.success) {
+		return NextResponse.json(
+			{
+				error: 'Invalid request body',
+				details: validationResult.error.issues.map(issue => ({
+					field: issue.path.join('.'),
+					message: issue.message,
+				})),
+			},
+			{ status: 400 }
+		)
+	}
+
+	const updateData = { ...body, ...validationResult.data }
+
+	const existingUser = await prisma.user.findUnique({
+		where: { id: session.user.id },
+	})
+
+	if (!existingUser) {
+		return NextResponse.json(
+			{ error: 'Пользователь не найден' },
+			{ status: 404 }
+		)
+	}
+
+	if (updateData.email && updateData.email !== existingUser.email) {
+		const emailExists = await prisma.user.findFirst({
+			where: {
+				email: updateData.email,
+				id: { not: session.user.id },
+			},
+		})
+
+		if (emailExists) {
+			return NextResponse.json(
+				{ error: 'Email already in use' },
+				{ status: 409 }
+			)
+		}
+	}
+
+	if (
+		updateData.phoneNormalized &&
+		updateData.phoneNormalized !== existingUser.phoneNormalized
+	) {
+		const phoneExists = await prisma.user.findFirst({
+			where: {
+				phoneNormalized: updateData.phoneNormalized,
+				id: { not: session.user.id },
+			},
+		})
+
+		if (phoneExists) {
+			return NextResponse.json(
+				{ error: 'Phone already in use' },
+				{ status: 409 }
+			)
+		}
+	}
+
+	const updatedUser = await prisma.user.update({
+		where: { id: session.user.id },
+		data: { ...updateData, updatedAt: new Date() },
+	})
+
+	return NextResponse.json({ success: true, user: updatedUser })
 }
 
 // Вспомогательная функция для получения статистики

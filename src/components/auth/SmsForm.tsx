@@ -6,9 +6,9 @@ import { useTranslations } from 'next-intl'
 import * as Yup from 'yup'
 import Button from '../ui/Button'
 import Link from 'next/link'
-import CodeDigits from '../ui/inputs/CodeDigits'
-import Input from '../ui/inputs/Input'
-import { formatPhoneNumber } from '@/utils/phoneNumber'
+import CodeDigits from '../ui/forms/CodeDigits'
+import Input from '../ui/forms/Input'
+import { phoneMask } from '@/utils/phoneNumber'
 import { AnimatePresence, motion } from 'framer-motion'
 import { containerVariants } from '../ui/animate/variants'
 import { useAuthStore } from '@/stores/authStore'
@@ -72,9 +72,7 @@ const SmsForm = () => {
 			<p className='form-subtitle'>
 				{t('Auth.smsForm.subtitle')}
 				<br />
-				<strong>
-					{formatPhoneNumber(session?.user.phoneNormalized || '')}
-				</strong>
+				<strong>{phoneMask(session?.user.phoneNormalized || '')}</strong>
 			</p>
 
 			<AnimatePresence>
@@ -134,7 +132,7 @@ const SmsForm = () => {
 						<div className='form-footer'>
 							{t('Auth.phoneForm.termsInfo', {
 								action: t('Auth.smsForm.confirm'),
-							})}
+							})}{' '}
 							<Link href='#'>{t('Auth.phoneForm.terms')}</Link> {tMain('And')}{' '}
 							<Link href='#'>{t('Auth.phoneForm.privacy')}</Link>.
 						</div>

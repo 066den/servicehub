@@ -1,5 +1,5 @@
-import { EStatus } from '.'
-
+import { EStatus, LocationData } from '.'
+import { ProviderType, Role } from '@prisma/client'
 export interface AuthTokens {
 	accessToken: string
 	refreshToken: string
@@ -49,7 +49,7 @@ export interface AuthState {
 	user: UserProfile | null
 	isLoading: boolean
 	error: string | null
-
+	isInitialized: boolean
 	// SMS flow
 	phone: string
 	step: 'phone' | 'code' | 'success'
@@ -65,10 +65,10 @@ export interface AuthState {
 	isRefreshing: boolean
 	refreshError: string | null
 
-	resendCountdown: number // секунды до разрешения повторной отправки
-	canResend: boolean // можно ли отправить код повторно
-	resendAttempts: number // количество попыток отправки
-	lastCodeSentAt: number // timestamp последней отправки
+	resendCountdown: number
+	canResend: boolean
+	resendAttempts: number
+	lastCodeSentAt: number
 
 	// actions
 	setPhone: (phone: string) => void
@@ -84,7 +84,7 @@ export interface AuthState {
 
 	// user profile actions
 	fetchUserProfile: (force?: boolean) => Promise<UserProfile | null>
-	updateLocalUser: (updates: Partial<UserProfile>) => Promise<void>
+	updateUser: (updates: Partial<UserProfile>) => Promise<void>
 	refreshUserProfile: () => Promise<void>
 
 	// Refresh token actions
@@ -107,6 +107,8 @@ export interface UserProfile {
 	firstName?: string
 	lastName?: string
 	displayName: string
+	location?: LocationData
+	role?: Role
 	isVerified: boolean
 	isActive: boolean
 	createdAt: string
@@ -121,4 +123,21 @@ export interface UserProfile {
 		rating: number
 		earnings: number
 	}
+}
+
+export interface Provider {
+	type: ProviderType
+	business_name?: string
+	company_info?: CompanyInfo
+	first_name?: string
+	last_name?: string
+	email?: string
+	phone?: string
+}
+
+export interface CompanyInfo {
+	legal_name: string
+	registration_number?: string
+	tax_number?: string
+	legal_address?: string
 }

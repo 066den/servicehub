@@ -4,21 +4,14 @@ import { ERoutes } from '@/types/enum'
 import { signOut } from 'next-auth/react'
 
 import './Sidebar.scss'
+import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+import { Role } from '@prisma/client'
 
-const orderItems = [
+const dashboardItems = [
 	{
-		icon: '📋',
-		label: 'myOrders',
-		href: ERoutes.MY_ORDERS,
-	},
-]
-const helpItems = [
-	{
-		icon: '🚪',
-		label: 'logout',
-		action: () => {
-			signOut()
-		},
+		icon: '📊',
+		label: 'home',
+		href: ERoutes.DASHBOARD,
 	},
 ]
 
@@ -29,18 +22,52 @@ const profileItems = [
 		href: ERoutes.PROFILE,
 	},
 	{
+		icon: '📋',
+		label: 'myOrders',
+		href: ERoutes.MY_ORDERS,
+	},
+	{
+		icon: '📅',
+		label: 'myRecords',
+		href: ERoutes.MY_RECORDS,
+	},
+	{
+		icon: '❤️',
+		label: 'favorites',
+		href: ERoutes.FAVORITES,
+	},
+	{
+		icon: '⭐',
+		label: 'myReviews',
+		href: ERoutes.MY_REVIEWS,
+	},
+]
+
+const settingsItems = [
+	{
 		icon: '⚙️',
 		label: 'settings',
 		href: ERoutes.SETTINGS,
 	},
+	{
+		icon: '🚪',
+		label: 'logout',
+		action: () => {
+			signOut()
+		},
+	},
 ]
 
 const Sidebar = () => {
+	const { user } = useUserProfile()
+	const isProvider = user?.role === Role.PROVIDER
 	return (
 		<aside className='sidebar'>
-			<SidebarSection items={orderItems} />
+			{isProvider && (
+				<SidebarSection title='dashboard' items={dashboardItems} />
+			)}
 			<SidebarSection title='account' items={profileItems} />
-			<SidebarSection title='help' items={helpItems} />
+			<SidebarSection title='settings' items={settingsItems} />
 		</aside>
 	)
 }

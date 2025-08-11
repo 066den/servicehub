@@ -3,7 +3,7 @@
 import { create } from 'zustand'
 import { AuthState, UserProfile } from '@/types/auth'
 import { getSession, signIn, signOut } from 'next-auth/react'
-import { devtools, persist } from 'zustand/middleware'
+import { createJSONStorage, devtools, persist } from 'zustand/middleware'
 import { WindowWithTimer } from '@/@types/global'
 
 export const useAuthStore = create<AuthState>()(
@@ -11,7 +11,7 @@ export const useAuthStore = create<AuthState>()(
 		persist(
 			(set, get) => ({
 				user: null,
-				isLoading: true,
+				isLoading: false,
 				error: null,
 				step: 'phone',
 				phone: '',
@@ -26,10 +26,11 @@ export const useAuthStore = create<AuthState>()(
 				canResend: true,
 				resendAttempts: 0,
 				lastCodeSentAt: 0,
+				isInitialized: false,
 
 				setPhone: (phone: string) => set({ phone, error: null }),
 				sendCode: async (phone: string) => {
-					set({ isLoading: true, error: null })
+					set({ error: null })
 					try {
 						if (!get().canResendCode()) {
 							throw new Error(
@@ -57,7 +58,6 @@ export const useAuthStore = create<AuthState>()(
 							step: 'code',
 							codeSent: true,
 							codeExpiresAt: new Date(Date.now() + 5 * 60 * 1000),
-							isLoading: false,
 							resendAttempts: currentAttempts,
 							lastCodeSentAt: now,
 						})
@@ -213,7 +213,7 @@ export const useAuthStore = create<AuthState>()(
 					try {
 						get().stopResendTimer()
 
-						await signOut({ redirect: false })
+						await signOut({ callbackUrl: '/auth/signin' })
 
 						set({
 							user: null,
@@ -229,6 +229,7 @@ export const useAuthStore = create<AuthState>()(
 							canResend: true,
 							resendAttempts: 0,
 							lastCodeSentAt: 0,
+							isInitialized: true,
 						})
 					} catch (error) {
 						if (error instanceof Error) {
@@ -323,6 +324,10 @@ export const useAuthStore = create<AuthState>()(
 				},
 
 				initialize: async () => {
+					if (get().isInitialized) {
+						return
+					}
+
 					set({ isLoading: true })
 
 					try {
@@ -345,6 +350,7 @@ export const useAuthStore = create<AuthState>()(
 								set({
 									user: fullUser,
 									step: 'success',
+									isInitialized: true,
 								})
 							} else {
 								set({
@@ -368,11 +374,15 @@ export const useAuthStore = create<AuthState>()(
 										},
 									},
 									step: 'success',
+									isInitialized: true,
 								})
 							}
+						} else {
+							set({ isInitialized: true })
 						}
 					} catch (error) {
 						console.error('Ошибка инициализации авторизации:', error)
+						set({ isInitialized: true })
 					} finally {
 						set({ isLoading: false })
 					}
@@ -381,11 +391,7 @@ export const useAuthStore = create<AuthState>()(
 				fetchUserProfile: async (
 					force = false
 				): Promise<UserProfile | null> => {
-					const { isLoadingProfile, lastProfileUpdate } = get()
-
-					if (isLoadingProfile) {
-						return null
-					}
+					const { lastProfileUpdate } = get()
 
 					const now = Date.now()
 					if (!force && now - lastProfileUpdate < 5 * 60 * 1000) {
@@ -442,8 +448,27 @@ export const useAuthStore = create<AuthState>()(
 					}
 				},
 
-				updateLocalUser: async (updates: Partial<UserProfile>) => {
+				updateUser: async (updates: Partial<UserProfile>) => {
 					const { user } = get()
+					const session = await getSession()
+
+					if (!session?.accessToken) {
+						throw new Error('Not access token')
+					}
+
+					const response = await fetch('/api/user/profile', {
+						method: 'PUT',
+						headers: {
+							Authorization: `Bearer ${session.accessToken}`,
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(updates),
+					})
+
+					if (!response.ok) {
+						const errorData = await response.json().catch(() => ({}))
+						throw new Error(errorData.error || `HTTP ${response.status}`)
+					}
 
 					if (user) {
 						set({
@@ -463,12 +488,24 @@ export const useAuthStore = create<AuthState>()(
 			{
 				name: 'auth-storage',
 				partialize: state => ({
+					user: state.user,
 					phone: state.phone,
 					step: state.step,
 					lastProfileUpdate: state.lastProfileUpdate,
 					lastCodeSentAt: state.lastCodeSentAt,
 					resendAttempts: state.resendAttempts,
 					canResend: state.canResend,
+					isInitialized: state.isInitialized,
+				}),
+				storage: createJSONStorage(() => {
+					if (typeof window !== 'undefined') {
+						return localStorage
+					}
+					return {
+						getItem: () => null,
+						setItem: () => {},
+						removeItem: () => {},
+					}
 				}),
 			}
 		),

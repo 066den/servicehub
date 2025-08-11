@@ -34,7 +34,8 @@
 		"phoneFormat": "Неверный формат номера телефона",
 		"firstNameRequired": "Имя обязательно",
 		"codeRequired": "Код обязательно",
-		"locationPlaceholder": "Почніть вводити назву міста..."
+		"locationPlaceholder": "Почніть вводити назву міста...",
+		"noResultsFound": "Ничего не найдено"
 	},
 	"Auth": {
 		"phoneForm": {
@@ -82,5 +83,38 @@
 		"refresh_token_not_found": "Нет refresh token",
 		"refresh_token_error": "Ошибка обновления токена",
 		"invalid_code_or_expired": "Неверный код или код просрочен"
+	},
+	"Notification": {
+		"location_not_selected": "Вы можете выбрать местоположение позже"
+	},
+	"getCurrentLocation": "Определить автоматически",
+	"skip": "Пока пропустить",
+	"confirm": "Подтвердить",
+	"chooseLocation": "Выберите ваше местоположение",
+	"chooseLocationHelper": "Это поможет найти исполнителей поблизости",
+	"becomeProvider": "Стати исполнителем",
+	"Categories": {
+		"title": "Категории",
+		"description": "Выберите категорию, которая вас интересует",
+		"beauty": "Красота и здоровье",
+		"home-master": "Домашний мастер",
+		"repair": "Ремонт и строительство",
+		"car-rental": "Курьерские услуги",
+		"transport": "Транспортные услуги",
+		"cleaning": "Уборка и помощь по хозяйству",
+		"repeater": "Репетиторство",
+		"car-repair": "Ремонт автотранспорта",
+		"computer-repair": "Ремонт компьютеров",
+		"computer-support": "Компьютерная помощь",
+		"pets": "Уход за животными",
+		"accounting": "Бухгалтерские услуги",
+		"legal-services": "Юридические услуги",
+		"marketing": "Маркетинг и реклама",
+		"events": "Мероприятия",
+		"design": "Дизайн",
+		"programming": "Программирование",
+		"photo-video": "Фото и видео",
+		"food": "Приготовление еды",
+		"other": "Другое"
 	}
 }

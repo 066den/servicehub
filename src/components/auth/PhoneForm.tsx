@@ -3,7 +3,7 @@
 import { Field, Form, Formik } from 'formik'
 import { useTranslations } from 'next-intl'
 import * as Yup from 'yup'
-import InputPhone from '../ui/inputs/InputPhone'
+import InputPhone from '../ui/forms/InputPhone'
 import Button from '../ui/Button'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'motion/react'
@@ -71,7 +71,7 @@ const PhoneForm = () => {
 						<div className='form-footer'>
 							{t('Auth.phoneForm.termsInfo', {
 								action: t('Auth.phoneForm.getCode'),
-							})}
+							})}{' '}
 							<Link href='#'>{t('Auth.phoneForm.terms')}</Link> {tMain('And')}{' '}
 							<Link href='#'>{t('Auth.phoneForm.privacy')}</Link>.
 						</div>

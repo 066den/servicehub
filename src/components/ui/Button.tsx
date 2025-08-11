@@ -94,7 +94,7 @@ const Button = ({
 			className={fullClassName}
 			ref={elementRef}
 			type={type}
-			disabled={disabled}
+			disabled={disabled || loading}
 			onClick={handleClick}
 			aria-label={ariaLabel}
 		>

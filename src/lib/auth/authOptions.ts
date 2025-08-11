@@ -78,6 +78,7 @@ export const authOptions: NextAuthOptions = {
 							phoneNormalized: result.user.phoneNormalized,
 							lastName: result.user.lastName,
 							firstName: result.user.firstName,
+							role: result.user.role,
 							isVerified: result.user.isVerified,
 							createdAt: result.user.createdAt,
 							accessToken: result.tokens.accessToken,
@@ -107,6 +108,7 @@ export const authOptions: NextAuthOptions = {
 				token.phoneNormalized = user.phoneNormalized
 				token.isVerified = user.isVerified
 				token.accessToken = user.accessToken
+				token.role = user.role
 				token.refreshToken = user.refreshToken
 				token.accessTokenExpires = Date.now() + 15 * 60 * 1000 // 15 минут
 				return token
@@ -132,8 +134,9 @@ export const authOptions: NextAuthOptions = {
 				session.user.phone = token.phone
 				session.user.phoneNormalized = token.phoneNormalized
 				session.user.isVerified = token.isVerified
+				session.user.role = token.role
 				session.accessToken = token.accessToken
-				session.refreshToken = token.refreshToken
+				//session.refreshToken = token.refreshToken
 			}
 
 			return session
