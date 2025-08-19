@@ -23,7 +23,7 @@ const SignInPage = () => {
 	}, [status, session, router])
 
 	return (
-		<div className='form-container'>
+		<div className='container'>
 			{step === 'code' ? <SmsForm /> : <PhoneForm />}
 		</div>
 	)

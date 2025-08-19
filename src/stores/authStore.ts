@@ -30,7 +30,7 @@ export const useAuthStore = create<AuthState>()(
 
 				setPhone: (phone: string) => set({ phone, error: null }),
 				sendCode: async (phone: string) => {
-					set({ error: null })
+					set({ error: null, isLoading: true })
 					try {
 						if (!get().canResendCode()) {
 							throw new Error(

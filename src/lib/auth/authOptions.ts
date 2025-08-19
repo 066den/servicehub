@@ -48,6 +48,7 @@ export const authOptions: NextAuthOptions = {
 							phone: credentials.phone,
 							phoneNormalized: normalizedPhone,
 							isVerified: false,
+							code: result?.code,
 						}
 					}
 
@@ -110,6 +111,9 @@ export const authOptions: NextAuthOptions = {
 				token.accessToken = user.accessToken
 				token.role = user.role
 				token.refreshToken = user.refreshToken
+				if (process.env.NODE_ENV === 'development') {
+					token.code = user.code
+				}
 				token.accessTokenExpires = Date.now() + 15 * 60 * 1000 // 15 минут
 				return token
 			}
@@ -136,6 +140,9 @@ export const authOptions: NextAuthOptions = {
 				session.user.isVerified = token.isVerified
 				session.user.role = token.role
 				session.accessToken = token.accessToken
+				if (process.env.NODE_ENV === 'development' && token.code) {
+					session.code = token.code
+				}
 				//session.refreshToken = token.refreshToken
 			}
 

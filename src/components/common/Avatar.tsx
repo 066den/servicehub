@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 
-import classNames from 'classnames'
+import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
 import { getAvatarColor, getFirstLetters } from '@/utils/textFormat'
 
@@ -24,7 +24,7 @@ export const Avatar = ({ className, size = 'md', onClick, icon }: Props) => {
 
 	const bgColor = getAvatarColor(content as string)
 
-	const fullClassName = classNames('user-avatar', `size-${size}`, className)
+	const fullClassName = cn('user-avatar', `size-${size}`, className)
 	return (
 		<div
 			className={fullClassName}

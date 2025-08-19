@@ -1,5 +1,5 @@
-import Footer from '@/components/main/Footer'
 import Header from '@/components/main/Header'
+import Footer from '@/components/main/Footer'
 
 export default function HomeLayout({
 	children,
@@ -7,10 +7,10 @@ export default function HomeLayout({
 	children: React.ReactNode
 }) {
 	return (
-		<main className='main'>
+		<>
 			<Header />
 			{children}
 			<Footer />
-		</main>
+		</>
 	)
 }

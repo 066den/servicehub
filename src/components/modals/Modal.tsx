@@ -1,15 +1,15 @@
 'use client'
 import { ReactNode } from 'react'
 import Portal from './Portal'
-import Button from '../ui/Button'
-import IconSvg from '../ui/IconSvg'
+import { Button } from '../ui/button'
 import { NoneToVoidFunction } from '@/@types/global'
 import { overlayVariants, modalVariants } from '../ui/animate/variants'
-import { AnimatePresence, motion } from 'motion/react'
-import classNames from 'classnames'
+import { AnimatePresence, motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
 
 import './Modal.scss'
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
+import { X } from 'lucide-react'
 
 type Props = {
 	children: ReactNode
@@ -41,13 +41,7 @@ const Modal = ({
 	function renderHeader() {
 		if (header || title) {
 			return (
-				<div
-					className={classNames(
-						'modal-header',
-						className,
-						`header-${headerColor}`
-					)}
-				>
+				<div className={cn('modal-header', className, `header-${headerColor}`)}>
 					{header}
 					{title && <div className='modal-title'>{title}</div>}
 					{subtitle && <div className='modal-subtitle'>{subtitle}</div>}
@@ -61,7 +55,7 @@ const Modal = ({
 			<AnimatePresence>
 				{isOpen && (
 					<div
-						className={classNames('modal', `modal-${position}`)}
+						className={cn('modal', `modal-${position}`)}
 						role='dialog'
 						aria-modal='true'
 						tabIndex={-1}
@@ -82,14 +76,13 @@ const Modal = ({
 							className='modal-content'
 						>
 							<Button
-								round
 								color='translucent'
 								size='sm'
-								ariaLabel='Close'
+								aria-label='Close'
 								className='modal-close'
 								onClick={onClose}
 							>
-								<IconSvg name='close' />
+								<X />
 							</Button>
 							{renderHeader()}
 							<div className='modal-body'>

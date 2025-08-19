@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import useGeolocation from '@/hooks/useGeolocation'
 import Modal from '../modals/Modal'
-import Button from '../ui/Button'
+
 import PlacesAutocomplete from '../ui/forms/PlacesAutocomplete'
 import { motion } from 'framer-motion'
 
@@ -12,6 +12,7 @@ import { fadeScaleVariants } from '../ui/animate/variants'
 import useNotifications from '@/hooks/storeHooks/useNotifications'
 import { useTranslations } from 'next-intl'
 import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+import { Button } from '../ui/button'
 
 const LocationSelector = () => {
 	const t = useTranslations()
@@ -67,24 +68,14 @@ const LocationSelector = () => {
 
 	const modalActions = (
 		<div className='modal-actions'>
-			<Button
-				outline
-				fullWidth
-				onClick={getCurrentLocation}
-				loading={isLoadingGeolocation}
-			>
+			<Button onClick={getCurrentLocation} disabled={isLoadingGeolocation}>
 				<span>🎯</span>
 				<span>{t('getCurrentLocation')}</span>
 			</Button>
 
 			<div className='btn-row'>
 				{!userLocation?.city && (
-					<Button
-						outline
-						color='secondary'
-						withoutTransform
-						onClick={handleSkip}
-					>
+					<Button color='secondary' onClick={handleSkip}>
 						{t('skip')}
 					</Button>
 				)}

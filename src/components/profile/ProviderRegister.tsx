@@ -5,8 +5,8 @@ import Input from '../ui/forms/Input'
 import PlacesAutocomplete from '../ui/forms/PlacesAutocomplete'
 import Map from '../common/Map'
 import { LocationData } from '@/types'
-import Button from '../ui/Button'
-import classNames from 'classnames'
+import { Button } from '../ui/button'
+import { cn } from '@/lib/utils'
 import Textarea from '../ui/forms/Textarea'
 import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
 import LoadingSpinner from '../ui/LoadingSpinner'
@@ -59,9 +59,10 @@ const ProviderRegister = () => {
 				<Form>
 					<div className='form-grid form-group'>
 						<div
-							className={classNames('account-type', {
-								selected: type === ProviderType.INDIVIDUAL,
-							})}
+							className={cn(
+								'account-type',
+								type === ProviderType.INDIVIDUAL && 'selected'
+							)}
 							onClick={() => {
 								setType(ProviderType.INDIVIDUAL)
 								setFieldValue('type', ProviderType.INDIVIDUAL)
@@ -82,9 +83,10 @@ const ProviderRegister = () => {
 						</div>
 
 						<div
-							className={classNames('account-type', {
-								selected: type === ProviderType.COMPANY,
-							})}
+							className={cn(
+								'account-type',
+								type === ProviderType.COMPANY && 'selected'
+							)}
 							onClick={() => {
 								setType(ProviderType.COMPANY)
 								setFieldValue('type', ProviderType.COMPANY)

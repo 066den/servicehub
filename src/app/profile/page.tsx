@@ -5,7 +5,6 @@ import { Formik, Form, Field } from 'formik'
 import * as Yup from 'yup'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
-import Button from '@/components/ui/Button'
 import PlacesAutocomplete from '@/components/ui/forms/PlacesAutocomplete'
 import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
 import { phoneMask } from '@/utils/phoneNumber'
@@ -13,6 +12,7 @@ import { LocationData } from '@/types'
 import { useState } from 'react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { containerVariants } from '@/components/ui/animate/variants'
+import { Button } from '@/components/ui/button'
 
 const ProfilePage = () => {
 	const t = useTranslations()

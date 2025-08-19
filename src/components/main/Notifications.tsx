@@ -1,24 +1,18 @@
 'use client'
-import { INotification, useNotificationStore } from '@/stores/notificationStore'
-import Button from '../ui/Button'
-import IconSvg from '../ui/IconSvg'
+import { useNotificationStore } from '@/stores/notificationStore'
+import { INotification } from '@/types'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
 	progressFillVariants,
 	systemNotificationVariants,
 } from '../ui/animate/variants'
+import { Button } from '../ui/button'
 
-const Notification = ({ notification }: { notification: any }) => {
-	const { persistent, duration, type, icon, title, message, actions, id } =
+const Notification = ({ notification }: { notification: INotification }) => {
+	const { persistent, duration, type, icon, title, message, actions } =
 		notification
 
-	const { removeNotification } = useNotificationStore(state => state)
-
-	const handleClose = () => {
-		if (id) {
-			removeNotification(id)
-		}
-	}
+	// const { removeNotification } = useNotificationStore(state => state)
 
 	const getIcon = () => {
 		const icons = {
@@ -63,17 +57,6 @@ const Notification = ({ notification }: { notification: any }) => {
 					)}
 				</div>
 			</div>
-
-			<Button
-				round
-				color='translucent'
-				size='sm'
-				ariaLabel='Close'
-				className='notification-close'
-				onClick={handleClose}
-			>
-				<IconSvg name='close' />
-			</Button>
 		</div>
 	)
 }

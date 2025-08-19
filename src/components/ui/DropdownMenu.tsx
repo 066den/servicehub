@@ -11,7 +11,7 @@ import {
 import { DropdownItem, DropdownMenuProps } from '@/types/ui'
 import { useDropdownPosition } from '@/hooks/useDropdownPosition'
 import LoadingSpinner from './LoadingSpinner'
-import classNames from 'classnames'
+import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { dropdownVariants } from './animate/variants'
 
@@ -458,7 +458,7 @@ const DropdownMenuItem = ({
 	return (
 		<div
 			onClick={handleClick}
-			className={classNames('dropdown-menu-item', className)}
+			className={cn('dropdown-menu-item', className)}
 			style={{
 				cursor: item.disabled ? 'not-allowed' : 'pointer',
 				background: isHighlighted

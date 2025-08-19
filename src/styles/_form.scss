@@ -149,26 +149,19 @@
 	margin-top: 0.5rem;
 }
 
-.phone-input-container {
-	position: relative;
-	display: flex;
-	align-items: center;
-	border: 2px solid var(--color-input-border);
-	border-radius: 0.625rem;
-	background-color: var(--color-input-background);
-	transition: border-color 0.3s ease;
-	&:focus-within {
-		border-color: var(--color-primary);
-		background-color: var(--color-white);
-		box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+.status-icon {
+	width: 1.25rem;
+	height: 1.25rem;
+
+	&.valid {
+		color: #10b981;
 	}
-	.form-input {
-		flex: 1;
-		border: none;
-		border-top-left-radius: 0;
-		border-bottom-left-radius: 0;
+
+	&.invalid {
+		color: hsl(var(--error));
 	}
 }
+
 /* Radio */
 .radio-item {
 	display: flex;

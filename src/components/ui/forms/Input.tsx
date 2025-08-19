@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { FieldProps } from 'formik'
-import classNames from 'classnames'
+import { cn } from '@/lib/utils'
 import { motion } from 'motion/react'
 import { shakeVariants } from '../animate/variants'
 
@@ -49,14 +49,10 @@ const Input = ({
 	}, [errors, errorMessage, name])
 
 	return (
-		<div
-			className={classNames('form-group', className, {
-				'with-clear': wwithClear,
-			})}
-		>
+		<div className={cn('form-group', className, wwithClear && 'with-clear')}>
 			{label && (
 				<label
-					className={classNames('form-label', { required })}
+					className={cn('form-label', required && 'required')}
 					htmlFor={name}
 				>
 					{label}

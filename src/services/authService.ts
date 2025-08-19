@@ -80,6 +80,7 @@ class AuthService {
 				userId: user?.id,
 				status: EStatus.sent,
 				message: 'success_send_code',
+				code,
 			}
 		} catch (error) {
 			console.error('Error sending verification code:', error)

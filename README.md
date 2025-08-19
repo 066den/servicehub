@@ -1,36 +1,140 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ServiceHub
 
-## Getting Started
+Современная платформа для поиска и заказа услуг с интуитивным интерфейсом и мощными возможностями.
 
-First, run the development server:
+## 🚀 Особенности
+
+- **Современный UI/UX** - Красивый и отзывчивый интерфейс
+- **Многоязычность** - Поддержка украинского и русского языков
+- **Аутентификация** - Безопасная система входа через SMS
+- **Геолокация** - Интеграция с Google Maps для поиска услуг поблизости
+- **Адаптивный дизайн** - Работает на всех устройствах
+
+## 🛠 Технологии
+
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Стилизация**: Tailwind CSS, SCSS
+- **Формы**: Formik + Yup валидация
+- **База данных**: Prisma + PostgreSQL
+- **Аутентификация**: NextAuth.js
+- **Карты**: Google Maps API
+
+## 📱 Компоненты
+
+### InputPhone
+
+Современный компонент для ввода телефонных номеров с валидацией и красивым дизайном.
+
+#### Особенности:
+
+- ✅ Автоматическое форматирование номера (050 123 45 67)
+- ✅ Валидация украинских номеров
+- ✅ Визуальная индикация статуса (валидный/невалидный)
+- ✅ Поддержка обязательных и необязательных полей
+- ✅ Вспомогательный текст и сообщения об ошибках
+- ✅ Адаптивный дизайн с фокусом на UX
+
+#### Использование:
+
+```tsx
+import { Field } from 'formik'
+import InputPhone from '@/components/ui/forms/InputPhone'
+
+// В форме Formik
+;<Field
+	name='phone'
+	component={InputPhone}
+	label='Номер телефона'
+	required={true}
+	helperText='Введите номер в формате 050 123 45 67'
+/>
+```
+
+#### Пропсы:
+
+| Проп          | Тип       | По умолчанию      | Описание              |
+| ------------- | --------- | ----------------- | --------------------- |
+| `label`       | `string`  | -                 | Текст метки поля      |
+| `required`    | `boolean` | `false`           | Обязательное поле     |
+| `disabled`    | `boolean` | `false`           | Заблокированное поле  |
+| `error`       | `string`  | -                 | Сообщение об ошибке   |
+| `helperText`  | `string`  | -                 | Вспомогательный текст |
+| `countryCode` | `string`  | `'+38'`           | Код страны            |
+| `placeholder` | `string`  | `'050 123 45 67'` | Плейсхолдер           |
+
+#### Валидация:
+
+Компонент автоматически валидирует украинские номера по формату `0XXXXXXXXX`, где:
+
+- Первая цифра должна быть 0
+- Вторая цифра должна быть 5, 6, 7, 8 или 9
+- Всего должно быть 10 цифр
+
+## 🎨 Стилизация
+
+Проект использует CSS переменные для единообразного дизайна:
+
+```scss
+:root {
+	--color-primary: #2563eb;
+	--color-primary-hover: #1d4ed8;
+	--color-error: #dc2626;
+	--color-input-border: #d1d5db;
+	--color-input-background: #f9fafb;
+}
+```
+
+## 📁 Структура проекта
+
+```
+src/
+├── app/                 # Next.js App Router
+├── components/          # React компоненты
+│   ├── ui/             # UI компоненты
+│   │   └── forms/      # Компоненты форм
+│   └── main/           # Основные компоненты
+├── hooks/               # React хуки
+├── stores/              # Zustand сторы
+├── styles/              # SCSS стили
+└── utils/               # Утилиты
+```
+
+## 🚀 Запуск
+
+1. Установите зависимости:
+
+```bash
+npm install
+```
+
+2. Настройте переменные окружения:
+
+```bash
+cp env-copy.txt .env.local
+```
+
+3. Запустите базу данных:
+
+```bash
+npx prisma db push
+npx prisma generate
+```
+
+4. Запустите проект:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📝 Лицензия
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+MIT License - см. файл LICENSE для деталей.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🤝 Вклад в проект
 
-## Learn More
+Мы приветствуем вклад в развитие проекта! Пожалуйста, создавайте issues и pull requests.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**ServiceHub** - Создано с ❤️ для упрощения поиска услуг
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

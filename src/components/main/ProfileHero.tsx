@@ -1,7 +1,7 @@
 'use client'
 
 import useNotifications from '@/hooks/storeHooks/useNotifications'
-import Button from '../ui/Button'
+import { Button } from '../ui/button'
 import './ProfileHero.scss'
 import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
 import { formatDateToString } from '@/utils/dateFormat'

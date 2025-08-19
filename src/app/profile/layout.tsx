@@ -1,7 +1,7 @@
 import Header from '@/components/main/Header'
 import Footer from '@/components/main/Footer'
-import Sidebar from '@/components/main/Sidebar'
-import ProfileHero from '@/components/main/ProfileHero'
+import Sidebar from '@/components/common/Sidebar'
+import { Card } from '@/components/ui/card'
 
 export default function UserLayout({
 	children,
@@ -11,11 +11,11 @@ export default function UserLayout({
 	return (
 		<div>
 			<Header />
-			<ProfileHero />
+			{/* <ProfileHero /> */}
 			<div className='container'>
-				<div className='dashboard-layout'>
+				<div className='grid grid-cols-[17.5rem_1fr] gap-6 py-6'>
 					<Sidebar />
-					<main className='main-content'>{children}</main>
+					<Card>{children}</Card>
 				</div>
 			</div>
 			<Footer />

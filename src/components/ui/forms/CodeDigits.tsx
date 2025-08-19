@@ -1,53 +1,71 @@
-import useEffectOnce from '@/hooks/useEffectOnce'
-import { FieldProps } from 'formik'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
+import { Input } from '../input'
 
 const CODE_DIGITS = 4
 
-const CodeDigits = ({ field, form: { setFieldValue } }: FieldProps) => {
-	const { name } = field
-	const [code, setCode] = useState(new Array(CODE_DIGITS).fill(''))
-	const inputs = useRef<HTMLInputElement[] | null>([])
+type CodeDigitsProps = {
+	value?: string
+	onChange: (value: string) => void
+	error?: string
+}
+
+const CodeDigits = ({ value = '', onChange, error }: CodeDigitsProps) => {
+	const [code, setCode] = useState<string[]>(() => {
+		// Initialize with value if provided, otherwise empty array
+		if (value && value.length === CODE_DIGITS) {
+			return value.split('')
+		}
+		return new Array(CODE_DIGITS).fill('')
+	})
+	const inputs = useRef<HTMLInputElement[]>([])
+
+	// Предотвращаем сброс состояния при изменении value
+	useEffect(() => {
+		if (value === '') {
+			setCode(new Array(CODE_DIGITS).fill(''))
+		}
+	}, [value])
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement>,
 		index: number
 	) => {
-		const value = e.target.value.replace(/\D/g, '')
+		const inputValue = e.target.value.replace(/\D/g, '')
 		const newCode = [...code]
-		newCode[index] = value
+		newCode[index] = inputValue
+
+		// Обновляем внутреннее состояние
 		setCode(newCode)
 
-		if (
-			value &&
-			index < CODE_DIGITS - 1 &&
-			inputs.current &&
-			inputs.current[index + 1]
-		) {
+		// Автофокус на следующий input
+		if (inputValue && index < CODE_DIGITS - 1 && inputs.current[index + 1]) {
 			inputs.current[index + 1].focus()
 		}
 
-		setFieldValue(name, newCode.join(''))
+		// Вызываем внешний onChange
+		onChange(newCode.join(''))
 	}
 
 	const handleKeyDown = (
 		e: React.KeyboardEvent<HTMLInputElement>,
 		index: number
 	) => {
+		// Обработка Backspace
 		if (
 			e.key === 'Backspace' &&
 			!code[index] &&
 			index > 0 &&
-			inputs.current &&
 			inputs.current[index - 1]
 		) {
 			inputs.current[index - 1].focus()
 			const newCode = [...code]
 			newCode[index - 1] = ''
 			setCode(newCode)
-			setFieldValue(name, newCode.join(''))
+			onChange(newCode.join(''))
 			e.preventDefault()
 		}
+
+		// Разрешаем только цифры и служебные клавиши
 		if (
 			!/[0-9]/.test(e.key) &&
 			!['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes(e.key)
@@ -62,24 +80,28 @@ const CodeDigits = ({ field, form: { setFieldValue } }: FieldProps) => {
 	) => {
 		e.preventDefault()
 		const pastedData = e.clipboardData.getData('text').replace(/\D/g, '')
+
 		if (pastedData.length === CODE_DIGITS) {
+			// Вставляем весь код
 			const newCode = pastedData.split('')
 			setCode(newCode)
+			onChange(newCode.join(''))
 
-			if (inputs.current && inputs.current[pastedData.length - 1]) {
-				inputs.current[pastedData.length - 1].focus()
+			// Фокус на последний input
+			if (inputs.current[CODE_DIGITS - 1]) {
+				inputs.current[CODE_DIGITS - 1].focus()
 			}
-			setFieldValue(name, newCode.join(''))
-		} else {
-			const pasteChar = pastedData.slice(0, 1)
+		} else if (pastedData.length > 0) {
+			// Вставляем одну цифру
 			const newCode = [...code]
-			newCode[index] = pasteChar
+			newCode[index] = pastedData[0]
 			setCode(newCode)
+			onChange(newCode.join(''))
 
+			// Фокус на следующий input если есть значение
 			if (
-				pasteChar &&
+				pastedData[0] &&
 				index < CODE_DIGITS - 1 &&
-				inputs.current &&
 				inputs.current[index + 1]
 			) {
 				inputs.current[index + 1].focus()
@@ -87,31 +109,32 @@ const CodeDigits = ({ field, form: { setFieldValue } }: FieldProps) => {
 		}
 	}
 
-	useEffectOnce(() => {
-		if (inputs.current && inputs.current[0]) {
+	// Автофокус на первый input при монтировании
+	useEffect(() => {
+		if (inputs.current[0]) {
 			inputs.current[0].focus()
 		}
-	})
+	}, [])
 
 	return (
-		<div className='sms-code-container'>
-			{code.map((digit, index) => (
-				<input
+		<div className='flex gap-2 justify-center'>
+			{Array.from({ length: CODE_DIGITS }).map((_, index) => (
+				<Input
 					key={index}
+					ref={el => {
+						if (el) inputs.current[index] = el
+					}}
+					id={`code-${index}`}
 					type='text'
-					inputMode='numeric'
-					className={`code-digit ${digit ? 'filled' : ''}`}
 					maxLength={1}
-					required
-					value={digit}
+					className={`w-12 h-14 text-center text-lg font-mono ${
+						error ? 'border-destructive' : ''
+					}`}
+					value={code[index] || ''}
 					onChange={e => handleChange(e, index)}
 					onKeyDown={e => handleKeyDown(e, index)}
 					onPaste={e => handlePaste(e, index)}
-					ref={el => {
-						if (inputs.current) {
-							inputs.current[index] = el as HTMLInputElement
-						}
-					}}
+					autoComplete='one-time-code'
 				/>
 			))}
 		</div>

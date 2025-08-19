@@ -1,57 +1,56 @@
 'use client'
-import SidebarSection from '../common/SidebarSection'
 import { ERoutes } from '@/types/enum'
 import { signOut } from 'next-auth/react'
-
-import './Sidebar.scss'
 import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
 import { Role } from '@prisma/client'
+import SidebarSection from './SidebarSection'
+import { Card } from '../ui/card'
 
 const dashboardItems = [
 	{
 		icon: '📊',
-		label: 'home',
-		href: ERoutes.DASHBOARD,
+		title: 'home',
+		url: ERoutes.DASHBOARD,
 	},
 ]
 
 const profileItems = [
 	{
 		icon: '👤',
-		label: 'profile',
-		href: ERoutes.PROFILE,
+		title: 'profile',
+		url: ERoutes.PROFILE,
 	},
 	{
 		icon: '📋',
-		label: 'myOrders',
-		href: ERoutes.MY_ORDERS,
+		title: 'myOrders',
+		url: ERoutes.MY_ORDERS,
 	},
 	{
 		icon: '📅',
-		label: 'myRecords',
-		href: ERoutes.MY_RECORDS,
+		title: 'myRecords',
+		url: ERoutes.MY_RECORDS,
 	},
 	{
 		icon: '❤️',
-		label: 'favorites',
-		href: ERoutes.FAVORITES,
+		title: 'favorites',
+		url: ERoutes.FAVORITES,
 	},
 	{
 		icon: '⭐',
-		label: 'myReviews',
-		href: ERoutes.MY_REVIEWS,
+		title: 'myReviews',
+		url: ERoutes.MY_REVIEWS,
 	},
 ]
 
 const settingsItems = [
 	{
 		icon: '⚙️',
-		label: 'settings',
-		href: ERoutes.SETTINGS,
+		title: 'settings',
+		url: ERoutes.SETTINGS,
 	},
 	{
 		icon: '🚪',
-		label: 'logout',
+		title: 'logout',
 		action: () => {
 			signOut()
 		},
@@ -60,15 +59,16 @@ const settingsItems = [
 
 const Sidebar = () => {
 	const { user } = useUserProfile()
+
 	const isProvider = user?.role === Role.PROVIDER
 	return (
-		<aside className='sidebar'>
+		<Card className='sticky top-20 h-fit'>
 			{isProvider && (
 				<SidebarSection title='dashboard' items={dashboardItems} />
 			)}
 			<SidebarSection title='account' items={profileItems} />
 			<SidebarSection title='settings' items={settingsItems} />
-		</aside>
+		</Card>
 	)
 }
 

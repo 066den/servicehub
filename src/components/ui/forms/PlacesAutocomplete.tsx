@@ -6,8 +6,7 @@ import usePlacesAutocomplete, {
 	getGeocode,
 	getLatLng,
 } from 'use-places-autocomplete'
-import IconSvg from '../IconSvg'
-import Button from '../Button'
+
 import { PlacesAutocompleteProps, Suggestion } from '@/types'
 import DropdownMenu from '../DropdownMenu'
 import { useGoogleMaps } from '@/components/providers/GoogleMapsProvider'
@@ -92,10 +91,10 @@ const PlacesAutocomplete = ({
 		[clearSuggestions, onLocationSelect, setValue]
 	)
 
-	const handleClear = useCallback(() => {
-		setValue('')
-		clearSuggestions()
-	}, [setValue, clearSuggestions])
+	// const handleClear = useCallback(() => {
+	// 	setValue('')
+	// 	clearSuggestions()
+	// }, [setValue, clearSuggestions])
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
@@ -140,16 +139,6 @@ const PlacesAutocomplete = ({
 				}}
 				onKeyDown={handleKeyDown}
 			/>
-			<Button
-				round
-				color='translucent'
-				size='sm'
-				ariaLabel='Close'
-				className='value-clear'
-				onClick={handleClear}
-			>
-				<IconSvg name='close' />
-			</Button>
 		</div>
 	)
 

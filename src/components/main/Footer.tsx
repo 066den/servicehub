@@ -2,66 +2,66 @@ import Link from 'next/link'
 
 const Footer = () => {
 	return (
-		<footer className='footer'>
+		<footer className='bg-dark-gray py-10'>
 			<div className='container'>
-				<div className='footer-content'>
+				<div className='grid grid-cols-4 gap-10'>
 					<div className='footer-section'>
-						<h4>ServiceHub</h4>
-						<Link className='link' href='#'>
+						<h4 className='text-accent'>ServiceHub</h4>
+						<Link className='text-light' href='#'>
 							Про нас
 						</Link>
-						<Link className='link' href='#'>
+						<Link className='text-light' href='#'>
 							Як це працює
 						</Link>
-						<Link className='link' href='#'>
+						<Link className='text-light' href='#'>
 							Блог
 						</Link>
-						<Link className='link' href='#'>
+						<Link className='text-light' href='#'>
 							Карьєра
 						</Link>
 					</div>
 
 					<div className='footer-section'>
-						<h4>Для клієнтів</h4>
-						<Link className='link' href='#'>
+						<h4 className='text-accent'>Для клієнтів</h4>
+						<Link className='text-light' href='#'>
 							Як замовити послугу
 						</Link>
-						<Link className='link' href='#'>
+						<Link className='text-light' href='#'>
 							Безпека
 						</Link>
-						<Link className='link' href='#'>
+						<Link className='text-light' href='#'>
 							Гарантії
 						</Link>
-						<Link className='link' href='#'>
+						<Link className='text-light' href='#'>
 							Допомога
 						</Link>
 					</div>
 
 					<div className='footer-section'>
-						<h4>Для виконавців</h4>
-						<Link className='link' href='#'>
+						<h4 className='text-accent'>Для виконавців</h4>
+						<Link className='text-light' href='#'>
 							Стати виконавцем
 						</Link>
-						<Link className='link' href='#'>
+						<Link className='text-light' href='#'>
 							Комісії
 						</Link>
-						<Link className='link' href='#'>
+						<Link className='text-light' href='#'>
 							Правила
 						</Link>
-						<Link className='link' href='#'>
+						<Link className='text-light' href='#'>
 							CRM система
 						</Link>
 					</div>
 
 					<div className='footer-section'>
-						<h4>Контакти</h4>
-						<Link className='link' href='#'>
+						<h4 className='text-accent'>Контакти</h4>
+						<Link className='text-light' href='#'>
 							+380 (44) 123-45-67
 						</Link>
-						<Link className='link' href='#'>
+						<Link className='text-light' href='#'>
 							support@servicehub.ua
 						</Link>
-						<Link className='link' href='#'>
+						<Link className='text-light' href='#'>
 							Київ, вул. Хрещатик, 1
 						</Link>
 					</div>
