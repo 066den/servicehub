@@ -8,9 +8,14 @@ import usePlacesAutocomplete, {
 } from 'use-places-autocomplete'
 
 import { PlacesAutocompleteProps, Suggestion } from '@/types'
-import DropdownMenu from '../DropdownMenu'
+import { Input } from '../input'
+import { Label } from '../label'
+import { Button } from '../button'
+import LoadingSpinner from '../LoadingSpinner'
 import { useGoogleMaps } from '@/components/providers/GoogleMapsProvider'
 import { getLocation } from '@/utils/getLocation'
+import { cn } from '@/lib/utils'
+import { X } from 'lucide-react'
 
 const PlacesAutocomplete = ({
 	onLocationSelect,
@@ -20,9 +25,11 @@ const PlacesAutocomplete = ({
 	placeholder,
 	helperText,
 	types,
+	className,
 }: PlacesAutocompleteProps) => {
 	const t = useTranslations('Form')
 	const inputRef = useRef<HTMLInputElement>(null)
+	const dropdownRef = useRef<HTMLDivElement>(null)
 	const { isLoaded } = useGoogleMaps()
 
 	const {
@@ -43,6 +50,7 @@ const PlacesAutocomplete = ({
 
 	const [isLoading, setIsLoading] = useState(false)
 	const [highlightedIndex, setHighlightedIndex] = useState(-1)
+	const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
 	useEffect(() => {
 		setHighlightedIndex(-1)
@@ -61,11 +69,28 @@ const PlacesAutocomplete = ({
 		}
 	}, [location, onLocationSelect, setValue])
 
+	// Close dropdown when clicking outside
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				dropdownRef.current &&
+				!dropdownRef.current.contains(event.target as Node)
+			) {
+				setIsDropdownOpen(false)
+				clearSuggestions()
+			}
+		}
+
+		document.addEventListener('mousedown', handleClickOutside)
+		return () => document.removeEventListener('mousedown', handleClickOutside)
+	}, [clearSuggestions])
+
 	const handleSelect = useCallback(
 		(suggestion: Suggestion) => {
 			const description = suggestion.description
 			setValue(description)
 			clearSuggestions()
+			setIsDropdownOpen(false)
 			setIsLoading(true)
 
 			getGeocode({ address: description, language: 'uk', region: 'ua' })
@@ -91,10 +116,21 @@ const PlacesAutocomplete = ({
 		[clearSuggestions, onLocationSelect, setValue]
 	)
 
-	// const handleClear = useCallback(() => {
-	// 	setValue('')
-	// 	clearSuggestions()
-	// }, [setValue, clearSuggestions])
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const newValue = e.target.value
+		setValue(newValue)
+		setIsDropdownOpen(true)
+		if (newValue.length === 0) {
+			setIsDropdownOpen(false)
+			clearSuggestions()
+		}
+	}
+
+	const handleInputFocus = () => {
+		if (value.length > 0 && data.length > 0) {
+			setIsDropdownOpen(true)
+		}
+	}
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
@@ -117,6 +153,7 @@ const PlacesAutocomplete = ({
 					break
 				case 'Escape':
 					clearSuggestions()
+					setIsDropdownOpen(false)
 					setHighlightedIndex(-1)
 					break
 			}
@@ -124,45 +161,82 @@ const PlacesAutocomplete = ({
 		[data, highlightedIndex, handleSelect, clearSuggestions]
 	)
 
-	const trigger = (
-		<div className='input-container with-clear'>
-			<input
-				ref={inputRef}
-				type='text'
-				className='form-input'
-				placeholder={placeholder || t('locationPlaceholder')}
-				value={value}
-				onChange={e => setValue(e.target.value)}
-				disabled={!ready || disabled}
-				onFocus={() => {
-					clearSuggestions()
-				}}
-				onKeyDown={handleKeyDown}
-			/>
-		</div>
-	)
-
-	const items = data.map(item => ({
-		id: item.place_id,
-		label: item.description,
-	}))
+	const handleClear = () => {
+		setValue('')
+		clearSuggestions()
+		setIsDropdownOpen(false)
+		setHighlightedIndex(-1)
+	}
 
 	return (
-		<div className='form-group'>
-			{label && <label className='form-label'>{label}</label>}
-			<DropdownMenu
-				className='places-autocomplete'
-				triggerOn='focus'
-				trigger={trigger}
-				items={status === 'OK' ? items : []}
-				loading={isLoading}
-				emptyText={t('noResultsFound')}
-				onItemSelect={item => {
-					const selected = data.find(d => d.place_id === item.id)
-					if (selected) handleSelect(selected)
-				}}
-			/>
-			{helperText && <div className='form-input-helper'>{helperText}</div>}
+		<div className={cn('space-y-2', className)}>
+			{label && <Label htmlFor={inputRef.current?.id}>{label}</Label>}
+
+			<div className='relative' ref={dropdownRef}>
+				<Input
+					ref={inputRef}
+					placeholder={placeholder || t('locationPlaceholder')}
+					value={value}
+					onChange={handleInputChange}
+					onFocus={handleInputFocus}
+					disabled={!ready || disabled}
+					onKeyDown={handleKeyDown}
+					withClear
+					className='mb-0'
+				/>
+
+				{/* Clear button */}
+				{value && (
+					<Button
+						variant='ghost'
+						size='round'
+						withoutTransform
+						onClick={handleClear}
+						className='absolute right-1 top-1/2 -translate-y-1/2 p-0'
+					>
+						<X />
+					</Button>
+				)}
+
+				{/* Loading indicator */}
+				{isLoading && (
+					<div className='absolute right-2 top-1/2 -translate-y-1/2'>
+						<LoadingSpinner size='sm' color='primary' />
+					</div>
+				)}
+
+				{/* Dropdown */}
+				{isDropdownOpen && status === 'OK' && data.length > 0 && (
+					<div className='absolute top-full z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-65 overflow-auto'>
+						{data.map((item, index) => (
+							<div
+								key={item.place_id}
+								className={cn(
+									'px-4 py-3 cursor-pointer transition-colors',
+									'hover:bg-gray-50 focus:bg-gray-50',
+									index === highlightedIndex &&
+										'bg-blue-50 border-l-2 border-blue-500',
+									'first:rounded-t-lg last:rounded-b-lg'
+								)}
+								onClick={() => handleSelect(item)}
+								onMouseEnter={() => setHighlightedIndex(index)}
+							>
+								<div className='text-gray-900'>{item.description}</div>
+							</div>
+						))}
+					</div>
+				)}
+
+				{/* No results */}
+				{isDropdownOpen && status === 'ZERO_RESULTS' && (
+					<div className='absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg'>
+						<div className='px-4 py-3 text-sm text-gray-500 text-center'>
+							{t('noResultsFound')}
+						</div>
+					</div>
+				)}
+			</div>
+			{helperText && <div className='text-sm text-gray-500'>{helperText}</div>}
 		</div>
 	)
 }

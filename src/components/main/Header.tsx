@@ -2,10 +2,8 @@
 
 import Navigation from '../common/Navigation'
 import { useTranslations } from 'next-intl'
-import { useAuthStore } from '@/stores/authStore'
 import { motion } from 'framer-motion'
 import { bounceVariants } from '../ui/animate/variants'
-import { Avatar } from '../common/Avatar'
 import { useRouter } from 'next/navigation'
 import Modal from '../modals/Modal'
 import { Button } from '../ui/button'
@@ -14,8 +12,9 @@ import useFlag from '@/hooks/useFlag'
 import LocationSelector from '../common/LocationSelector'
 import Logo from '../common/Logo'
 import { ERoutes } from '@/types/enum'
-
-//import './Header.scss'
+import Avatar from '../ui/Avatar'
+import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+import { Skeleton } from '../ui/skeleton'
 
 const Header = () => {
 	const t = useTranslations()
@@ -35,7 +34,7 @@ const Header = () => {
 			href: '/contact',
 		},
 	]
-	const { user } = useAuthStore()
+	const { user, isLoading } = useUserProfile()
 
 	const [isModalProfileOpen, openModalProfile, closeModalProfile] = useFlag()
 
@@ -63,7 +62,9 @@ const Header = () => {
 
 					<Navigation items={navigationItems} />
 					<div className='flex items-center gap-4'>
-						{!user || !user.isVerified ? (
+						{isLoading ? (
+							<Skeleton className='h-10 w-20' />
+						) : !user || !user.isVerified ? (
 							<Button
 								variant='outline-primary'
 								size='md'
@@ -85,42 +86,45 @@ const Header = () => {
 										</motion.span>
 									)}
 								</button>
-								<Avatar onClick={handleAvatarClick} />
+								<Avatar user={user} onClick={handleAvatarClick} />
 							</>
 						)}
 
-						<Button
-							variant='accent'
-							size='md'
-							onClick={() => router.push(ERoutes.PROVIDER)}
-							className='min-w-[160px] font-semibold'
-						>
-							{t('becomeProvider')}
-						</Button>
+						{isLoading ? (
+							<Skeleton className='h-10 w-20' />
+						) : (
+							<Button
+								variant='accent'
+								size='md'
+								onClick={() => router.push(ERoutes.EXECUTOR)}
+								className='min-w-[160px] font-semibold'
+							>
+								{t('becomeProvider')}
+							</Button>
+						)}
 					</div>
 				</div>
 				<Modal
 					isOpen={isModalProfileOpen}
 					title={t('Profile.menu')}
 					onClose={closeModalProfile}
+					position='top'
 				>
-					<div className='btn-column space-y-3'>
+					<div className='space-y-2'>
 						<Button
-							variant='outline'
-							size='lg'
+							variant='outline-primary'
+							size='md'
 							onClick={handleProfileClick}
-							withoutTransform
-							className='w-full justify-start'
+							className='w-full'
 						>
 							👤 {t('Link.profile_title')}
 						</Button>
 
 						<Button
-							variant='destructive'
-							size='lg'
+							variant='outline-destructive'
+							size='md'
 							onClick={handleLogout}
-							withoutTransform
-							className='w-full justify-start'
+							className='w-full'
 						>
 							🚪 {t('Link.logout')}
 						</Button>

@@ -1,9 +1,7 @@
-@use './reboot';
-@use './variables';
-//@use './mixins';
-@use './spacing';
-@use './form';
-@use './common';
+@import '_variables.scss';
+@import '_spacing.scss';
+@import '_form.scss';
+@import '_common.scss';
 
 body {
 	font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI',

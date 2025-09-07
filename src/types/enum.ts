@@ -1,6 +1,6 @@
 export enum ERoutes {
 	PROFILE = '/profile',
-	PROVIDER = '/profile/provider',
+	EXECUTOR = '/profile/executor',
 	DASHBOARD = '/profile/dashboard',
 	MY_RECORDS = '/profile/records',
 	MY_REVIEWS = '/profile/reviews',

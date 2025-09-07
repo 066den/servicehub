@@ -1,3 +1,4 @@
+'use client'
 import { useCallback, useRef } from 'react'
 
 import { GoogleMap, Marker } from '@react-google-maps/api'

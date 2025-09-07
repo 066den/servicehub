@@ -47,7 +47,8 @@
 		"locationPlaceholder": "Почніть вводити назву міста...",
 		"noResultsFound": "Нічого не знайдено",
 		"phoneDisabled": "Телефон який ви використали при реєстрації. Його не можна змінити",
-		"phoneIncomplete": "Введіть повністю номер телефону"
+		"phoneIncomplete": "Введіть повністю номер телефону",
+		"phonePlaceholder": "050 123 45 67"
 	},
 	"Auth": {
 		"phoneForm": {
@@ -97,10 +98,18 @@
 		"user_not_found": "Користувача не знайдено",
 		"refresh_token_not_found": "Немає refresh token",
 		"refresh_token_error": "Помилка обновлення токену",
-		"invalid_code_or_expired": "Не вірний код або код застарів"
+		"invalid_code_or_expired": "Не вірний код або код застарів",
+		"file_type": "Неправильний формат файлу",
+		"file_size": "Розмір файлу перевищує 5MB",
+		"upload_error": "Не вдалося завантажити фото"
+	},
+	"Success": {
+		"upload": "Фото успішно завантажено"
 	},
 	"Notification": {
-		"location_not_selected": "Ви можете вибрати місцезнаходження пізніше"
+		"location_not_selected": "Ви можете вибрати місцезнаходження пізніше",
+		"profile_updated": "Профіль успішно оновлено",
+		"profile_update_error": "Не вдалося оновити профіль"
 	},
 	"getCurrentLocation": "Визначити автоматично",
 	"skip": "Поки що пропустити",

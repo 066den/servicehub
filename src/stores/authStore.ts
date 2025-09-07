@@ -1,10 +1,71 @@
 'use client'
 
 import { create } from 'zustand'
-import { AuthState, UserProfile } from '@/types/auth'
+import { UserProfile } from '@/types/auth'
 import { getSession, signIn, signOut } from 'next-auth/react'
 import { createJSONStorage, devtools, persist } from 'zustand/middleware'
 import { WindowWithTimer } from '@/@types/global'
+
+export interface AuthState {
+	// state
+	user: UserProfile | null
+	isLoading: boolean
+	error: string | null
+	isInitialized: boolean
+	// SMS flow
+	phone: string
+	step: 'phone' | 'code' | 'success'
+	codeSent: boolean
+	codeExpiresAt: Date | null
+
+	// user profile
+	isLoadingProfile: boolean
+	profileError: string | null
+	lastProfileUpdate: number
+
+	// Refresh token logic
+	isRefreshing: boolean
+	refreshError: string | null
+
+	resendCountdown: number
+	canResend: boolean
+	resendAttempts: number
+	lastCodeSentAt: number
+
+	// actions
+	setPhone: (phone: string) => void
+	sendCode: (phone: string) => Promise<void>
+	verifyCode: (
+		code: string,
+		firstName?: string,
+		lastName?: string
+	) => Promise<void>
+	logout: () => Promise<void>
+	clearError: () => void
+	setStep: (step: 'phone' | 'code' | 'success') => void
+
+	// user profile actions
+	fetchUserProfile: (force?: boolean) => Promise<UserProfile | null>
+	updateUser: (updates: Partial<UserProfile>) => Promise<void>
+	refreshUserProfile: () => Promise<void>
+
+	// Refresh token actions
+	refreshSession: () => Promise<boolean>
+	handleTokenExpiry: () => Promise<void>
+
+	// timer methods
+	startResendTimer: (seconds?: number) => void
+	stopResendTimer: () => void
+	resetResendTimer: () => void
+	canResendCode: () => boolean
+
+	// avatar actions
+	uploadAvatar: (file: File) => Promise<void>
+	removeAvatar: () => Promise<void>
+
+	// initialize
+	initialize: () => Promise<void>
+}
 
 export const useAuthStore = create<AuthState>()(
 	devtools(
@@ -118,7 +179,6 @@ export const useAuthStore = create<AuthState>()(
 											id: session.user.id,
 											phone: session.user.phone,
 											phoneNormalized: session.user.phoneNormalized,
-											displayName: session.user.phone,
 											isVerified: session.user.isVerified,
 											isActive: true,
 											createdAt: new Date().toISOString(),
@@ -358,7 +418,6 @@ export const useAuthStore = create<AuthState>()(
 										id: session.user.id,
 										phone: session.user.phone,
 										phoneNormalized: session.user.phoneNormalized,
-										displayName: session.user.phone,
 										isVerified: session.user.isVerified,
 										isActive: true,
 										createdAt: new Date().toISOString(),
@@ -391,14 +450,18 @@ export const useAuthStore = create<AuthState>()(
 				fetchUserProfile: async (
 					force = false
 				): Promise<UserProfile | null> => {
-					const { lastProfileUpdate } = get()
+					const { lastProfileUpdate, user } = get()
 
 					const now = Date.now()
 					if (!force && now - lastProfileUpdate < 5 * 60 * 1000) {
-						return get().user
+						return user
 					}
 
-					set({ isLoadingProfile: true, profileError: null })
+					if (!user) {
+						set({ isLoadingProfile: true })
+					}
+
+					set({ profileError: null })
 
 					try {
 						const session = await getSession()
@@ -451,38 +514,112 @@ export const useAuthStore = create<AuthState>()(
 				updateUser: async (updates: Partial<UserProfile>) => {
 					const { user } = get()
 					const session = await getSession()
+					if (!user) {
+						throw new Error('User not found')
+					}
 
 					if (!session?.accessToken) {
 						throw new Error('Not access token')
 					}
 
-					const response = await fetch('/api/user/profile', {
-						method: 'PUT',
-						headers: {
-							Authorization: `Bearer ${session.accessToken}`,
-							'Content-Type': 'application/json',
+					set({
+						user: {
+							...user,
+							...updates,
+							updatedAt: new Date().toISOString(),
 						},
-						body: JSON.stringify(updates),
 					})
 
-					if (!response.ok) {
-						const errorData = await response.json().catch(() => ({}))
-						throw new Error(errorData.error || `HTTP ${response.status}`)
-					}
-
-					if (user) {
-						set({
-							user: {
-								...user,
-								...updates,
-								updatedAt: new Date().toISOString(),
+					try {
+						const response = await fetch('/api/user/profile', {
+							method: 'PUT',
+							headers: {
+								Authorization: `Bearer ${session.accessToken}`,
+								'Content-Type': 'application/json',
 							},
+							body: JSON.stringify(updates),
 						})
+
+						if (!response.ok) {
+							const errorData = await response.json().catch(() => ({}))
+							throw new Error(errorData.error || `HTTP ${response.status}`)
+						}
+					} catch (error) {
+						set({ user })
+						if (error instanceof Error) {
+							console.error('Error updateUser:', error.message)
+							throw new Error(error.message)
+						}
 					}
 				},
 
 				refreshUserProfile: async () => {
 					await get().fetchUserProfile(true)
+				},
+
+				uploadAvatar: async (file: File) => {
+					try {
+						const session = await getSession()
+						if (!session?.accessToken) {
+							throw new Error('Unauthorized')
+						}
+
+						const formData = new FormData()
+						formData.append('avatar', file)
+
+						const response = await fetch('/api/user/avatar', {
+							method: 'POST',
+							headers: {
+								Authorization: `Bearer ${session.accessToken}`,
+							},
+							body: formData,
+						})
+
+						if (!response.ok) {
+							const errorData = await response.json().catch(() => ({}))
+							throw new Error(errorData.error || `HTTP ${response.status}`)
+						}
+
+						const data = await response.json()
+						if (data.success) {
+							await get().refreshUserProfile()
+						} else {
+							throw new Error(data.error || 'Failed to upload avatar')
+						}
+					} catch (error) {
+						console.error('Error uploadAvatar:', error)
+					}
+				},
+
+				removeAvatar: async () => {
+					try {
+						const session = await getSession()
+						if (!session?.accessToken) {
+							throw new Error('Unauthorized')
+						}
+
+						const response = await fetch('/api/user/avatar', {
+							method: 'DELETE',
+							headers: {
+								Authorization: `Bearer ${session.accessToken}`,
+								'Content-Type': 'application/json',
+							},
+						})
+
+						if (!response.ok) {
+							const errorData = await response.json().catch(() => ({}))
+							throw new Error(errorData.error || `HTTP ${response.status}`)
+						}
+
+						const data = await response.json()
+						if (data.success) {
+							await get().refreshUserProfile()
+						} else {
+							throw new Error(data.error || 'Failed to remove avatar')
+						}
+					} catch (error) {
+						console.error('Error removeAvatar:', error)
+					}
 				},
 			}),
 			{

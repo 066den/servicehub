@@ -29,7 +29,7 @@ const SidebarSection = ({ title, items }: Props) => {
 	return (
 		<div className='space-y-4'>
 			{title && (
-				<div className='font-medium text-secondary-foreground px-6'>
+				<div className='font-medium text-secondary-foreground px-6 uppercase text-sm tracking-[0.5px]'>
 					{t(title)}
 				</div>
 			)}
@@ -43,9 +43,9 @@ const SidebarSection = ({ title, items }: Props) => {
 							withoutTransform
 							onClick={() => handleClick(item)}
 							className={cn(
-								'justify-start items-center gap-2 text-left text-base text-secondary-foreground hover:bg-gray-100 hover:text-primary',
+								'justify-start items-center gap-2 px-4 border-primary text-left text-base text-secondary-foreground hover:bg-gray-100 hover:text-primary',
 								pathname === item.url &&
-									'bg-primary/10 text-primary hover:bg-primary/10'
+									'bg-primary/10 text-primary border-l-[3px] hover:bg-primary/10'
 							)}
 						>
 							<span className='text-lg'> {item.icon} </span>

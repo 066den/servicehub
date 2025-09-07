@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/stores/authStore'
+import { getDisplayName } from '@/utils/textFormat'
 import { useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 
@@ -17,6 +18,10 @@ export const useUserProfile = () => {
 		updateUser,
 		initialize,
 		logout,
+		uploadAvatar,
+		removeAvatar,
+		isUploadingAvatar,
+		avatarUploadError,
 	} = useAuthStore()
 
 	useEffect(() => {
@@ -44,10 +49,15 @@ export const useUserProfile = () => {
 		updateUser,
 		setPhone,
 		sendCode,
+		uploadAvatar,
+		removeAvatar,
+		isUploadingAvatar,
+		avatarUploadError,
 
 		isVerified: user?.isVerified || false,
-		displayName: user?.displayName || 'Пользователь',
+		...(user && { displayName: getDisplayName(user) }),
 		hasCompletedProfile: !!(user?.firstName && user?.lastName),
+		userLocation: user?.location || null,
 
 		stats: user?.stats || {
 			totalOrders: 0,

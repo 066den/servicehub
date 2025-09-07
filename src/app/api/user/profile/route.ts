@@ -79,7 +79,6 @@ export async function GET() {
 		updatedAt: user.updatedAt.toISOString(),
 		lastLoginAt: user.lastLoginAt?.toISOString() || null,
 		//activeSessions: user._count.sessions,
-		displayName: getDisplayName(user.firstName, user.lastName, user.phone),
 	}
 
 	return NextResponse.json({ success: true, user: profileData })
@@ -159,7 +158,10 @@ export async function PUT(req: Request) {
 
 	const updatedUser = await prisma.user.update({
 		where: { id: session.user.id },
-		data: { ...updateData, updatedAt: new Date() },
+		data: {
+			...updateData,
+			updatedAt: new Date(),
+		},
 	})
 
 	return NextResponse.json({ success: true, user: updatedUser })
@@ -211,26 +213,4 @@ async function getUserStats(userId: number) {
 			earnings: 0,
 		}
 	}
-}
-
-// Вспомогательная функция для отображаемого имени
-function getDisplayName(
-	firstName?: string | null,
-	lastName?: string | null,
-	phone?: string
-): string {
-	if (firstName && lastName) {
-		return `${firstName} ${lastName}`
-	}
-	if (firstName) {
-		return firstName
-	}
-	if (lastName) {
-		return lastName
-	}
-	// Возвращаем замаскированный номер телефона
-	if (phone) {
-		return phone.replace(/(\+\d{2})(\d{3})(\d{3})(\d{2})(\d{2})/, '$1***$4$5')
-	}
-	return 'Пользователь'
 }

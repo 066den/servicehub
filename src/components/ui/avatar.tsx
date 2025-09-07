@@ -1,53 +1,72 @@
-"use client"
+import { ReactNode, useEffect, useState } from 'react'
 
-import * as React from "react"
-import * as AvatarPrimitive from "@radix-ui/react-avatar"
+import { cn } from '@/lib/utils'
+import {
+	getAvatarColor,
+	getFirstLetters,
+	getDisplayName,
+} from '@/utils/textFormat'
+import { UserProfile } from '@/types/auth'
+import Image from 'next/image'
 
-import { cn } from "@/lib/utils"
-
-function Avatar({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root>) {
-  return (
-    <AvatarPrimitive.Root
-      data-slot="avatar"
-      className={cn(
-        "relative flex size-8 shrink-0 overflow-hidden rounded-full",
-        className
-      )}
-      {...props}
-    />
-  )
+type Props = {
+	className?: string
+	size?: 'sm' | 'md' | 'lg'
+	user?: UserProfile | null
+	onClick?: () => void
+	icon?: ReactNode
 }
 
-function AvatarImage({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
-  return (
-    <AvatarPrimitive.Image
-      data-slot="avatar-image"
-      className={cn("aspect-square size-full", className)}
-      {...props}
-    />
-  )
+const Avatar = ({ className, size = 'md', onClick, icon, user }: Props) => {
+	const [content, setContent] = useState('')
+	const [bgColor, setBgColor] = useState('')
+
+	useEffect(() => {
+		if (user?.firstName) {
+			setContent(getFirstLetters(getDisplayName(user)))
+		} else {
+			setContent(getFirstLetters('Користувач'))
+		}
+		setBgColor(getAvatarColor(content as string))
+	}, [user, content])
+
+	const fullClassName = cn(
+		className,
+		'relative rounded-full bg-primary-gradient flex items-center justify-center text-white font-medium cursor-pointer hover:shadow-lg transition-all duration-300 ease-in-out',
+		{
+			'w-8 h-8': size === 'sm',
+			'w-11 h-11 text-lg': size === 'md',
+			'w-[5rem] h-[5rem] text-3xl': size === 'lg',
+		}
+	)
+	return (
+		<div
+			className={fullClassName}
+			style={{ background: `linear-gradient(#fff -125%, ${bgColor} 100%)` }}
+			onClick={onClick}
+		>
+			{user?.avatar ? (
+				<Image
+					src={user.avatar}
+					alt={content}
+					width={size === 'lg' ? 200 : 100}
+					height={size === 'lg' ? 200 : 100}
+				/>
+			) : (
+				content
+			)}
+			{icon && (
+				<div
+					className={`absolute bottom-0 right-0 hover:scale-110 transition-all duration-300 ease-in-out ${
+						size === 'lg' ? 'text-2xl' : 'text-sm'
+					}`}
+					title='Змінити фото'
+				>
+					{icon}
+				</div>
+			)}
+		</div>
+	)
 }
 
-function AvatarFallback({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
-  return (
-    <AvatarPrimitive.Fallback
-      data-slot="avatar-fallback"
-      className={cn(
-        "bg-muted flex size-full items-center justify-center rounded-full",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-export { Avatar, AvatarImage, AvatarFallback }
+export default Avatar

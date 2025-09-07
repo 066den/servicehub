@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 
 import useEffectOnce from '@/hooks/useEffectOnce'
 import { sloganVariants } from '../ui/animate/variants'
+import Image from 'next/image'
 
 // Constants
 const SLOGAN_LENGTH = 6
@@ -19,7 +20,9 @@ interface LogoProps {
 	color?: 'default' | 'white'
 	withSlogan?: boolean
 	size?: 'sm' | 'md' | 'lg'
+	variant?: 'text' | 'image'
 	isLink?: boolean
+	className?: string
 }
 
 // Component
@@ -28,6 +31,8 @@ const Logo: React.FC<LogoProps> = ({
 	withSlogan = false,
 	size,
 	isLink = false,
+	variant = 'text',
+	className,
 }) => {
 	const t = useTranslations()
 	const [currentIndex, setCurrentIndex] = useState(0)
@@ -52,14 +57,15 @@ const Logo: React.FC<LogoProps> = ({
 		// Size variants
 		size === 'sm' && 'text-[1.8em]',
 		(size === 'md' || !size) && 'text-[2.5em]',
-		size === 'lg' && 'text-[3em] mb-3',
+		size === 'lg' && 'text-[3.5em] mb-3',
 		// Link styles
-		isLink && 'cursor-pointer'
+		isLink && 'cursor-pointer',
+		className
 	)
 
 	// Logo main container styles
 	const logoMainClassName = cn(
-		'flex gap-1.5 font-bold no-underline',
+		'flex flex-col gap-1.5 font-bold no-underline',
 		color === 'default' && 'text-primary',
 		color === 'white' && 'text-white',
 		size === 'lg' && 'items-center'
@@ -67,22 +73,22 @@ const Logo: React.FC<LogoProps> = ({
 
 	// Hub icon styles
 	const hubIconClassName = cn(
-		'flex items-center justify-center relative bg-accent rounded-full shadow-lg',
+		'flex items-center justify-center relative bg-accent rounded-full shadow-lg flex-shrink-0',
 		(size === 'sm' || !size) && 'w-10 h-10',
-		size === 'lg' && 'w-12 h-12 shadow-xl'
+		size === 'lg' && 'w-14 h-14 shadow-xl'
 	)
 
 	// Hub icon inner circle styles
 	const hubIconInnerClassName = cn(
 		'absolute bg-white rounded-full shadow-md',
 		(size === 'sm' || !size) && 'w-3 h-3',
-		size === 'lg' && 'w-3.5 h-3.5 shadow-lg'
+		size === 'lg' && 'w-4 h-4 shadow-lg'
 	)
 
 	// Slogan styles
 	const sloganClassName = cn(
 		'text-[0.375em] font-medium text-secondary-foreground uppercase tracking-wider ml-0.5',
-		size === 'lg' && 'text-white text-sm'
+		size === 'lg' && 'text-white text-xl font-light lowercase'
 	)
 
 	return (
@@ -93,6 +99,7 @@ const Logo: React.FC<LogoProps> = ({
 					<div className={hubIconInnerClassName} />
 				</div>
 				Hub
+				<Image src='/logo-wo.png' alt='Logo' width={370} height={90} />
 			</div>
 
 			{withSlogan && (

@@ -1,19 +1,19 @@
 'use client'
 
 import { useAuthStore } from '@/stores/authStore'
-import { Provider } from '@/types/auth'
+import { Executor } from '@/types/auth'
 import { getSession } from 'next-auth/react'
+import { toast } from 'sonner'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist } from 'zustand/middleware'
-import { useNotificationStore } from './notificationStore'
 
 interface ProviderState {
-	provider: Provider | null
+	provider: Executor | null
 	lastProviderUpdate: number
 	isLoadingProvider: boolean
 	providerError: string | null
-	fetchProvider: () => Promise<Provider | null>
-	createProvider: (provider: Provider) => void
+	fetchProvider: () => Promise<Executor | null>
+	createProvider: (provider: Executor) => void
 }
 
 export const useProviderStore = create<ProviderState>()(
@@ -24,7 +24,7 @@ export const useProviderStore = create<ProviderState>()(
 				lastProviderUpdate: 0,
 				isLoadingProvider: false,
 				providerError: null,
-				fetchProvider: async (force = false): Promise<Provider | null> => {
+				fetchProvider: async (force = false): Promise<Executor | null> => {
 					const { lastProviderUpdate } = get()
 
 					const now = Date.now()
@@ -58,7 +58,7 @@ export const useProviderStore = create<ProviderState>()(
 							throw new Error(data.error || 'Failed to fetch provider')
 						}
 
-						const provider: Provider = data.provider
+						const provider: Executor = data.provider
 
 						set({
 							provider,
@@ -80,7 +80,7 @@ export const useProviderStore = create<ProviderState>()(
 						return null
 					}
 				},
-				createProvider: async (provider: Provider) => {
+				createProvider: async (provider: Executor) => {
 					const session = await getSession()
 					if (!session?.accessToken) {
 						throw new Error('Not access token')
@@ -110,11 +110,7 @@ export const useProviderStore = create<ProviderState>()(
 
 						set({ provider: data.provider })
 						await useAuthStore.getState().refreshUserProfile()
-						useNotificationStore.getState().addNotification({
-							title: 'Профіль виконавця успішно створено',
-							message: 'Ви можете зараз починати отримувати замовлення',
-							type: 'success',
-						})
+						toast.success('Профіль виконавця успішно створено')
 					} catch (error) {
 						let message = 'Ошибка создания профіля виконавця'
 						if (error instanceof Error) {

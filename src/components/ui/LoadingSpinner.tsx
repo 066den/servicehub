@@ -1,5 +1,6 @@
 'use client'
 
+import { cn } from '@/lib/utils'
 import { motion } from 'motion/react'
 
 interface LoadingSpinnerProps {
@@ -9,9 +10,24 @@ interface LoadingSpinnerProps {
 
 function LoadingSpinner({ color, size }: LoadingSpinnerProps) {
 	return (
-		<div className='spinner-container'>
+		<div className='flex items-center justify-center'>
 			<motion.div
-				className={`spinner ${color} ${size}`}
+				className={cn(
+					'w-10 h-10 border-4 border-white/20 rounded-full border-t-white',
+					{
+						'border-primary/50 border-t-transparent border-4':
+							color === 'primary',
+						'border-t-secondary': color === 'secondary',
+						'border-t-accent': color === 'accent',
+						'border-t-error': color === 'error',
+						'border-t-warning': color === 'warning',
+					},
+					{
+						'w-8 h-8': size === 'sm',
+						'w-10 h-10': size === 'md',
+						'w-14 h-14': size === 'lg',
+					}
+				)}
 				animate={{ rotate: 360 }}
 				transition={{
 					duration: 1,

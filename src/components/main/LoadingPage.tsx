@@ -1,30 +1,20 @@
-'use client'
-
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
 import Logo from '../common/Logo'
-import LoadingSpinner from '../ui/LoadingSpinner'
-import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+
+import { Progress } from '../ui/progress'
 
 export default function LoadingPage() {
-	const { isLoading } = useUserProfile()
-	useBodyScrollLock(isLoading)
-
-	if (!isLoading) return null
-
 	return (
-		<div className='loading-page'>
-			<div className='particle' />
-			<div className='particle' />
-			<div className='particle' />
-			<div className='particle' />
-			<div className='loading-container'>
+		<div className='fixed inset-0 z-50 flex items-center justify-center bg-primary-gradient'>
+			<div className='relative text-center max-w-sm mx-auto px-4'>
 				<Logo color='white' size='lg' withSlogan={true} />
 
-				<div className='loading-content'>
-					<div className='loading-text'>Загружаем платформу...</div>
+				<div className='mt-8 space-y-4'>
+					<div className='text-xl font-medium text-white/95'>
+						Завантажуємо платформу...
+					</div>
 
-					<LoadingSpinner color='accent' size='lg' />
-
+					{/* <LoadingSpinner color='accent' size='lg' /> */}
+					<Progress className='progress-bar' />
 					{/* <div className='loading-dots'>
 						<div className='dot' />
 						<div className='dot' />
@@ -46,3 +36,4 @@ export default function LoadingPage() {
 		</div>
 	)
 }
+

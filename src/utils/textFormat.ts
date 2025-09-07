@@ -1,3 +1,5 @@
+import { UserProfile } from '@/types/auth'
+
 export const getFirstLetters = (phrase: string, count = 2) => {
 	return phrase
 		.replace(/[.,!@#$%^&*()_+=\-`~[\]/\\{}:"|<>?]+/gi, '')
@@ -24,7 +26,7 @@ const avatarColors = [
 	'#0EA5E9', // sky
 ]
 
-export function getAvatarColor(name: string): string {
+export const getAvatarColor = (name: string): string => {
 	let hash = 0
 
 	for (let i = 0; i < name.length; i++) {
@@ -33,4 +35,22 @@ export function getAvatarColor(name: string): string {
 
 	const index = Math.abs(hash) % avatarColors.length
 	return avatarColors[index]
+}
+
+export const getDisplayName = (user: UserProfile): string => {
+	const { firstName, lastName } = user
+	if (firstName && lastName) {
+		return `${firstName} ${lastName}`
+	}
+	if (firstName) {
+		return firstName
+	}
+	if (lastName) {
+		return lastName
+	}
+
+	// if (phone) {
+	// 	return phone.replace(/(\+\d{2})(\d{3})(\d{3})(\d{2})(\d{2})/, '$1***$4$5')
+	// }
+	return 'Пользователь'
 }

@@ -9,10 +9,9 @@ type FormData = {
 
 const FormExamples: React.FC = () => {
 	const {
-		register,
 		handleSubmit,
 		control,
-		formState: { errors },
+		formState: {},
 		watch,
 		setValue,
 	} = useForm<FormData>()

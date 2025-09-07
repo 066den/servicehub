@@ -42,7 +42,7 @@ const GradientExamples: React.FC = () => {
 					<h4 className='text-xl font-bold mb-2'>
 						Primary Gradient (CSS переменная)
 					</h4>
-					<p>Используем style={{ background: 'var(--primary-gradient)' }}</p>
+					{/* <p>Используем style={{ background: 'var(--primary-gradient)' }}</p> */}
 				</div>
 
 				<div
@@ -52,7 +52,7 @@ const GradientExamples: React.FC = () => {
 					<h4 className='text-xl font-bold mb-2'>
 						Secondary Gradient (CSS переменная)
 					</h4>
-					<p>Используем style={{ background: 'var(--secondary-gradient)' }}</p>
+					{/* <p>Используем style={{ background: 'var(--secondary-gradient)' }}</p> */}
 				</div>
 			</div>
 

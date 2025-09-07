@@ -20,17 +20,17 @@ const buttonVariants = cva(
 				outline:
 					'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground hover:shadow-sm dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
 				'outline-primary':
-					'border-2 border-primary bg-background text-primary shadow-xs hover:bg-primary hover:text-primary-foreground hover:shadow-[0_8px_25px_hsl(var(--color-primary-shadow))]',
+					'border-2 border-primary bg-background text-primary shadow-xs hover:bg-primary/10 hover:shadow-[0_2px_8px_hsl(var(--color-primary-shadow))]',
 				'outline-accent':
 					'border-2 border-accent bg-background text-accent shadow-xs hover:bg-accent hover:text-accent-foreground hover:shadow-[0_8px_25px_hsl(var(--color-accent-shadow))]',
 				'outline-destructive':
-					'border-2 border-destructive bg-background text-destructive shadow-xs hover:bg-destructive hover:text-destructive-foreground hover:shadow-[0_8px_25px_hsl(var(--color-default-shadow))]',
+					'border-2 border-destructive bg-background text-destructive shadow-xs hover:bg-destructive/10 hover:shadow-[0_2px_8px_hsl(var(--color-default-shadow))]',
 				'outline-secondary':
 					'border-2 border-border bg-background text-secondary-foreground shadow-xs hover:bg-secondary hover:text-secondary-foreground hover:shadow-sm dark:bg-input/30 dark:border-input',
 				secondary:
 					'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 hover:shadow-sm',
 				ghost:
-					'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
+					'text-secondary-foreground hover:bg-muted dark:hover:bg-accent/50',
 				link: 'text-primary underline-offset-4 hover:underline hover:translate-y-0 hover:shadow-none',
 			},
 			size: {
@@ -89,7 +89,15 @@ function Button({
 			disabled={loading || props.disabled}
 			{...props}
 		>
-			{loading ? '⏳ Обробка...' : props.children}
+			{loading ? (
+				size === 'round' ? (
+					<div className='w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin' />
+				) : (
+					'⏳ Обробка...'
+				)
+			) : (
+				props.children
+			)}
 		</Comp>
 	)
 }

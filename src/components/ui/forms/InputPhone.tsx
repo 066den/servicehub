@@ -1,16 +1,16 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { formatPhone } from '@/utils/phoneNumber'
 import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { Phone } from 'lucide-react'
 
 const PHONE_LENGTH = 10
 export const VALID_PHONE_PATTERN = /^0[56789]\d{8}$/
 
 type InputPhoneProps = {
-	label: string
+	label?: string
 	required?: boolean
 	disabled?: boolean
 	error?: string
@@ -21,8 +21,9 @@ type InputPhoneProps = {
 	onChange?: (value: string) => void
 	onBlur?: () => void
 	name?: string
-	validateOnBlur?: boolean // Включить валидацию при потере фокуса
-	showValidationErrors?: boolean // Показывать ли ошибки валидации
+	validateOnBlur?: boolean
+	showValidationErrors?: boolean
+	className?: string
 }
 
 const InputPhone = ({
@@ -39,10 +40,11 @@ const InputPhone = ({
 	name,
 	validateOnBlur = true,
 	showValidationErrors = true,
+	className,
 }: InputPhoneProps) => {
 	const [customValue, setCustomValue] = useState('')
-	const [isFocused, setIsFocused] = useState(false)
 	const [internalError, setInternalError] = useState<string | undefined>()
+	const inputRef = useRef<HTMLInputElement>(null)
 
 	// Валидация телефона
 	const validatePhone = useCallback(
@@ -100,11 +102,9 @@ const InputPhone = ({
 	}
 
 	const handleBlur = () => {
-		setIsFocused(false)
-
 		// Валидация при потере фокуса
-		if (validateOnBlur && externalValue) {
-			const validationResult = validatePhone(externalValue)
+		if (validateOnBlur) {
+			const validationResult = validatePhone(externalValue || '')
 			if (validationResult !== true) {
 				setInternalError(validationResult)
 			}
@@ -117,7 +117,6 @@ const InputPhone = ({
 	}
 
 	const handleFocus = () => {
-		setIsFocused(true)
 		// Очищаем внутреннюю ошибку при фокусе
 		setInternalError(undefined)
 	}
@@ -125,70 +124,63 @@ const InputPhone = ({
 	// Приоритет ошибок: внешняя ошибка > внутренняя ошибка
 	const displayError = externalError || internalError
 
-	const getInputState = () => {
-		if (displayError) return 'error'
-		if (isFocused) return 'focused'
-		return 'default'
-	}
-
-	const inputState = getInputState()
-
 	return (
-		<>
+		<div className={cn('space-y-2 mb-4', className)}>
 			{label && (
-				<Label
-					htmlFor={name}
-					className={`phone-label ${required ? 'required' : ''}`}
-				>
+				<Label htmlFor={name} required={required}>
 					{label}
 				</Label>
 			)}
 
-			<div
-				className={cn(
-					'flex border-2 border-gray-200 rounded-md bg-input focus-within:border-primary focus-within:bg-white',
-					inputState,
-					disabled ? 'disabled' : '',
-					label ? 'mt-2' : ''
+			<div className='relative space-y-2'>
+				<div className='flex items-stretch'>
+					{/* Country code section */}
+					<div className='flex items-center gap-2 px-4 py-3 bg-gray-50 border-2 border-r-0 border-gray-200 rounded-l-lg text-sm font-medium text-gray-700 h-[52px]'>
+						<Phone className='w-4 h-4 text-blue-600' />
+						<span>{countryCode}</span>
+					</div>
+
+					{/* Phone input */}
+					<div className='relative flex-1'>
+						<input
+							ref={inputRef}
+							type='tel'
+							value={customValue}
+							id={name}
+							className={cn(
+								'w-full h-[52px] px-4 py-3 text-base font-normal text-gray-900 placeholder:text-gray-500',
+								'border-2 border-l-0 border-gray-200 rounded-r-lg bg-white',
+								'focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100',
+								'hover:border-gray-300 transition-all duration-300 ease',
+								'disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed',
+								displayError &&
+									'border-red-500 focus:border-red-500 focus:ring-red-100'
+							)}
+							placeholder={placeholder}
+							autoComplete='tel'
+							disabled={disabled}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							onFocus={handleFocus}
+							maxLength={13}
+						/>
+					</div>
+				</div>
+
+				{/* Error message */}
+				{showValidationErrors && displayError && (
+					<div className='flex items-center gap-1 text-sm text-red-600'>
+						<span>✗</span>
+						<span>{displayError}</span>
+					</div>
 				)}
-			>
-				<div className='flex items-center gap-1 px-4 bg-input border-r rounded-l-md'>
-					<svg viewBox='0 0 24 16' className='w-5 h-5'>
-						<rect width='24' height='8' fill='#0057b7' />
-						<rect y='8' width='24' height='8' fill='#ffd700' />
-					</svg>
-					<span className='font-medium text-secondary-foreground'>
-						{countryCode}
-					</span>
-				</div>
 
-				<Input
-					type='tel'
-					value={customValue}
-					id={name}
-					className='border-none rounded-l-none outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 rounded-r-md'
-					placeholder={placeholder}
-					autoComplete='tel'
-					disabled={disabled}
-					onChange={handleChange}
-					onBlur={handleBlur}
-					onFocus={handleFocus}
-					maxLength={13} // 10 digits + 3 spaces
-				/>
+				{/* Helper text */}
+				{helperText && !displayError && (
+					<div className='text-sm text-gray-500'>{helperText}</div>
+				)}
 			</div>
-
-			{helperText && !displayError && (
-				<div className='text-sm text-secondary-foreground'>{helperText}</div>
-			)}
-
-			{/* Показываем ошибки только если включено */}
-			{showValidationErrors && displayError && (
-				<div className='text-sm text-destructive flex items-center gap-2 mt-2'>
-					<span>✗</span>
-					<span>{displayError}</span>
-				</div>
-			)}
-		</>
+		</div>
 	)
 }
 

@@ -14,7 +14,7 @@
 		--background: 210 40% 98%; /* #f8fafc */
 		--foreground: 222.2 84% 4.9%;
 		--card: 0 0% 100%;
-		--card-foreground: 222.2 84% 4.9%;
+		--card-foreground: 222.2 84% 4.9%; /* #1f2937 */
 		--popover: 0 0% 100%;
 		--popover-foreground: 222.2 84% 4.9%;
 
@@ -31,11 +31,15 @@
 			hsl(221.2 83.2% 45.1%)
 		);
 		--secondary-gradient: linear-gradient(135deg, #667eea, #764ba2);
-		--primary-gradient-light: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+		--primary-gradient-light: linear-gradient(
+			135deg,
+			hsl(270, 100%, 98.04%),
+			hsl(268.7, 100%, 95.49%)
+		);
 
 		/* Secondary цвета */
 		--secondary: 210 40% 96%;
-		--secondary-foreground: 220 9% 46%; /* #6b7280 */
+		--secondary-foreground: 215 25% 27%; /* #64748b */
 		--color-secondary-hover: 210 40% 88.2%; /* #e2e8f0 */
 		--color-secondary-shadow: 210 40% 96% / 0.3;
 
@@ -58,7 +62,7 @@
 		--destructive-foreground: 210 40% 98%;
 		/*--error: 0 84.2% 60.2%;  #EF4444 */
 		--destructive-dark: 0 84.2% 52.2%; /* #dc2626 */
-		--error-light: 0 84.2% 94.1%; /* #fef2f2 */
+		--destructive-light: 0 84.2% 94.1%; /* #fef2f2 */
 
 		/* Border и Input цвета */
 		--border: 214.3 31.8% 91.4%;
@@ -66,23 +70,12 @@
 		--ring: 221.2 83.2% 53.3%;
 		--radius: 0.75rem;
 
-		/* Sidebar цвета */
-		--sidebar-background: 0 0% 98%;
-		--sidebar-foreground: 240 5.3% 26.1%;
-		--sidebar-primary: 240 5.9% 10%;
-		--sidebar-primary-foreground: 0 0% 98%;
-		--sidebar-accent: 240 4.8% 95.9%;
-		--sidebar-accent-foreground: 240 5.9% 10%;
-		--sidebar-border: 220 13% 91%;
-		--sidebar-ring: 217.2 91.2% 59.8%;
-
 		/* Цвета из _variables.scss, которые используются в проекте */
 		--color-text: 222.2 84% 4.9%; /* #1f2937 */
 		--color-text-light: 210 40% 84.7%; /* #d1d5db */
 		--color-text-secondary: 215 25% 27%; /* #64748b */
 		--color-text-tertiary: 215 25% 22.1%; /* #374151 */
 		--color-text-title: 222.2 84% 4.9%; /* #1f2937 */
-		--color-text-label: 215 25% 22.1%; /* #374151 */
 
 		/* Gray цвета */
 		--color-light-gray: 210 40% 98%; /* #f8fafc */
@@ -206,7 +199,6 @@
 		--color-text-secondary: 210 40% 84.7%; /* #d1d5db */
 		--color-text-tertiary: 210 40% 96.1%; /* #f1f5f9 */
 		--color-text-title: 210 40% 98%; /* #f8fafc */
-		--color-text-label: 210 40% 96.1%; /* #f1f5f9 */
 
 		/* Gray цвета для темной темы */
 		--color-light-gray: 222.2 84% 4.9%; /* #1f2937 */

@@ -38,6 +38,7 @@ const config = {
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
 					foreground: 'hsl(var(--destructive-foreground))',
+					light: 'hsl(var(--destructive-light))',
 				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
@@ -69,7 +70,7 @@ const config = {
 			backgroundImage: {
 				'primary-gradient': 'var(--primary-gradient)',
 				'secondary-gradient': 'var(--secondary-gradient)',
-				'light-gradient': 'var(--background-gradient-light)',
+				'light-gradient': 'var(--primary-gradient-light)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

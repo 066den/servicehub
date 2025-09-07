@@ -11,7 +11,6 @@ export default function UserLayout({
 	return (
 		<div>
 			<Header />
-			{/* <ProfileHero /> */}
 			<div className='container'>
 				<div className='grid grid-cols-[17.5rem_1fr] gap-6 py-6'>
 					<Sidebar />

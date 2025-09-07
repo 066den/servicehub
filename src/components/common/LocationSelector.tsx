@@ -9,14 +9,13 @@ import { motion } from 'framer-motion'
 import { LocationData } from '@/types'
 import useFlag from '@/hooks/useFlag'
 import { fadeScaleVariants } from '../ui/animate/variants'
-import useNotifications from '@/hooks/storeHooks/useNotifications'
 import { useTranslations } from 'next-intl'
 import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
 import { Button } from '../ui/button'
+import { toast } from 'sonner'
 
 const LocationSelector = () => {
 	const t = useTranslations()
-	const { showInfo } = useNotifications()
 	const { user, updateUser, isLoading } = useUserProfile()
 	const { location: userLocation } = user || {}
 	const {
@@ -36,11 +35,9 @@ const LocationSelector = () => {
 					skiped: true,
 				},
 			})
-			showInfo({
-				message: t('Notification.location_not_selected'),
-			})
+			toast.info(t('Notification.location_not_selected'))
 		}
-	}, [userLocation?.city, closeModal, showInfo, t, updateUser])
+	}, [userLocation?.city, closeModal, t, updateUser])
 
 	const handleConfirm = useCallback(() => {
 		if (location) {
@@ -67,19 +64,29 @@ const LocationSelector = () => {
 	}, [userLocation?.skiped, openModal, isLoading, userLocation, user])
 
 	const modalActions = (
-		<div className='modal-actions'>
-			<Button onClick={getCurrentLocation} disabled={isLoadingGeolocation}>
+		<div className='flex flex-col gap-2'>
+			<Button
+				size='lg'
+				variant='outline-primary'
+				onClick={getCurrentLocation}
+				disabled={isLoadingGeolocation}
+			>
 				<span>🎯</span>
 				<span>{t('getCurrentLocation')}</span>
 			</Button>
 
-			<div className='btn-row'>
+			<div className='grid grid-cols-2 gap-2'>
 				{!userLocation?.city && (
-					<Button color='secondary' onClick={handleSkip}>
+					<Button variant='outline-secondary' size='lg' onClick={handleSkip}>
 						{t('skip')}
 					</Button>
 				)}
-				<Button color='accent' onClick={handleConfirm} disabled={!location}>
+				<Button
+					variant='accent'
+					size='lg'
+					onClick={handleConfirm}
+					disabled={!location}
+				>
 					{t('confirm')}
 				</Button>
 			</div>
@@ -89,11 +96,17 @@ const LocationSelector = () => {
 	return (
 		<>
 			{userLocation && userLocation.city && (
-				<Button className='location-selector' onClick={openModal}>
-					<span className='location-icon'>📍</span>
-					<div className='location-info'>
-						<div className='location-name'>{userLocation.city}</div>
-						<div className='location-area'>{userLocation.area}</div>
+				<Button
+					variant='outline-secondary'
+					withoutTransform
+					onClick={openModal}
+					size='md'
+					className='text-sm px-3'
+				>
+					<span>📍</span>
+					<div className='flex flex-col items-start leading-none'>
+						<span>{userLocation.city}</span>
+						<span>{userLocation.area}</span>
 					</div>
 				</Button>
 			)}
@@ -106,7 +119,10 @@ const LocationSelector = () => {
 				isOpen={isOpenModal}
 				onClose={handleSkip}
 			>
-				<PlacesAutocomplete onLocationSelect={setLocation} />
+				<PlacesAutocomplete
+					location={location}
+					onLocationSelect={setLocation}
+				/>
 
 				{location && (
 					<motion.div
@@ -115,12 +131,14 @@ const LocationSelector = () => {
 						animate='visible'
 						exit='exit'
 					>
-						<div className='section-label'>Вибране місто</div>
-						<div className='location-item'>
-							<span className='location-icon'>📍</span>
-							<div className='location-info'>
-								<div className='location-name'>{location?.city}</div>
-								<div className='location-area'>{location?.area}</div>
+						<div className='text-sm font-medium text-gray-500 uppercase tracking-widest mb-2'>
+							Вибране місто
+						</div>
+						<div className='flex items-center gap-2 p-2 bg-gray-100 rounded-lg border border-gray-200'>
+							<span className='text-2xl'>📍</span>
+							<div className='flex flex-col items-start leading-none'>
+								<div className='text-lg font-medium'>{location?.city}</div>
+								<div className='text-sm text-gray-500'>{location?.area}</div>
 							</div>
 						</div>
 					</motion.div>

@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { GoogleMapsProvider } from '@/components/providers/GoogleMapsProvider'
-import { Notifications } from '@/components/main/Notifications'
+import { Toaster } from '@/components/ui/sonner'
 
 const t = await getTranslations('home')
 import './globals.css'
@@ -37,8 +37,8 @@ export default async function RootLayout({
 						<GoogleMapsProvider>
 							<main className='flex flex-col min-h-screen'>{children}</main>
 						</GoogleMapsProvider>
-						<Notifications />
-						{/* <LoadingPage /> */}
+						<Toaster position='top-center' richColors />
+						{/* <Notifications /> */}
 					</NextIntlClientProvider>
 				</AuthProvider>
 			</body>
