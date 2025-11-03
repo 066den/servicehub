@@ -42,10 +42,12 @@ const Modal = ({
 		if (header || title) {
 			return (
 				<div
-					className={cn('px-8 py-4', className, {
-						'border-b border-gray-100': headerColor === 'default',
-						'bg-primary text-white': headerColor === 'primary',
-					})}
+					className={cn(
+						'px-8 py-4',
+						className,
+						'border-b border-gray-100',
+						headerColor === 'primary' && 'bg-primary text-white'
+					)}
 				>
 					{header}
 					{title && (

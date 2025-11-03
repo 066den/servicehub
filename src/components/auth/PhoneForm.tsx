@@ -9,6 +9,7 @@ import Notification from '../ui/Notification'
 import { containerVariants } from '../ui/animate/variants'
 import { Button } from '../ui/button'
 import { useForm, useController } from 'react-hook-form'
+import { Smartphone } from 'lucide-react'
 
 type FormData = {
 	phone: string
@@ -70,8 +71,8 @@ const PhoneForm = () => {
 					name={name}
 				/>
 
-				<div className='flex items-center gap-3 text-primary bg-primary-light/5 rounded-md py-3 px-4 mb-4 text-sm border-l-4 border-primary mt-6'>
-					<span>📱</span>
+				<div className='flex items-center gap-2 text-primary bg-primary-light/5 rounded-md py-3 px-4 mb-4 text-sm border-l-4 border-primary mt-6'>
+					<Smartphone />
 					{t('Auth.phoneForm.info')}
 				</div>
 

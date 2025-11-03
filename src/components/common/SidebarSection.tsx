@@ -1,5 +1,6 @@
 'use client'
 
+import { ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -8,7 +9,7 @@ import { Button } from '../ui/button'
 type Props = {
 	title?: string
 	items: {
-		icon: string
+		icon: ReactNode | string
 		title: string
 		url?: string
 		action?: () => void

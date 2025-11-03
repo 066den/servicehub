@@ -6,7 +6,7 @@ const Footer = () => {
 			<div className='container'>
 				<div className='grid grid-cols-4 gap-10'>
 					<div className='footer-section'>
-						<h4 className='text-accent'>ServiceHub</h4>
+						<h4 className='text-accent'>UslugiUA</h4>
 						<Link className='text-light' href='#'>
 							Про нас
 						</Link>

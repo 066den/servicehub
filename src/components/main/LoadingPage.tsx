@@ -6,7 +6,7 @@ export default function LoadingPage() {
 	return (
 		<div className='fixed inset-0 z-50 flex items-center justify-center bg-primary-gradient'>
 			<div className='relative text-center max-w-sm mx-auto px-4'>
-				<Logo color='white' size='lg' withSlogan={true} />
+				<Logo color='white' size='lg' withSlogan={true} withImage={false} />
 
 				<div className='mt-8 space-y-4'>
 					<div className='text-xl font-medium text-white/95'>

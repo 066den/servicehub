@@ -23,15 +23,16 @@ interface LogoProps {
 	variant?: 'text' | 'image'
 	isLink?: boolean
 	className?: string
+	withImage?: boolean
 }
 
 // Component
 const Logo: React.FC<LogoProps> = ({
 	color = 'default',
 	withSlogan = false,
+	withImage = true,
 	size,
 	isLink = false,
-	variant = 'text',
 	className,
 }) => {
 	const t = useTranslations()
@@ -55,7 +56,7 @@ const Logo: React.FC<LogoProps> = ({
 	// Prepare className with Tailwind classes
 	const logoClassName = cn(
 		// Size variants
-		size === 'sm' && 'text-[1.8em]',
+		size === 'sm' && 'text-4xl',
 		(size === 'md' || !size) && 'text-[2.5em]',
 		size === 'lg' && 'text-[3.5em] mb-3',
 		// Link styles
@@ -65,41 +66,32 @@ const Logo: React.FC<LogoProps> = ({
 
 	// Logo main container styles
 	const logoMainClassName = cn(
-		'flex flex-col gap-1.5 font-bold no-underline',
+		'font-bold no-underline',
 		color === 'default' && 'text-primary',
 		color === 'white' && 'text-white',
 		size === 'lg' && 'items-center'
 	)
 
-	// Hub icon styles
-	const hubIconClassName = cn(
-		'flex items-center justify-center relative bg-accent rounded-full shadow-lg flex-shrink-0',
-		(size === 'sm' || !size) && 'w-10 h-10',
-		size === 'lg' && 'w-14 h-14 shadow-xl'
-	)
-
-	// Hub icon inner circle styles
-	const hubIconInnerClassName = cn(
-		'absolute bg-white rounded-full shadow-md',
-		(size === 'sm' || !size) && 'w-3 h-3',
-		size === 'lg' && 'w-4 h-4 shadow-lg'
-	)
-
-	// Slogan styles
 	const sloganClassName = cn(
-		'text-[0.375em] font-medium text-secondary-foreground uppercase tracking-wider ml-0.5',
+		'text-[0.275em] font-medium text-secondary-foreground uppercase tracking-wider ml-0.5 leading-4',
 		size === 'lg' && 'text-white text-xl font-light lowercase'
 	)
 
 	return (
 		<Wrapper {...wrapperProps} className={logoClassName}>
 			<div className={logoMainClassName}>
-				Service
-				<div className={hubIconClassName}>
-					<div className={hubIconInnerClassName} />
+				<div className='flex items-center gap-1 font'>
+					Uslugi
+					<span className='text-accent'>UA</span>
+					{withImage && (
+						<Image
+							src='/logo-img.png'
+							alt='Logo'
+							width={size === 'lg' ? 80 : 40}
+							height={size === 'lg' ? 80 : 40}
+						/>
+					)}
 				</div>
-				Hub
-				<Image src='/logo-wo.png' alt='Logo' width={370} height={90} />
 			</div>
 
 			{withSlogan && (

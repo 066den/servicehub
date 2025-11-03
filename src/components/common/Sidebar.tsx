@@ -1,55 +1,65 @@
 'use client'
-import { ERoutes } from '@/types/enum'
+import { ROUTES } from '@/lib/constants'
 import { signOut } from 'next-auth/react'
 import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
 import { Role } from '@prisma/client'
 import SidebarSection from './SidebarSection'
 import { Card } from '../ui/card'
+import {
+	Calendar,
+	Heart,
+	ShoppingBag,
+	Star,
+	User,
+	Settings,
+	Home,
+	LogOut,
+} from 'lucide-react'
 
 const dashboardItems = [
 	{
-		icon: '📊',
+		icon: <Home className='size-5' />,
 		title: 'home',
-		url: ERoutes.DASHBOARD,
+		url: ROUTES.DASHBOARD,
 	},
 ]
 
 const profileItems = [
 	{
-		icon: '👤',
+		icon: <User className='size-5' />,
 		title: 'profile',
-		url: ERoutes.PROFILE,
+		url: ROUTES.PROFILE,
 	},
 	{
-		icon: '📋',
+		icon: <ShoppingBag className='size-5' />,
 		title: 'myOrders',
-		url: ERoutes.MY_ORDERS,
+		url: ROUTES.MY_ORDERS,
 	},
 	{
-		icon: '📅',
+		icon: <Calendar className='size-5' />,
 		title: 'myRecords',
-		url: ERoutes.MY_RECORDS,
+		url: ROUTES.MY_RECORDS,
 	},
 	{
-		icon: '❤️',
+		icon: <Heart className='size-5' />,
 		title: 'favorites',
-		url: ERoutes.FAVORITES,
+		url: ROUTES.FAVORITES,
 	},
 	{
-		icon: '⭐',
+		icon: <Star className='size-5' />,
 		title: 'myReviews',
-		url: ERoutes.MY_REVIEWS,
+		url: ROUTES.MY_REVIEWS,
 	},
 ]
 
 const settingsItems = [
 	{
-		icon: '⚙️',
+		icon: <Settings className='size-5' />,
 		title: 'settings',
-		url: ERoutes.SETTINGS,
+		url: ROUTES.SETTINGS,
 	},
 	{
-		icon: '🚪',
+		icon: <LogOut className='size-5' />,
 		title: 'logout',
 		action: () => {
 			signOut()

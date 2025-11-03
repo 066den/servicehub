@@ -103,7 +103,6 @@ const LocationSelector = () => {
 					size='md'
 					className='text-sm px-3'
 				>
-					<span>📍</span>
 					<div className='flex flex-col items-start leading-none'>
 						<span>{userLocation.city}</span>
 						<span>{userLocation.area}</span>
@@ -114,7 +113,6 @@ const LocationSelector = () => {
 				title={t('chooseLocation')}
 				subtitle={t('chooseLocationHelper')}
 				position='top'
-				headerColor='primary'
 				footer={modalActions}
 				isOpen={isOpenModal}
 				onClose={handleSkip}
@@ -130,8 +128,9 @@ const LocationSelector = () => {
 						initial='hidden'
 						animate='visible'
 						exit='exit'
+						className='space-y-2 mt-4'
 					>
-						<div className='text-sm font-medium text-gray-500 uppercase tracking-widest mb-2'>
+						<div className='text-sm font-medium text-gray-500 uppercase tracking-widest'>
 							Вибране місто
 						</div>
 						<div className='flex items-center gap-2 p-2 bg-gray-100 rounded-lg border border-gray-200'>

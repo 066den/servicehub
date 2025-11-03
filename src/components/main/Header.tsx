@@ -11,10 +11,11 @@ import { signOut } from 'next-auth/react'
 import useFlag from '@/hooks/useFlag'
 import LocationSelector from '../common/LocationSelector'
 import Logo from '../common/Logo'
-import { ERoutes } from '@/types/enum'
 import Avatar from '../ui/Avatar'
 import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
 import { Skeleton } from '../ui/skeleton'
+import { Bell } from 'lucide-react'
+import { ROUTES } from '@/lib/constants'
 
 const Header = () => {
 	const t = useTranslations()
@@ -75,7 +76,7 @@ const Header = () => {
 						) : (
 							<>
 								<button className='notification-btn'>
-									🔔
+									<Bell className='size-5' />
 									{0 > 0 && (
 										<motion.span
 											variants={bounceVariants}
@@ -96,7 +97,7 @@ const Header = () => {
 							<Button
 								variant='accent'
 								size='md'
-								onClick={() => router.push(ERoutes.EXECUTOR)}
+								onClick={() => router.push(ROUTES.EXECUTOR)}
 								className='min-w-[160px] font-semibold'
 							>
 								{t('becomeProvider')}

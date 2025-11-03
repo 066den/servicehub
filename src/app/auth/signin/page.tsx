@@ -5,7 +5,7 @@ import SmsForm from '@/components/auth/SmsForm'
 import { useAuthStore } from '@/stores/authStore'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { ERoutes } from '@/types/enum'
+import { ROUTES } from '@/lib/constants'
 
 const SignInPage = () => {
 	const { status, data: session } = useSession()
@@ -18,7 +18,7 @@ const SignInPage = () => {
 			session?.user?.id &&
 			session.user.isVerified
 		) {
-			router.push(ERoutes.PROFILE)
+			router.push(ROUTES.PROFILE)
 		}
 	}, [status, session, router])
 
