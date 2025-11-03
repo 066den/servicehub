@@ -8,68 +8,69 @@ datasource db {
 }
 
 model User {
-  id                     Int       @id @default(autoincrement())
-  phone                  String    @unique
-  phoneNormalized        String?   @unique
-  email                  String?   @unique
-  emailVerifiedAt        DateTime?
-  isEmailVerified        Boolean   @default(false)
-  password               String? 
-  passwordUpdatedAt      DateTime?
-  firstName              String
-  lastName               String?
-  avatar                 String?
-  location               Json?
-  role                   Role    @default(CLIENT)
-  isVerified             Boolean   @default(false)
-  lastLoginAt            DateTime?
-  isActive               Boolean   @default(true)
-  isBlocked              Boolean   @default(false)
-  notificationPreferences Json?   
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
-  sessions               Session[]
-  orders                 Order[]   @relation("ClientOrders")
-  reviews                Review[]  @relation("ClientReviews")
-  providers              Provider[]
-  verificationCodes   VerificationCode[]
-  refreshTokens       RefreshToken[]
+  id                      Int                @id @default(autoincrement())
+  phone                   String             @unique
+  phoneNormalized         String?            @unique
+  email                   String?            @unique
+  emailVerifiedAt         DateTime?
+  isEmailVerified         Boolean            @default(false)
+  password                String?
+  passwordUpdatedAt       DateTime?
+  firstName               String
+  lastName                String?
+  avatar                  String?
+  location                Json?
+  role                    Role               @default(CLIENT)
+  isVerified              Boolean            @default(false)
+  lastLoginAt             DateTime?
+  isActive                Boolean            @default(true)
+  isBlocked               Boolean            @default(false)
+  notificationPreferences Json?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  orders                  Order[]            @relation("ClientOrders")
+  providers               Provider?
+  refreshTokens           RefreshToken[]
+  reviews                 Review[]           @relation("ClientReviews")
+  sessions                Session[]
+  verificationCodes       VerificationCode[]
+
   @@index([phone])
   @@index([email])
   @@index([role])
 }
 
 model Provider {
-  id                    Int      @id @default(autoincrement())
-  user                  User?    @relation(fields: [userId], references: [id])
-  userId                Int      @unique
-  type                  ProviderType    @default(INDIVIDUAL)                 
+  id                    Int              @id @default(autoincrement())
+  userId                Int              @unique
+  type                  ProviderType     @default(INDIVIDUAL)
   businessName          String
   description           String?
   avatar                String?
   status                ProviderStatus   @default(PENDING)
-  rating                Float    @default(0)
-  reviewCount           Int      @default(0)
-  companyInfo           CompanyInfo?    @relation(fields: [companyInfoId], references: [id])
-  companyInfoId         Int?            @unique
-  employees             Employee[]
+  rating                Float            @default(0)
+  reviewCount           Int              @default(0)
+  companyInfoId         Int?             @unique
   workingHours          Json?
   serviceAreas          Json?
   documents             Json?
-  isActive              Boolean  @default(true)
-  isDeleted             Boolean  @default(false)
-  subscriptionPlan      SubscriptionPlan   @default(FREE)
+  isActive              Boolean          @default(true)
+  isDeleted             Boolean          @default(false)
+  subscriptionPlan      SubscriptionPlan @default(FREE)
   subscriptionExpiresAt DateTime?
   location              Json?
   email                 String?
   phone                 String?
-  instagram             String?   
-  facebook              String?   
+  instagram             String?
+  facebook              String?
   telegram              String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
   deletedAt             DateTime?
+  employees             Employee[]
   orders                Order[]
+  companyInfo           CompanyInfo?     @relation(fields: [companyInfoId], references: [id])
+  user                  User             @relation(fields: [userId], references: [id])
   reviews               Review[]
   services              Service[]
 
@@ -81,169 +82,161 @@ model Provider {
 }
 
 model CompanyInfo {
-  id                Int      @id @default(autoincrement())
-  // Юридична інформація
-  legalName         String   // Юридична назва
-  registrationNumber String? // ЄДРПОУ
-  taxNumber         String?  // Податковий номер
-  legalAddress      String?  // Юридична адреса
-  // Контактна інформація
-  website           String?
-  email             String?
-  phone             String?
-  // Банківські дані
-  bankDetails       Json?    // IBAN, МФО, банк
-  // Ліцензії та сертифікати
-  licenses          Json?    // Масив ліцензій
-  certificates      Json?    // Сертифікати якості
-  // Статистика
-  foundedYear       Int?
-  employeeCount     Int      @default(0)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  provider          Provider?
+  id                 Int       @id @default(autoincrement())
+  legalName          String
+  registrationNumber String?
+  taxNumber          String?
+  legalAddress       String?
+  website            String?
+  email              String?
+  phone              String?
+  bankDetails        Json?
+  licenses           Json?
+  certificates       Json?
+  foundedYear        Int?
+  employeeCount      Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  provider           Provider?
 }
 
-// Співробітники компанії
 model Employee {
-  id            Int            @id @default(autoincrement())
-  provider      Provider       @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  providerId    Int
-  firstName     String
-  lastName      String
-  phone         String?
-  role          EmployeeRole   @default(WORKER)
-  status        EmployeeStatus @default(ACTIVE)
-  position      String?        // Посада
-  department    String?        // Відділ
-  specialization String?       // Спеціалізація
-  experience    Int?           // Досвід в роках
-  workingHours  Json?          // Індивідуальний графік
-  avatar        String?        // Фото профілю
-  hireDate      DateTime       @default(now())
+  id              Int             @id @default(autoincrement())
+  providerId      Int
+  firstName       String
+  lastName        String
+  phone           String?
+  role            EmployeeRole    @default(WORKER)
+  status          EmployeeStatus  @default(ACTIVE)
+  position        String?
+  department      String?
+  specialization  String?
+  experience      Int?
+  workingHours    Json?
+  avatar          String?
+  hireDate        DateTime        @default(now())
   terminationDate DateTime?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-   
-  assignedOrders OrderEmployee[]  // Замовлення, які виконує співробітник
-  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  provider        Provider        @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  assignedOrders  OrderEmployee[]
+
   @@index([providerId])
   @@index([status])
   @@index([role])
 }
 
 model OrderEmployee {
-  id         Int      @id @default(autoincrement())
-  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId    Int
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  employeeId Int
-  startTime  DateTime?
-  endTime    DateTime?
-  hoursWorked Float?  @default(0)
-  payment    Float? // Оплата
-  notes      String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  
+  id          Int       @id @default(autoincrement())
+  orderId     Int
+  employeeId  Int
+  startTime   DateTime?
+  endTime     DateTime?
+  hoursWorked Float?    @default(0)
+  payment     Float?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
   @@unique([orderId, employeeId])
   @@index([orderId])
   @@index([employeeId])
 }
 
 model Service {
-  id              Int      @id @default(autoincrement())
-  provider        Provider @relation(fields: [providerId], references: [id])
-  providerId      Int
-  name            String
-  description     String?
-  category        Category @relation(fields: [categoryId], references: [id])
-  categoryId      Int
-  type            Type     @relation(fields: [typeId], references: [id])
-  typeId          Int
-  price           Float?
-  duration        Int?
-  pricingOptions  Json?
-  location        Json?
-  photos          ServicePhoto[]
-  requirements    Json?
-  isActive        Boolean  @default(true)
-  isFeatured      Boolean @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  deletedAt       DateTime?
-  orders          Order[]
-  serviceTags     ServiceTag[]
+  id             Int            @id @default(autoincrement())
+  providerId     Int
+  name           String
+  description    String?
+  categoryId     Int
+  typeId         Int
+  price          Float?
+  duration       Int?
+  pricingOptions Json?
+  location       Json?
+  requirements   Json?
+  isActive       Boolean        @default(true)
+  isFeatured     Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+  orders         Order[]
+  category       Category       @relation(fields: [categoryId], references: [id])
+  provider       Provider       @relation(fields: [providerId], references: [id])
+  type           Type           @relation(fields: [typeId], references: [id])
+  photos         ServicePhoto[]
+  serviceTags    ServiceTag[]
 
+  @@unique([providerId, name])
   @@index([categoryId])
   @@index([typeId])
   @@index([providerId])
   @@index([isActive])
   @@index([deletedAt])
   @@index([isFeatured])
-
-  @@unique([providerId, name])
 }
 
 model ServicePhoto {
-  id        Int      @id @default(autoincrement())
-  service   Service  @relation(fields: [serviceId], references: [id])
+  id        Int       @id @default(autoincrement())
   serviceId Int
-  url       String  
-  alt       String? 
-  order     Int      @default(0)
-  isMain    Boolean  @default(false) 
-  photoType PhotoType @default(GALLERY) 
+  url       String
+  alt       String?
+  order     Int       @default(0)
+  isMain    Boolean   @default(false)
+  photoType PhotoType @default(GALLERY)
+  service   Service   @relation(fields: [serviceId], references: [id])
 
   @@index([serviceId])
   @@index([photoType])
 }
 
 model Order {
-  id             Int      @id @default(autoincrement())
-  client         User     @relation("ClientOrders", fields: [clientId], references: [id])
-  clientId       Int
-  provider       Provider @relation(fields: [providerId], references: [id])
-  providerId     Int
-  service        Service  @relation(fields: [serviceId], references: [id])
-  serviceId      Int
-  status         OrderStatus   @default(CREATED)
-  scheduledAt    DateTime?
-  startedAt      DateTime?
-  completedAt    DateTime?
-  serviceDetails Json?
-  location       Json?
-  clientNotes    String?
-  providerNotes  String?
-  totalAmount    Float?
-  platformFee    Float?
-  paymentStatus  PaymentStatus @default(PENDING)
-  photos         String[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  deletedAt      DateTime?
-  reviews        Review[]
-  assignedEmployees OrderEmployee[]  // Призначені співробітники
-  estimatedHours   Float?           // Планований час виконання
-  actualHours      Float?           // Фактичний час виконання
-  teamNotes        String?          // Нотатки команди
-  workLog          Json?            // Лог роботи (час початку/закінчення для кожного співробітника)
+  id                Int             @id @default(autoincrement())
+  clientId          Int
+  providerId        Int
+  serviceId         Int
+  status            OrderStatus     @default(CREATED)
+  scheduledAt       DateTime?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  serviceDetails    Json?
+  location          Json?
+  clientNotes       String?
+  providerNotes     String?
+  totalAmount       Float?
+  platformFee       Float?
+  paymentStatus     PaymentStatus   @default(PENDING)
+  photos            String[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
+  estimatedHours    Float?
+  actualHours       Float?
+  teamNotes         String?
+  workLog           Json?
+  client            User            @relation("ClientOrders", fields: [clientId], references: [id])
+  provider          Provider        @relation(fields: [providerId], references: [id])
+  service           Service         @relation(fields: [serviceId], references: [id])
+  assignedEmployees OrderEmployee[]
+  reviews           Review?
+
   @@index([clientId])
   @@index([providerId])
   @@index([serviceId])
   @@index([status])
   @@index([scheduledAt])
   @@index([deletedAt])
- 
 }
 
 model Category {
   id          Int       @id @default(autoincrement())
   name        String
-  slug        String? @unique
+  slug        String?   @unique
   icon        String?
   image       String?
-  description String?  
+  description String?
   services    Service[]
   types       Type[]
 
@@ -253,21 +246,21 @@ model Category {
 model Type {
   id          Int       @id @default(autoincrement())
   name        String
-  slug        String? @unique
+  slug        String?   @unique
   image       String?
   icon        String?
   description String?
   categoryId  Int
-  category    Category  @relation(fields: [categoryId], references: [id])
   services    Service[]
+  category    Category  @relation(fields: [categoryId], references: [id])
 
   @@index([slug])
   @@index([categoryId])
 }
 
 model Tag {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id       Int          @id @default(autoincrement())
+  name     String       @unique
   services ServiceTag[]
 }
 
@@ -284,39 +277,36 @@ model ServiceTag {
 
 model Review {
   id         Int      @id @default(autoincrement())
-  order      Order    @relation(fields: [orderId], references: [id])
-  orderId    Int
-  client     User     @relation("ClientReviews", fields: [clientId], references: [id])
+  orderId    Int      @unique
   clientId   Int
-  provider   Provider @relation(fields: [providerId], references: [id])
   providerId Int
   rating     Int
   comment    String?
   photos     String[]
   response   String?
   createdAt  DateTime @default(now())
+  client     User     @relation("ClientReviews", fields: [clientId], references: [id])
+  order      Order    @relation(fields: [orderId], references: [id])
+  provider   Provider @relation(fields: [providerId], references: [id])
 
   @@index([providerId])
   @@index([clientId])
   @@index([rating])
-
-  @@unique([orderId])
 }
 
 model Session {
-  id                Int      @id @default(autoincrement())
-  userId            Int
-  accessToken       String    @unique
-  refreshTokenId    Int?
-  expiresAt         DateTime
-  lastActivityAt    DateTime @default(now())
-  ipAddress         String?
-  userAgent         String?
-  deviceInfo        String?
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  accessToken    String   @unique
+  refreshTokenId Int?
+  expiresAt      DateTime
+  lastActivityAt DateTime @default(now())
+  ipAddress      String?
+  userAgent      String?
+  deviceInfo     String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationCode {
@@ -328,43 +318,42 @@ model VerificationCode {
   maxAttempts Int       @default(3)
   isUsed      Boolean   @default(false)
   expiresAt   DateTime
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
   usedAt      DateTime?
   ipAddress   String?
-  userId      Int? 
-  user        User? @relation(fields: [userId], references: [id])
+  userId      Int?
+  user        User?     @relation(fields: [userId], references: [id])
 
   @@index([phone, codeType, isUsed, expiresAt])
 }
 
 model SmsLog {
-  id                 Int       @id @default(autoincrement())
-  phone              String
-  message            String
-  provider           String?
-  providerMessageId  String?
-  status             String    @default("pending")
-  cost               Decimal   @default(0.0000) @db.Decimal(10, 4)
-  errorMessage       String?
-  sentAt             DateTime  @default(now())
-  deliveredAt        DateTime?
-  testMode           Boolean   @default(false)
-  createdAt          DateTime  @default(now())
+  id                Int       @id @default(autoincrement())
+  phone             String
+  message           String
+  provider          String?
+  providerMessageId String?
+  status            String    @default("pending")
+  cost              Decimal   @default(0.0000) @db.Decimal(10, 4)
+  errorMessage      String?
+  sentAt            DateTime  @default(now())
+  deliveredAt       DateTime?
+  testMode          Boolean   @default(false)
+  createdAt         DateTime  @default(now())
 }
 
 model RefreshToken {
   id        Int      @id @default(autoincrement())
   token     String   @unique
-  userId    Int     
-  expiresAt DateTime 
-  createdAt DateTime @default(now()) 
-  isRevoked Boolean  @default(false) 
-  ipAddress String? @map("ip_address")
-  userAgent String? @map("user_agent")
-  deviceId  String? @map("device_id")
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  isRevoked Boolean  @default(false)
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  deviceId  String?  @map("device_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-
 
 enum Role {
   CLIENT
@@ -403,27 +392,27 @@ enum PaymentStatus {
 }
 
 enum PhotoType {
-  GALLERY  
-  BEFORE  
-  AFTER  
+  GALLERY
+  BEFORE
+  AFTER
 }
 
 enum ProviderType {
-  INDIVIDUAL  
-  COMPANY  
+  INDIVIDUAL
+  COMPANY
 }
 
 enum EmployeeRole {
-  OWNER   
-  MANAGER   
-  WORKER     
-  SPECIALIST  
-  ADMIN     
+  OWNER
+  MANAGER
+  WORKER
+  SPECIALIST
+  ADMIN
 }
 
 enum EmployeeStatus {
-  ACTIVE      
-  INACTIVE     
-  ON_VACATION  
-  SUSPENDED    
+  ACTIVE
+  INACTIVE
+  ON_VACATION
+  SUSPENDED
 }
