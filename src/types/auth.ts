@@ -71,13 +71,15 @@ export interface UserProfile {
 
 export interface Executor {
 	type: ProviderType
-	business_name?: string
-	company_info?: CompanyInfo
-	first_name?: string
-	last_name?: string
-	email?: string
-	phone?: string
+	businessName: string
 	description?: string
+	phone?: string
+	email?: string
+	location?: string
+	companyInfo?: CompanyInfo
+	firstName?: string
+	lastName?: string
+	avatar?: string
 }
 
 export interface CompanyInfo {

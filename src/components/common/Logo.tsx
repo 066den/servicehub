@@ -74,23 +74,26 @@ const Logo: React.FC<LogoProps> = ({
 
 	const sloganClassName = cn(
 		'text-[0.275em] font-medium text-secondary-foreground uppercase tracking-wider ml-0.5 leading-4',
-		size === 'lg' && 'text-white text-xl font-light lowercase'
+		size === 'lg' && 'text-white text-xl font-light lowercase',
+		withImage && 'text-right'
 	)
 
 	return (
 		<Wrapper {...wrapperProps} className={logoClassName}>
 			<div className={logoMainClassName}>
 				<div className='flex items-center gap-1 font'>
-					Uslugi
-					<span className='text-accent'>UA</span>
 					{withImage && (
 						<Image
 							src='/logo-img.png'
 							alt='Logo'
 							width={size === 'lg' ? 80 : 40}
 							height={size === 'lg' ? 80 : 40}
+							className='h-auto w-auto'
+							priority
 						/>
 					)}
+					Uslugi
+					<span className='text-accent'>UA</span>
 				</div>
 			</div>
 

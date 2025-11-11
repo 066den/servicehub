@@ -110,8 +110,14 @@ npm install
 2. Настройте переменные окружения:
 
 ```bash
-cp env-copy.txt .env.local
+cp env.example .env.local
 ```
+
+Затем отредактируйте `.env.local` и укажите правильные значения:
+
+- `DATABASE_URL` - строка подключения к PostgreSQL
+- `JWT_SECRET` - секретный ключ для JWT токенов
+- `NEXTAUTH_SECRET` - секретный ключ для NextAuth
 
 3. Запустите базу данных:
 

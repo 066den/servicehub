@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Input } from '../ui/input'
 import PlacesAutocomplete from '../ui/forms/PlacesAutocomplete'
 import Map from '../common/Map'
@@ -18,6 +18,10 @@ import { phoneMask } from '@/utils/phoneNumber'
 import { Badge } from '../ui/badge'
 import { containerVariants } from '../ui/animate/variants'
 import { motion } from 'motion/react'
+import { toast } from 'sonner'
+import { SkeletonForm, SkeletonSectionHeader } from '../ui/sceletons'
+import { Skeleton } from '../ui/skeleton'
+import type { Executor } from '@/types/auth'
 
 type FormData = {
 	type: ProviderType
@@ -28,10 +32,12 @@ type FormData = {
 }
 
 const ExecutorRegister = () => {
-	const { user, isLoading } = useUserProfile()
-	const { createProvider } = useProvider()
+	const { user, userLocation, isLoading } = useUserProfile()
+	const { createProvider, isLoadingProvider } = useProvider()
 
-	const [location, setLocation] = useState<LocationData | null>(null)
+	const [location, setLocation] = useState<LocationData | null>(
+		userLocation || null
+	)
 
 	const validationSchema: Yup.ObjectSchema<FormData> = Yup.object().shape({
 		type: Yup.mixed<ProviderType>().required('Тип акаунту є обовʼязковим'),
@@ -53,28 +59,63 @@ const ExecutorRegister = () => {
 		resolver: yupResolver(validationSchema),
 		defaultValues: {
 			type: ProviderType.INDIVIDUAL,
-			businessName: `${user?.lastName} ${user?.firstName}` || '',
+			businessName: '',
 			email: '',
 			description: '',
-			phone: phoneMask(user?.phone || ''),
+			phone: '',
 		},
 	})
+
+	useEffect(() => {
+		if (user) {
+			const fullName = [user.lastName, user.firstName].filter(Boolean).join(' ')
+			if (fullName) {
+				setValue('businessName', fullName)
+			}
+			if (user.phone) {
+				setValue('phone', phoneMask(user.phone))
+			}
+		}
+	}, [user, setValue])
+
+	useEffect(() => {
+		if (userLocation) {
+			setLocation(userLocation)
+		}
+	}, [userLocation])
 
 	const watchedType = watch('type')
 
 	const onSubmit = handleSubmit(async (data: FormData) => {
+		const payload: Executor = {
+			type: data.type,
+			businessName: data.businessName.trim(),
+			phone: data.phone?.trim() || undefined,
+			description: data.description?.trim() || undefined,
+			email: data.email?.trim() || undefined,
+			location: location?.address?.trim(),
+		}
+
 		try {
-			await createProvider({
-				type: data.type,
-				business_name: data.businessName,
-				email: data.email,
-				phone: data.phone,
-				description: data.description,
-			})
+			await createProvider(payload)
+			toast.success('Профіль виконавця успішно створено')
 		} catch (error) {
-			console.error(error)
+			if (error instanceof Error) {
+				toast.error(error.message)
+			}
+			toast.error('Помилка при створенні профіля виконавця')
 		}
 	})
+
+	if (isLoading) {
+		return (
+			<div className='px-6 py-2 space-y-6'>
+				<SkeletonSectionHeader />
+				<SkeletonForm count={2} />
+				<Skeleton className='h-[300px] w-full rounded-lg' />
+			</div>
+		)
+	}
 
 	return (
 		<motion.section
@@ -139,9 +180,11 @@ const ExecutorRegister = () => {
 								Обраний
 							</Badge>
 						)}
-						<div className='account-type-icon'>🏢</div>
-						<div className='account-type-title'>Компанія</div>
-						<div className='account-type-desc'>
+						<div className='text-5xl mb-4'>🏢</div>
+						<div className='text-xl font-semibold mb-2 text-gray-900'>
+							Компанія
+						</div>
+						<div className='text-sm text-gray-500 leading-relaxed'>
 							Організація або команда, що надає професійні послуги
 						</div>
 					</div>
@@ -188,6 +231,7 @@ const ExecutorRegister = () => {
 					placeholder='Почніть вводити адресу...'
 					types={['address']}
 				/>
+
 				<div className='mb-4 mt-4'>
 					<Map center={location?.coordinates} height={300} zoom={15} />
 				</div>
@@ -196,7 +240,7 @@ const ExecutorRegister = () => {
 					variant='accent'
 					disabled={!isValid || isSubmitting}
 					type='submit'
-					loading={isLoading}
+					loading={isLoadingProvider}
 					size='md'
 				>
 					Зареєструватися як виконавець

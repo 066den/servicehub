@@ -29,6 +29,11 @@ const ImageCropModal = ({
 
 	useEffect(() => {
 		if (!isOpen) {
+			// Очищаем Croppie при закрытии
+			if (croppieRef.current) {
+				croppieRef.current.destroy()
+				croppieRef.current = null
+			}
 			return
 		}
 
@@ -52,8 +57,10 @@ const ImageCropModal = ({
 			return () => clearTimeout(timer)
 		}
 
+		// Если Croppie уже инициализирован, пересоздаем его для нового изображения
 		if (croppieRef.current) {
-			return
+			croppieRef.current.destroy()
+			croppieRef.current = null
 		}
 
 		initializeWhenReady()
@@ -68,7 +75,7 @@ const ImageCropModal = ({
 				viewport: {
 					width: cropSize,
 					height: cropSize,
-					type: 'circle', // Круглый вьюпорт для аватаров
+					type: 'circle', // Круглый viewport для аватаров
 				},
 				boundary: {
 					width: cropSize + 40,
@@ -82,14 +89,25 @@ const ImageCropModal = ({
 				// Создаем экземпляр Croppie
 				croppieRef.current = new Croppie(containerRef.current, options)
 
-				// Загружаем изображение
+				// Загружаем изображение и настраиваем масштаб для заполнения viewport
 				croppieRef.current
 					.bind({
 						url: imageUrl,
-						zoom: 0, // Автоматический зум для заполнения области
+						zoom: 0, // Автоматический zoom для заполнения
 					})
 					.then(() => {
 						setError(null)
+						// Убеждаемся, что изображение заполняет весь viewport
+						if (croppieRef.current) {
+							// Получаем текущие данные и корректируем zoom если нужно
+							const data = croppieRef.current.get()
+							if (data && data.zoom !== undefined) {
+								// Если zoom слишком мал, увеличиваем его для заполнения
+								if (data.zoom < 0) {
+									croppieRef.current.setZoom(0)
+								}
+							}
+						}
 					})
 					.catch(err => {
 						console.error('Failed to bind image:', err)
@@ -120,18 +138,94 @@ const ImageCropModal = ({
 		setError(null)
 
 		try {
-			// Получаем результат кропа как blob
-			const result = await croppieRef.current.result({
+			// Получаем квадратное изображение от Croppie (без circle для правильного масштабирования)
+			const squareResult = await croppieRef.current.result({
 				type: 'blob',
 				size: { width: cropSize, height: cropSize },
+				format: 'png',
+				circle: false, // Квадратное изображение с правильным масштабированием
 			})
 
-			if (result instanceof Blob) {
-				const file = new File([result], 'cropped.jpg', { type: 'image/jpeg' })
-				onCrop(file)
-			} else {
+			if (!(squareResult instanceof Blob)) {
 				setError('Failed to create cropped image')
+				return
 			}
+
+			// Проверяем, нужно ли дополнительное масштабирование
+			// Если изображение уже правильно обрезано, используем его как есть
+			const img = new Image()
+			img.src = URL.createObjectURL(squareResult)
+
+			await new Promise<void>((resolve, reject) => {
+				img.onload = () => {
+					try {
+						// Если изображение уже правильного размера, используем его напрямую
+						if (img.width === cropSize && img.height === cropSize) {
+							const file = new File([squareResult], 'cropped.png', {
+								type: 'image/png',
+							})
+							URL.revokeObjectURL(img.src)
+							onCrop(file)
+							resolve()
+							return
+						}
+
+						// Иначе создаем canvas и правильно масштабируем
+						const canvas = document.createElement('canvas')
+						canvas.width = cropSize
+						canvas.height = cropSize
+						const ctx = canvas.getContext('2d')
+
+						if (!ctx) {
+							reject(new Error('Failed to get canvas context'))
+							return
+						}
+
+						// Масштабируем изображение для заполнения всего квадрата
+						// Используем object-cover логику: масштабируем так, чтобы заполнить весь квадрат
+						const imgAspect = img.width / img.height
+						const targetAspect = 1 // квадрат
+						
+						let drawWidth, drawHeight, drawX, drawY
+						
+						if (imgAspect > targetAspect) {
+							// Изображение шире - заполняем по высоте
+							drawHeight = cropSize
+							drawWidth = img.width * (cropSize / img.height)
+							drawX = (cropSize - drawWidth) / 2
+							drawY = 0
+						} else {
+							// Изображение выше - заполняем по ширине
+							drawWidth = cropSize
+							drawHeight = img.height * (cropSize / img.width)
+							drawX = 0
+							drawY = (cropSize - drawHeight) / 2
+						}
+						
+						ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight)
+
+						canvas.toBlob(
+							(blob) => {
+								if (blob) {
+									const file = new File([blob], 'cropped.png', {
+										type: 'image/png',
+									})
+									URL.revokeObjectURL(img.src)
+									onCrop(file)
+									resolve()
+								} else {
+									reject(new Error('Failed to create blob from canvas'))
+								}
+							},
+							'image/png',
+							0.95
+						)
+					} catch (err) {
+						reject(err)
+					}
+				}
+				img.onerror = () => reject(new Error('Failed to load image'))
+			})
 		} catch (err) {
 			console.error('Failed to crop image:', err)
 			setError('Failed to crop image')
@@ -147,7 +241,7 @@ const ImageCropModal = ({
 					ref={containerRef}
 					style={{
 						width: cropSize + 40,
-						height: cropSize + 40 * 2,
+						height: cropSize + 40,
 					}}
 				/>
 

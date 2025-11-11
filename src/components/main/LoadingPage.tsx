@@ -14,7 +14,7 @@ export default function LoadingPage() {
 					</div>
 
 					{/* <LoadingSpinner color='accent' size='lg' /> */}
-					<Progress className='progress-bar' />
+					<Progress />
 					{/* <div className='loading-dots'>
 						<div className='dot' />
 						<div className='dot' />

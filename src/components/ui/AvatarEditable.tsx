@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 
 import { cn } from '@/lib/utils'
 import { getAvatarColor, getFirstLetters } from '@/utils/textFormat'
-import ImageCropModal from '../modals/ImageCropModal'
+import { ImageCropper } from './ImageCropper'
 import Image from 'next/image'
 import ConfirmDialog from '../modals/ConfirmDialog'
 import useFlag from '@/hooks/useFlag'
+import { validateFile } from '@/lib/validate'
 
 type Props = {
 	className?: string
@@ -32,10 +33,9 @@ const AvatarEditable = ({
 
 	const [content, setContent] = useState('')
 	const [bgColor, setBgColor] = useState('')
-	const [showCropModal, setShowCropModal] = useState(false)
+	const [isCropping, setIsCropping] = useState(false)
 	const [selectedImageUrl, setSelectedImageUrl] = useState<string>('')
 	const [isOpenConfirmDialog, openConfirmDialog, closeConfirmDialog] = useFlag()
-	useFlag()
 
 	const t = useTranslations()
 
@@ -47,21 +47,6 @@ const AvatarEditable = ({
 		}
 		setBgColor(getAvatarColor(content as string))
 	}, [alt, content])
-
-	const validateFile = (file: File): string | null => {
-		const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
-		const maxSize = 5 * 1024 * 1024 // 5MB
-
-		if (!allowedTypes.includes(file.type)) {
-			return t('errors.fileType')
-		}
-
-		if (file.size > maxSize) {
-			return t('Error.file_size')
-		}
-
-		return null
-	}
 
 	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0]
@@ -77,33 +62,32 @@ const AvatarEditable = ({
 
 		const imageUrl = URL.createObjectURL(file)
 		setSelectedImageUrl(imageUrl)
-		setShowCropModal(true)
+		setIsCropping(true)
 
 		e.target.value = ''
 	}
 
-	const handleCropComplete = async (croppedBlob: Blob) => {
+	const handleCropComplete = async (croppedFile: File) => {
 		try {
-			const croppedFile = new File([croppedBlob], 'avatar.jpg', {
-				type: 'image/jpeg',
-				lastModified: Date.now(),
-			})
-
 			await onUpload?.(croppedFile)
 			toast.success(t('Success.upload'))
-			setShowCropModal(false)
+			setIsCropping(false)
 
-			URL.revokeObjectURL(selectedImageUrl)
-			setSelectedImageUrl('')
+			if (selectedImageUrl) {
+				URL.revokeObjectURL(selectedImageUrl)
+				setSelectedImageUrl('')
+			}
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : t('errors.upload'))
 		}
 	}
 
 	const handleCropCancel = () => {
-		setShowCropModal(false)
-		URL.revokeObjectURL(selectedImageUrl)
-		setSelectedImageUrl('')
+		setIsCropping(false)
+		if (selectedImageUrl) {
+			URL.revokeObjectURL(selectedImageUrl)
+			setSelectedImageUrl('')
+		}
 	}
 
 	const handleUploadClick = (e: React.MouseEvent) => {
@@ -117,18 +101,18 @@ const AvatarEditable = ({
 		}
 	}
 
-	const handleConfirm = useCallback(() => {
+	const handleConfirm = () => {
 		closeConfirmDialog()
 		fileInputRef.current?.click()
-	}, [closeConfirmDialog])
+	}
 
 	const fullClassName = cn(
 		className,
-		'relative rounded-full bg-primary-gradient flex items-center justify-center text-white font-medium cursor-pointer hover:shadow-lg transition-all duration-300 ease-in-out',
+		'relative rounded-full bg-primary-gradient flex items-center justify-center text-white cursor-pointer hover:shadow-lg transition-all duration-300 ease-in-out',
 		{
 			'w-8 h-8': size === 'sm',
-			'w-11 h-11 text-lg': size === 'md',
-			'w-[5rem] h-[5rem] text-3xl': size === 'lg',
+			'w-11 h-11': size === 'md',
+			'w-[5rem] h-[5rem]': size === 'lg',
 		}
 	)
 	return (
@@ -154,9 +138,16 @@ const AvatarEditable = ({
 					alt={alt || ''}
 					width={size === 'lg' ? 200 : 100}
 					height={size === 'lg' ? 200 : 100}
+					className='w-full h-full object-cover rounded-full'
 				/>
 			) : (
-				content
+				<span
+					className={`${
+						size === 'lg' ? 'text-3xl' : size === 'md' ? 'text-lg' : 'text-sm'
+					} font-medium`}
+				>
+					{content}
+				</span>
 			)}
 
 			{src ? (
@@ -181,25 +172,24 @@ const AvatarEditable = ({
 				</div>
 			)}
 
-			{showCropModal && (
-				<ImageCropModal
-					isOpen={showCropModal}
-					imageUrl={selectedImageUrl}
-					onCrop={handleCropComplete}
-					onClose={handleCropCancel}
-					cropSize={size === 'lg' ? 300 : 200}
+			{isCropping && selectedImageUrl && (
+				<ImageCropper
+					src={selectedImageUrl}
+					aspectRatio={1}
+					onCropComplete={handleCropComplete}
+					onCancel={handleCropCancel}
 				/>
 			)}
 			<ConfirmDialog
 				title='Змінити фото'
-				text='Ви впевнені, що хочете змінити фото?'
+				text={t('Profile.changePhotoText')}
 				isOpen={isOpenConfirmDialog}
 				onClose={closeConfirmDialog}
 				onConfirm={handleConfirm}
 				onDestroy={onRemove}
 				onCancel={closeConfirmDialog}
-				destroyText='❌ Видалити'
-				confirmText='🔄 Змінити'
+				destroyText={t('delete')}
+				confirmText={t('change')}
 			/>
 		</div>
 	)

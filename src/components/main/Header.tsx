@@ -16,6 +16,8 @@ import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
 import { Skeleton } from '../ui/skeleton'
 import { Bell } from 'lucide-react'
 import { ROUTES } from '@/lib/constants'
+import { useProvider } from '@/hooks/storeHooks/useProvider'
+import { ProviderType } from '@prisma/client'
 
 const Header = () => {
 	const t = useTranslations()
@@ -36,7 +38,7 @@ const Header = () => {
 		},
 	]
 	const { user, isLoading } = useUserProfile()
-
+	const { isProvider, provider } = useProvider()
 	const [isModalProfileOpen, openModalProfile, closeModalProfile] = useFlag()
 
 	const handleAvatarClick = () => {
@@ -93,6 +95,10 @@ const Header = () => {
 
 						{isLoading ? (
 							<Skeleton className='h-10 w-20' />
+						) : isProvider ? (
+							provider?.type === ProviderType.COMPANY && (
+								<Avatar provider={provider} />
+							)
 						) : (
 							<Button
 								variant='accent'

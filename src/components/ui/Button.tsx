@@ -64,6 +64,7 @@ function Button({
 	asChild = false,
 	fullWidth = false,
 	loading = false,
+	type = 'button',
 	...props
 }: React.ComponentProps<'button'> &
 	VariantProps<typeof buttonVariants> & {
@@ -87,6 +88,7 @@ function Button({
 				})
 			)}
 			disabled={loading || props.disabled}
+			type={asChild ? undefined : type}
 			{...props}
 		>
 			{loading ? (

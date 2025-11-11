@@ -67,7 +67,7 @@ model Provider {
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
   deletedAt             DateTime?
-  employees             Employee[]
+  staff                 Staff[]
   orders                Order[]
   companyInfo           CompanyInfo?     @relation(fields: [companyInfoId], references: [id])
   user                  User             @relation(fields: [userId], references: [id])
@@ -94,20 +94,20 @@ model CompanyInfo {
   licenses           Json?
   certificates       Json?
   foundedYear        Int?
-  employeeCount      Int       @default(0)
+  staffCount         Int       @default(0)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   provider           Provider?
 }
 
-model Employee {
+model Staff {
   id              Int             @id @default(autoincrement())
   providerId      Int
   firstName       String
   lastName        String
   phone           String?
-  role            EmployeeRole    @default(WORKER)
-  status          EmployeeStatus  @default(ACTIVE)
+  role            StaffRole       @default(WORKER)
+  status          StaffStatus     @default(ACTIVE)
   position        String?
   department      String?
   specialization  String?
@@ -119,17 +119,17 @@ model Employee {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   provider        Provider        @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  assignedOrders  OrderEmployee[]
+  assignedOrders  OrderStaff[]
 
   @@index([providerId])
   @@index([status])
   @@index([role])
 }
 
-model OrderEmployee {
+model OrderStaff {
   id          Int       @id @default(autoincrement())
   orderId     Int
-  employeeId  Int
+  staffId     Int
   startTime   DateTime?
   endTime     DateTime?
   hoursWorked Float?    @default(0)
@@ -137,12 +137,12 @@ model OrderEmployee {
   notes       String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  staff       Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
   order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  @@unique([orderId, employeeId])
+  @@unique([orderId, staffId])
   @@index([orderId])
-  @@index([employeeId])
+  @@index([staffId])
 }
 
 model Service {
@@ -219,7 +219,7 @@ model Order {
   client            User            @relation("ClientOrders", fields: [clientId], references: [id])
   provider          Provider        @relation(fields: [providerId], references: [id])
   service           Service         @relation(fields: [serviceId], references: [id])
-  assignedEmployees OrderEmployee[]
+  assignedStaff     OrderStaff[]
   reviews           Review?
 
   @@index([clientId])
@@ -402,7 +402,7 @@ enum ProviderType {
   COMPANY
 }
 
-enum EmployeeRole {
+enum StaffRole {
   OWNER
   MANAGER
   WORKER
@@ -410,7 +410,7 @@ enum EmployeeRole {
   ADMIN
 }
 
-enum EmployeeStatus {
+enum StaffStatus {
   ACTIVE
   INACTIVE
   ON_VACATION

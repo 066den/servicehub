@@ -6,6 +6,7 @@ import { getSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist } from 'zustand/middleware'
+import { apiRequestAuth } from '@/lib/api'
 
 interface ProviderState {
 	provider: Executor | null
@@ -81,42 +82,25 @@ export const useProviderStore = create<ProviderState>()(
 					}
 				},
 				createProvider: async (provider: Executor) => {
-					const session = await getSession()
-					if (!session?.accessToken) {
-						throw new Error('Not access token')
-					}
+					set({ isLoadingProvider: true })
 
 					try {
-						const response = await fetch('/api/user/provider', {
+						const response = await apiRequestAuth('/api/user/provider', {
 							method: 'POST',
-							headers: {
-								Authorization: `Bearer ${session.accessToken}`,
-								'Content-Type': 'application/json',
-							},
 							body: JSON.stringify(provider),
 						})
-
-						if (!response.ok) {
-							const errorData = await response.json().catch(() => ({}))
-							console.error(errorData)
-							throw new Error(errorData.error || `HTTP ${response.status}`)
-						}
-
-						const data = await response.json()
-
-						if (!data.success || !data.provider) {
-							throw new Error(data.error || 'Failed to create provider')
-						}
-
-						set({ provider: data.provider })
+						const data = response as Executor
+						set({ provider: data })
 						await useAuthStore.getState().refreshUserProfile()
 						toast.success('Профіль виконавця успішно створено')
 					} catch (error) {
-						let message = 'Ошибка создания профіля виконавця'
+						let message = 'Помилка при створенні профіля виконавця'
 						if (error instanceof Error) {
 							message = error.message || message
 						}
 						set({ providerError: message })
+					} finally {
+						set({ isLoadingProvider: false })
 					}
 				},
 			}),

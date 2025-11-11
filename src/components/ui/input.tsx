@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { Label } from './label'
@@ -33,7 +35,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		},
 		ref
 	) => {
-		const inputId = id || `input-${Math.random().toString(36).substring(2, 9)}`
+		const generatedId = React.useId()
+		const sanitizedGeneratedId = React.useMemo(
+			() => generatedId.replace(/[^a-zA-Z0-9_-]/g, ''),
+			[generatedId]
+		)
+		const inputId = id ?? `input-${sanitizedGeneratedId || 'field'}`
 
 		return (
 			<div className={cn('space-y-2 mb-4', className)}>

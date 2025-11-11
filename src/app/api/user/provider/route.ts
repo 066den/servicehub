@@ -1,17 +1,8 @@
 import { authOptions } from '@/lib/auth/authOptions'
+import { createProviderSchemaValidate } from '@/lib/schemas'
 import { prisma } from '@/lib/prisma'
-import { ProviderType } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
-import { z } from 'zod'
-
-const createProviderSchema = z.object({
-	businessName: z.string().min(1).max(50),
-	description: z.string().max(500).optional(),
-	phone: z.string().min(1).max(15),
-	location: z.string().min(1).max(50).optional(),
-	type: z.enum(ProviderType),
-})
 
 export async function GET() {
 	const session = await getServerSession(authOptions)
@@ -39,9 +30,15 @@ export async function POST(req: Request) {
 	}
 
 	const body = await req.json().catch(() => ({}))
-	const validationResult = createProviderSchema.safeParse(body)
+	const validationResult = createProviderSchemaValidate(body)
 
 	if (!validationResult.success) {
+		console.log(
+			validationResult.error.issues.map(issue => ({
+				field: issue.path.join('.'),
+				message: issue.message,
+			}))
+		)
 		return NextResponse.json(
 			{
 				error: 'Invalid request body',
@@ -81,5 +78,5 @@ export async function POST(req: Request) {
 		},
 	})
 
-	return NextResponse.json({ success: true, provider })
+	return NextResponse.json(provider)
 }

@@ -6,48 +6,64 @@ import {
 	getFirstLetters,
 	getDisplayName,
 } from '@/utils/textFormat'
-import { UserProfile } from '@/types/auth'
+import { Executor, UserProfile } from '@/types/auth'
 import Image from 'next/image'
+import { ProviderType } from '@prisma/client'
 
 type Props = {
 	className?: string
 	size?: 'sm' | 'md' | 'lg'
 	user?: UserProfile | null
+	provider?: Executor | null
 	onClick?: () => void
 	icon?: ReactNode
 }
 
-const Avatar = ({ className, size = 'md', onClick, icon, user }: Props) => {
+const Avatar = ({
+	className,
+	size = 'md',
+	onClick,
+	icon,
+	user,
+	provider,
+}: Props) => {
 	const [content, setContent] = useState('')
 	const [bgColor, setBgColor] = useState('')
 
 	useEffect(() => {
-		if (user?.firstName) {
-			setContent(getFirstLetters(getDisplayName(user)))
-		} else {
-			setContent(getFirstLetters('Користувач'))
+		let initials = getFirstLetters('Користувач')
+
+		if (provider?.businessName) {
+			initials = getFirstLetters(provider.businessName)
+		} else if (user) {
+			initials = getFirstLetters(getDisplayName(user))
 		}
-		setBgColor(getAvatarColor(content as string))
-	}, [user, content])
+
+		setContent(initials)
+		setBgColor(getAvatarColor(initials))
+	}, [provider, user])
 
 	const fullClassName = cn(
 		className,
-		'relative rounded-full bg-primary-gradient flex items-center justify-center text-white font-medium cursor-pointer hover:shadow-lg transition-all duration-300 ease-in-out',
+		'relative rounded-full bg-primary-gradient flex items-center justify-center text-white font-medium cursor-pointer overflow-hidden hover:shadow-lg transition-all duration-300 ease-in-out',
+		provider?.type === ProviderType.COMPANY ? 'rounded-lg' : 'rounded-full',
 		{
 			'w-8 h-8': size === 'sm',
 			'w-11 h-11 text-lg': size === 'md',
 			'w-[5rem] h-[5rem] text-3xl': size === 'lg',
 		}
 	)
+	const imageSrc = provider?.avatar ?? user?.avatar ?? null
+
 	return (
 		<div
 			className={fullClassName}
 			style={{ background: `linear-gradient(#fff -125%, ${bgColor} 100%)` }}
 			onClick={onClick}
 		>
-			{user?.avatar ? (
+			{imageSrc ? (
 				<Image
-					src={user.avatar}
+					src={imageSrc}
 					alt={content}
 					width={size === 'lg' ? 200 : 100}
 					height={size === 'lg' ? 200 : 100}

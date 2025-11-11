@@ -20,8 +20,6 @@ export const useUserProfile = () => {
 		logout,
 		uploadAvatar,
 		removeAvatar,
-		isUploadingAvatar,
-		avatarUploadError,
 	} = useAuthStore()
 
 	useEffect(() => {
@@ -51,8 +49,6 @@ export const useUserProfile = () => {
 		sendCode,
 		uploadAvatar,
 		removeAvatar,
-		isUploadingAvatar,
-		avatarUploadError,
 
 		isVerified: user?.isVerified || false,
 		...(user && { displayName: getDisplayName(user) }),

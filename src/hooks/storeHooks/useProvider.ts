@@ -1,7 +1,16 @@
 import { useProviderStore } from '@/stores/providerStore'
 
 export const useProvider = () => {
-	const { provider, providerError, createProvider } = useProviderStore()
+	const { provider, providerError, createProvider, isLoadingProvider } =
+		useProviderStore()
 
-	return { provider, providerError, createProvider }
+	const isProvider = !!provider
+
+	return {
+		provider,
+		providerError,
+		createProvider,
+		isLoadingProvider,
+		isProvider,
+	}
 }

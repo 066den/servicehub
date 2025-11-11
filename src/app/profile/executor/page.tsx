@@ -1,7 +1,7 @@
-import ExecutorRegister from '@/components/profile/ExecutorRegister'
+import ExecutorProfile from '@/components/profile/ExecutorProfile'
 
 const ProviderPage = () => {
-	return <ExecutorRegister />
+	return <ExecutorProfile />
 }
 
 export default ProviderPage
