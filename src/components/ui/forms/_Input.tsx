@@ -42,14 +42,39 @@ const Input = ({
 		onBlur(e)
 	}
 
+	const extractFieldError = (value: unknown): string | null => {
+		if (typeof value === 'string') {
+			return value
+		}
+
+		if (Array.isArray(value)) {
+			const stringError = value.find(
+				(item): item is string => typeof item === 'string'
+			)
+			return stringError ?? null
+		}
+
+		return null
+	}
+
 	useEffect(() => {
-		setError(
-			errorMessage || (typeof errors[name] === 'string' ? errors[name] : '')
-		)
+		if (typeof errorMessage === 'string') {
+			setError(errorMessage)
+			return
+		}
+
+		const fieldError = (errors as Record<string, unknown>)?.[name]
+		setError(extractFieldError(fieldError))
 	}, [errors, errorMessage, name])
 
 	return (
-		<div className={cn('form-group', className, wwithClear && 'with-clear')}>
+		<div
+			className={cn(
+				'position-relative mb',
+				className,
+				wwithClear && 'with-clear'
+			)}
+		>
 			{label && (
 				<label
 					className={cn('form-label', required && 'required')}
