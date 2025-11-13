@@ -15,6 +15,7 @@ type Props = {
 	size?: 'sm' | 'md' | 'lg'
 	src?: string
 	alt?: string
+	isExecutor?: boolean
 	onClick?: () => void
 	onUpload?: (file: File) => void
 	onRemove?: () => void
@@ -28,6 +29,7 @@ const AvatarEditable = ({
 	alt,
 	onUpload,
 	onRemove,
+	isExecutor = false,
 }: Props) => {
 	const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -108,11 +110,23 @@ const AvatarEditable = ({
 
 	const fullClassName = cn(
 		className,
-		'relative rounded-full bg-primary-gradient flex items-center justify-center text-white cursor-pointer hover:shadow-lg transition-all duration-300 ease-in-out',
+		'relative bg-primary-gradient flex items-center justify-center text-white cursor-pointer hover:shadow-lg transition-all duration-300 ease-in-out',
+		isExecutor ? 'rounded-lg' : 'rounded-full',
 		{
 			'w-8 h-8': size === 'sm',
 			'w-11 h-11': size === 'md',
 			'w-[5rem] h-[5rem]': size === 'lg',
+		}
+	)
+
+	const iconClassName = cn(
+		'absolute hover:scale-110 transition-all duration-300 ease-in-out',
+		isExecutor
+			? 'rounded-lg bottom-[-2px] right-[-2px]'
+			: 'rounded-full bottom-0 right-0',
+		{
+			'text-2xl': size === 'lg',
+			'text-sm': size === 'md',
 		}
 	)
 	return (
@@ -138,7 +152,10 @@ const AvatarEditable = ({
 					alt={alt || ''}
 					width={size === 'lg' ? 200 : 100}
 					height={size === 'lg' ? 200 : 100}
-					className='w-full h-full object-cover rounded-full'
+					className={cn(
+						'w-full h-full object-cover',
+						isExecutor ? 'rounded-lg' : 'rounded-full'
+					)}
 				/>
 			) : (
 				<span
@@ -152,9 +169,7 @@ const AvatarEditable = ({
 
 			{src ? (
 				<div
-					className={`absolute bottom-0 right-0 hover:scale-110 transition-all duration-300 ease-in-out ${
-						size === 'lg' ? 'text-xl' : 'text-sm'
-					}`}
+					className={iconClassName}
 					onClick={openConfirmDialog}
 					title='Змінити фото'
 				>
@@ -162,9 +177,7 @@ const AvatarEditable = ({
 				</div>
 			) : (
 				<div
-					className={`absolute bottom-0 right-0 hover:scale-110 transition-all duration-300 ease-in-out ${
-						size === 'lg' ? 'text-2xl' : 'text-sm'
-					}`}
+					className={iconClassName}
 					onClick={handleUploadClick}
 					title='Додати фото'
 				>

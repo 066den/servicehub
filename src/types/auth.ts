@@ -75,7 +75,7 @@ export interface Executor {
 	description?: string
 	phone?: string
 	email?: string
-	location?: string
+	location?: LocationData
 	companyInfo?: CompanyInfo
 	firstName?: string
 	lastName?: string

@@ -78,18 +78,19 @@ const settingsItems = [
 ]
 
 const Sidebar = () => {
-	const { user } = useUserProfile()
+	const { user, isLoading } = useUserProfile()
 	const { provider } = useProvider()
 
 	const isProvider = user?.role === Role.PROVIDER
 
 	return (
 		<Card className='sticky top-20 h-fit'>
-			{isProvider && provider?.type === ProviderType.INDIVIDUAL ? (
-				<SidebarSection title='dashboard' items={providerItems} />
-			) : (
-				<SidebarSection title='dashboard' items={companyItems} />
-			)}
+			{!isLoading &&
+				(isProvider && provider?.type === ProviderType.INDIVIDUAL ? (
+					<SidebarSection title='dashboard' items={providerItems} />
+				) : (
+					<SidebarSection title='dashboard' items={companyItems} />
+				))}
 
 			<SidebarSection title='account' items={profileItems} />
 			<SidebarSection title='settings' items={settingsItems} />

@@ -8,6 +8,7 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
+		"type-check": "tsc --noEmit",
 		"db:migrate": "prisma migrate dev",
 		"db:push": "prisma db push",
 		"prisma:generate": "prisma generate",
@@ -15,7 +16,8 @@
 		"db:seed": "tsx prisma/seed.ts",
 		"db:backup": "powershell -ExecutionPolicy Bypass -File scripts/backup-db.ps1",
 		"db:check": "powershell -ExecutionPolicy Bypass -File scripts/check-db.ps1",
-		"db:test": "powershell -ExecutionPolicy Bypass -File scripts/test-db-connection.ps1"
+		"db:test": "powershell -ExecutionPolicy Bypass -File scripts/test-db-connection.ps1",
+		"prepare": "husky"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.2.1",
@@ -86,3 +88,4 @@
 		"typescript": "^5"
 	}
 }
+

@@ -11,52 +11,42 @@ import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
 import InputPhone from '../ui/forms/InputPhone'
 import { useProvider } from '@/hooks/storeHooks/useProvider'
 import { ProviderType } from '@prisma/client'
-import * as Yup from 'yup'
-import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm } from 'react-hook-form'
 import { phoneMask } from '@/utils/phoneNumber'
 import { Badge } from '../ui/badge'
 import { containerVariants } from '../ui/animate/variants'
 import { motion } from 'motion/react'
 import { toast } from 'sonner'
-import { SkeletonForm, SkeletonSectionHeader } from '../ui/sceletons'
-import { Skeleton } from '../ui/skeleton'
-import type { Executor } from '@/types/auth'
 
-type FormData = {
-	type: ProviderType
-	businessName: string
-	email?: string
-	phone: string
-	description?: string
-}
+import type { Executor } from '@/types/auth'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { createProviderSchema } from '@/lib/schemas'
+import type { z } from 'zod'
+
+type FormData = z.input<typeof createProviderSchema>
 
 const ExecutorRegister = () => {
-	const { user, userLocation, isLoading } = useUserProfile()
+	const { user, userLocation } = useUserProfile()
 	const { createProvider, isLoadingProvider } = useProvider()
 
 	const [location, setLocation] = useState<LocationData | null>(
 		userLocation || null
 	)
 
-	const validationSchema: Yup.ObjectSchema<FormData> = Yup.object().shape({
-		type: Yup.mixed<ProviderType>().required('Тип акаунту є обовʼязковим'),
-		businessName: Yup.string().required('Назва є обовʼязковою'),
-		email: Yup.string().email('Некоректний email').optional(),
-		phone: Yup.string().required('Телефон є обовʼязковим'),
-		description: Yup.string()
-			.optional()
-			.max(500, 'Опис не може бути більше 500 символів'),
-	})
-
 	const {
 		register,
 		handleSubmit,
 		setValue,
+		getValues,
 		watch,
 		formState: { errors, isValid, isSubmitting },
 	} = useForm<FormData>({
-		resolver: yupResolver(validationSchema),
+		resolver: zodResolver<
+			FormData,
+			undefined,
+			FormData,
+			typeof createProviderSchema
+		>(createProviderSchema, undefined, { raw: true }),
 		defaultValues: {
 			type: ProviderType.INDIVIDUAL,
 			businessName: '',
@@ -67,16 +57,22 @@ const ExecutorRegister = () => {
 	})
 
 	useEffect(() => {
-		if (user) {
-			const fullName = [user.lastName, user.firstName].filter(Boolean).join(' ')
-			if (fullName) {
-				setValue('businessName', fullName)
-			}
-			if (user.phone) {
-				setValue('phone', phoneMask(user.phone))
+		if (!user) {
+			return
+		}
+
+		const fullName = [user.lastName, user.firstName].filter(Boolean).join(' ')
+		if (fullName && getValues('businessName') !== fullName) {
+			setValue('businessName', fullName)
+		}
+
+		if (user.phone) {
+			const maskedPhone = phoneMask(user.phone)
+			if (getValues('phone') !== maskedPhone) {
+				setValue('phone', maskedPhone)
 			}
 		}
-	}, [user, setValue])
+	}, [user, getValues, setValue])
 
 	useEffect(() => {
 		if (userLocation) {
@@ -86,14 +82,14 @@ const ExecutorRegister = () => {
 
 	const watchedType = watch('type')
 
-	const onSubmit = handleSubmit(async (data: FormData) => {
+	const onSubmit = handleSubmit(async data => {
 		const payload: Executor = {
 			type: data.type,
 			businessName: data.businessName.trim(),
 			phone: data.phone?.trim() || undefined,
 			description: data.description?.trim() || undefined,
 			email: data.email?.trim() || undefined,
-			location: location?.address?.trim(),
+			location: location || undefined,
 		}
 
 		try {
@@ -106,16 +102,6 @@ const ExecutorRegister = () => {
 			toast.error('Помилка при створенні профіля виконавця')
 		}
 	})
-
-	if (isLoading) {
-		return (
-			<div className='px-6 py-2 space-y-6'>
-				<SkeletonSectionHeader />
-				<SkeletonForm count={2} />
-				<Skeleton className='h-[300px] w-full rounded-lg' />
-			</div>
-		)
-	}
 
 	return (
 		<motion.section
@@ -213,12 +199,10 @@ const ExecutorRegister = () => {
 				</div>
 
 				<div className='space-y-2 mb-4'>
-					<label className='text-base font-semibold text-gray-700 leading-none select-none'>
-						Про себе
-					</label>
+					<label className='text-base font-semibold text-gray-700 leading-none select-none'></label>
 					<Textarea
 						{...register('description')}
-						placeholder='Розкажіть про свій досвід, навички та підхід до роботи...'
+						placeholder='Розкажіть про свої навички та спеціалізацію...'
 					/>
 					<div className='text-sm text-gray-500'>
 						Опис допоможе клієнтам краще зрозуміти ваші можливості

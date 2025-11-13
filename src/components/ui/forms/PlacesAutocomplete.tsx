@@ -64,10 +64,9 @@ const PlacesAutocomplete = ({
 
 	useEffect(() => {
 		if (location && location.city) {
-			setValue(`${location?.city}, ${location?.area}`)
-			onLocationSelect?.(location)
+			setValue(`${location.address}`)
 		}
-	}, [location, onLocationSelect, setValue])
+	}, [location, setValue])
 
 	// Close dropdown when clicking outside
 	useEffect(() => {

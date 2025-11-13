@@ -15,10 +15,14 @@ export const getLocation = (result: google.maps.GeocoderResult) => {
 	})
 
 	return {
-		address: result.formatted_address,
+		address: getShortAddress(result),
 		city,
 		area,
 		placeId: result.place_id,
 		formattedAddress: result.formatted_address,
 	}
+}
+
+const getShortAddress = (result: google.maps.GeocoderResult) => {
+	return result.formatted_address.split(',').slice(0, -2).join(',')
 }

@@ -78,7 +78,7 @@ export const useDropdownPosition = (
 		}
 
 		setDropdownPosition(newPosition)
-	}, [isOpen, position, offset.x, offset.y])
+	}, [isOpen, position, offset.x, offset.y, triggerRef, menuRef])
 
 	useEffect(() => {
 		calculatePosition()

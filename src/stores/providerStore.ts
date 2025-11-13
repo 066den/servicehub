@@ -2,19 +2,22 @@
 
 import { useAuthStore } from '@/stores/authStore'
 import { Executor } from '@/types/auth'
-import { getSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist } from 'zustand/middleware'
 import { apiRequestAuth } from '@/lib/api'
+import { UpdateProviderSchema } from '@/lib/schemas'
 
 interface ProviderState {
 	provider: Executor | null
 	lastProviderUpdate: number
 	isLoadingProvider: boolean
 	providerError: string | null
-	fetchProvider: () => Promise<Executor | null>
+	fetchProvider: (force?: boolean) => Promise<Executor | null>
 	createProvider: (provider: Executor) => void
+	updateProvider: (provider: UpdateProviderSchema) => void
+	uploadAvatar: (file: File) => Promise<void>
+	removeAvatar: () => Promise<void>
 }
 
 export const useProviderStore = create<ProviderState>()(
@@ -35,31 +38,18 @@ export const useProviderStore = create<ProviderState>()(
 
 					set({ isLoadingProvider: true, providerError: null })
 
-					const session = await getSession()
-					if (!session?.accessToken) {
-						throw new Error('Not access token')
-					}
-
 					try {
-						const response = await fetch('/api/user/provider', {
-							headers: {
-								Authorization: `Bearer ${session.accessToken}`,
-								'Content-Type': 'application/json',
-							},
-						})
-
-						if (!response.ok) {
-							const errorData = await response.json().catch(() => ({}))
-							throw new Error(errorData.error || `HTTP ${response.status}`)
-						}
-
-						const data = await response.json()
+						const data = await apiRequestAuth<{
+							success: boolean
+							provider: Executor
+							error?: string
+						}>('/api/user/provider')
 
 						if (!data.success || !data.provider) {
 							throw new Error(data.error || 'Failed to fetch provider')
 						}
 
-						const provider: Executor = data.provider
+						const provider = data.provider
 
 						set({
 							provider,
@@ -83,7 +73,6 @@ export const useProviderStore = create<ProviderState>()(
 				},
 				createProvider: async (provider: Executor) => {
 					set({ isLoadingProvider: true })
-
 					try {
 						const response = await apiRequestAuth('/api/user/provider', {
 							method: 'POST',
@@ -101,6 +90,100 @@ export const useProviderStore = create<ProviderState>()(
 						set({ providerError: message })
 					} finally {
 						set({ isLoadingProvider: false })
+					}
+				},
+
+				updateProvider: async (provider: UpdateProviderSchema) => {
+					set({ isLoadingProvider: true })
+					const { provider: currentProvider } = get()
+					if (!currentProvider) {
+						throw new Error('Provider not found')
+					}
+
+					set({ provider: { ...currentProvider, ...provider } })
+
+					try {
+						await apiRequestAuth('/api/user/provider', {
+							method: 'PUT',
+							body: JSON.stringify(provider),
+						})
+					} catch (error) {
+						set({ provider: currentProvider })
+						let message = 'Помилка при оновленні профіля виконавця'
+						if (error instanceof Error) {
+							message = error.message || message
+						}
+						set({ providerError: message })
+					} finally {
+						set({ isLoadingProvider: false })
+					}
+				},
+
+				uploadAvatar: async (file: File) => {
+					const { provider: currentProvider } = get()
+					if (!currentProvider) {
+						throw new Error('Provider not found')
+					}
+
+					try {
+						const formData = new FormData()
+						formData.append('avatar', file)
+
+						const data = await apiRequestAuth<{
+							success: boolean
+							avatarUrl: string
+							error?: string
+						}>('/api/user/provider/avatar', {
+							method: 'POST',
+							body: formData,
+						})
+
+						if (!data.success) {
+							throw new Error(data.error || 'Failed to upload provider avatar')
+						}
+
+						if (currentProvider) {
+							set({
+								provider: {
+									...currentProvider,
+									avatar: data.avatarUrl,
+								},
+								lastProviderUpdate: Date.now(),
+							})
+						} else {
+							await get().fetchProvider(true)
+						}
+					} catch (error) {
+						console.error('Error uploadAvatar:', error)
+						if (error instanceof Error) {
+							set({ providerError: error.message })
+						}
+					}
+				},
+				removeAvatar: async () => {
+					const { provider: currentProvider } = get()
+					if (!currentProvider) {
+						throw new Error('Provider not found')
+					}
+					set({ provider: { ...currentProvider, avatar: undefined } })
+
+					try {
+						const data = await apiRequestAuth<{
+							success: boolean
+							error?: string
+						}>('/api/user/provider/avatar', {
+							method: 'DELETE',
+						})
+
+						if (!data.success) {
+							throw new Error(data.error || 'Failed to remove provider avatar')
+						}
+					} catch (error) {
+						set({ provider: currentProvider })
+						console.error('Error removeAvatar:', error)
+						if (error instanceof Error) {
+							set({ providerError: error.message })
+						}
 					}
 				},
 			}),

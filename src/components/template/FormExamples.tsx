@@ -57,7 +57,6 @@ const FormExamples: React.FC = () => {
 									onChange={field.onChange}
 									onBlur={field.onBlur}
 									name={field.name}
-									ref={field.ref}
 								/>
 								{/* Дополнительное отображение ошибок валидации */}
 								{fieldState.error && (
