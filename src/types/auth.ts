@@ -84,6 +84,7 @@ export interface Executor {
 
 export interface CompanyInfo {
 	legal_name: string
+	legal_form?: string
 	registration_number?: string
 	tax_number?: string
 	legal_address?: string

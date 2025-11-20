@@ -7,9 +7,9 @@ import { LocationData } from '@/types'
 import { Button } from '../ui/button'
 import { cn } from '@/lib/utils'
 import { Textarea } from '../ui/textarea'
-import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
 import InputPhone from '../ui/forms/InputPhone'
-import { useProvider } from '@/hooks/storeHooks/useProvider'
+import { useProvider } from '@/stores/provider/useProvider'
 import { ProviderType } from '@prisma/client'
 import { useForm } from 'react-hook-form'
 import { phoneMask } from '@/utils/phoneNumber'
@@ -222,10 +222,10 @@ const ExecutorRegister = () => {
 
 				<Button
 					variant='accent'
+					size='lg'
 					disabled={!isValid || isSubmitting}
 					type='submit'
 					loading={isLoadingProvider}
-					size='md'
 				>
 					Зареєструватися як виконавець
 				</Button>

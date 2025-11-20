@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/stores/authStore'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
 
 export const useResendTimer = () => {
 	const {
@@ -11,7 +11,7 @@ export const useResendTimer = () => {
 		resetResendTimer,
 		sendCode,
 		phone,
-	} = useAuthStore()
+	} = useUserProfile()
 
 	const formatTime = (seconds: number): string => {
 		const mins = Math.floor(seconds / 60)

@@ -1,4 +1,4 @@
-import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
 import { formatDateToString } from '@/utils/dateFormat'
 import { Badge } from '../ui/badge'
 import AvatarEditable from '../ui/AvatarEditable'

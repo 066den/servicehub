@@ -7,17 +7,17 @@ import { bounceVariants } from '../ui/animate/variants'
 import { useRouter } from 'next/navigation'
 import Modal from '../modals/Modal'
 import { Button } from '../ui/button'
-import { signOut } from 'next-auth/react'
 import useFlag from '@/hooks/useFlag'
 import LocationSelector from '../common/LocationSelector'
 import Logo from '../common/Logo'
 import Avatar from '../ui/Avatar'
-import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
 import { Skeleton } from '../ui/skeleton'
 import { Bell } from 'lucide-react'
 import { ROUTES } from '@/lib/constants'
-import { useProvider } from '@/hooks/storeHooks/useProvider'
+import { useProvider } from '@/stores/provider/useProvider'
 import { ProviderType } from '@prisma/client'
+import AvatarCompany from '../ui/AvatarCompany'
 
 const Header = () => {
 	const t = useTranslations()
@@ -37,7 +37,7 @@ const Header = () => {
 			href: '/contact',
 		},
 	]
-	const { user, isLoading } = useUserProfile()
+	const { user, isLoading, logout } = useUserProfile()
 	const { isProvider, provider } = useProvider()
 	const [isModalProfileOpen, openModalProfile, closeModalProfile] = useFlag()
 
@@ -45,13 +45,21 @@ const Header = () => {
 		openModalProfile()
 	}
 
+	const handleCompanyProfileClick = () => {
+		router.push(ROUTES.EXECUTOR)
+	}
+
 	const handleProfileClick = () => {
 		router.push('/profile')
 		closeModalProfile()
 	}
 
-	const handleLogout = () => {
-		signOut()
+	const handleLogout = async () => {
+		try {
+			await logout()
+		} finally {
+			closeModalProfile()
+		}
 	}
 
 	return (
@@ -97,7 +105,10 @@ const Header = () => {
 							<Skeleton className='h-10 w-20' />
 						) : isProvider ? (
 							provider?.type === ProviderType.COMPANY && (
-								<Avatar provider={provider} />
+								<AvatarCompany
+									provider={provider}
+									onClick={handleCompanyProfileClick}
+								/>
 							)
 						) : (
 							<Button

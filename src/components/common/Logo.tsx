@@ -73,7 +73,7 @@ const Logo: React.FC<LogoProps> = ({
 	)
 
 	const sloganClassName = cn(
-		'text-[0.275em] font-medium text-secondary-foreground uppercase tracking-wider ml-0.5 leading-4',
+		'text-[0.275em] font-medium text-secondary-foreground uppercase tracking-wider ml-0.5 -mt-1 leading-4',
 		size === 'lg' && 'text-white text-xl font-light lowercase',
 		withImage && 'text-right'
 	)

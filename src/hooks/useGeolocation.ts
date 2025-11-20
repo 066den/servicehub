@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useGoogleMaps } from '@/components/providers/GoogleMapsProvider'
 import { LocationData } from '@/types'
-import { getGeocode } from 'use-places-autocomplete'
 import { getLocation } from '@/utils/getLocation'
 
 interface GeolocationHookResult {
@@ -45,29 +44,49 @@ const useGeolocation = (): GeolocationHookResult => {
 		setIsLoading(true)
 		setError(null)
 
-		getGeocode({
-			location: { lat: coords.latitude, lng: coords.longitude },
-			language: 'uk',
-			region: 'ua',
-		})
-			.then(results => {
-				const result = results[0]
-				const locationData = getLocation(result)
-				setLocation({
-					coordinates: {
-						lat: coords.latitude,
-						lng: coords.longitude,
-					},
-					...locationData,
-				})
-			})
-			.catch(error => {
-				console.error('Error getting coordinates:', error)
-				setError('Невдалося отримати координати')
-			})
-			.finally(() => {
+		try {
+			// Используем Geocoder для reverse geocoding
+			if (typeof window === 'undefined' || !window.google?.maps) {
+				setError('Google Maps не завантажено')
 				setIsLoading(false)
-			})
+				return
+			}
+
+			const geocoder = new google.maps.Geocoder()
+			const location = new google.maps.LatLng(
+				coords.latitude,
+				coords.longitude
+			)
+
+			geocoder.geocode(
+				{
+					location,
+					language: 'uk',
+					region: 'ua',
+				},
+				(results, status) => {
+					if (status === 'OK' && results && results.length > 0) {
+						const result = results[0]
+						const locationData = getLocation(result)
+						setLocation({
+							coordinates: {
+								lat: coords.latitude,
+								lng: coords.longitude,
+							},
+							...locationData,
+						})
+					} else {
+						console.error('Error getting coordinates:', status)
+						setError('Невдалося отримати координати')
+					}
+					setIsLoading(false)
+				}
+			)
+		} catch (error) {
+			console.error('Error getting coordinates:', error)
+			setError('Невдалося отримати координати')
+			setIsLoading(false)
+		}
 	}, [])
 
 	const handleError = useCallback((error: GeolocationPositionError) => {

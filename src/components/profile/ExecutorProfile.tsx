@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useProvider } from '@/hooks/storeHooks/useProvider'
+import { useEffect, useState } from 'react'
+import { useProvider } from '@/stores/provider/useProvider'
 import ExecutorRegister from './ExecutorRegister'
 import { motion } from 'motion/react'
 import { containerVariants } from '../ui/animate/variants'
@@ -9,7 +9,10 @@ import { useTranslations } from 'next-intl'
 import ExecutorProfileHero from './ExecutorProfileHero'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { UpdateProviderSchema, updateProviderSchema } from '@/lib/schemas'
+import { updateProviderSchema } from '@/lib/schemas'
+import type { z } from 'zod'
+
+type FormData = z.input<typeof updateProviderSchema>
 import { ProviderType } from '@prisma/client'
 import { Input } from '../ui/input'
 import InputPhone from '../ui/forms/InputPhone'
@@ -17,7 +20,7 @@ import { Textarea } from '../ui/textarea'
 import PlacesAutocomplete from '../ui/forms/PlacesAutocomplete'
 import Map from '../common/Map'
 import type { LocationData } from '@/types'
-import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
 import {
 	SkeletonForm,
 	SkeletonProfileHero,
@@ -26,12 +29,18 @@ import {
 import { Skeleton } from '../ui/skeleton'
 import { Button } from '../ui/button'
 import { toast } from 'sonner'
+import useFlag from '@/hooks/useFlag'
+import ChangeTypeModal from '../modals/ChangeTypeModal'
 
 const ExecutorProfile = () => {
-	const { provider, isLoadingProvider, updateProvider } = useProvider()
+	const { provider, isLoadingProvider, updateProvider, changeProviderType } =
+		useProvider()
 	const { userLocation, isLoading } = useUserProfile()
-
 	const t = useTranslations()
+	const [isTypeModalOpen, openTypeModal, closeTypeModal] = useFlag()
+	const [selectedType, setSelectedType] = useState(
+		provider?.type ?? ProviderType.INDIVIDUAL
+	)
 
 	const {
 		register,
@@ -41,7 +50,7 @@ const ExecutorProfile = () => {
 		trigger,
 		reset,
 		formState: { errors, isValid },
-	} = useForm<UpdateProviderSchema>({
+	} = useForm<FormData>({
 		resolver: zodResolver(updateProviderSchema),
 		defaultValues: {
 			businessName: provider?.businessName ?? '',
@@ -67,8 +76,9 @@ const ExecutorProfile = () => {
 	}, [provider, reset, userLocation])
 
 	const watchedLocation = watch('location') as LocationData | undefined
-	const onSubmit = handleSubmit(async (data: UpdateProviderSchema) => {
-		const payload: UpdateProviderSchema = {
+
+	const onSubmit = handleSubmit(async (data: FormData) => {
+		const payload: z.output<typeof updateProviderSchema> = {
 			businessName: data.businessName.trim(),
 			description: data.description || undefined,
 			phone: data.phone,
@@ -86,6 +96,36 @@ const ExecutorProfile = () => {
 			toast.error('Помилка при оновленні профіля виконавця')
 		}
 	})
+
+	const handleOpenTypeModal = () => {
+		if (provider?.type) {
+			setSelectedType(provider.type)
+		}
+		openTypeModal()
+	}
+
+	const handleConfirmTypeChange = async () => {
+		if (!provider) {
+			return
+		}
+
+		if (selectedType === provider.type) {
+			closeTypeModal()
+			return
+		}
+
+		try {
+			await changeProviderType(selectedType)
+			toast.success(t('Profile.changeTypeSuccess'))
+			closeTypeModal()
+		} catch (error) {
+			toast.error(
+				error instanceof Error && error.message
+					? error.message
+					: t('Profile.changeTypeError')
+			)
+		}
+	}
 
 	if (isLoading) {
 		return (
@@ -112,12 +152,19 @@ const ExecutorProfile = () => {
 			<div className='flex justify-between items-center mb-6 border-b border-gray-200 pb-4'>
 				<div>
 					<h1 className='text-3xl font-bold mb-2'>
-						{t('Profile.executorTitle')}
+						{provider?.type === ProviderType.COMPANY
+							? t('Profile.companyTitle')
+							: t('Profile.executorTitle')}
 					</h1>
 					<p className='text-secondary-foreground'>
-						{t('Profile.executorSubtitle')}
+						{provider?.type === ProviderType.COMPANY
+							? t('Profile.companySubtitle')
+							: t('Profile.executorSubtitle')}
 					</p>
 				</div>
+				<Button variant='outline' onClick={handleOpenTypeModal}>
+					{t('Profile.changeType')}
+				</Button>
 			</div>
 			<ExecutorProfileHero />
 			<form onSubmit={onSubmit}>
@@ -191,6 +238,14 @@ const ExecutorProfile = () => {
 					{t('Profile.save')}
 				</Button>
 			</form>
+
+			<ChangeTypeModal
+				isOpen={isTypeModalOpen}
+				onClose={closeTypeModal}
+				onConfirm={handleConfirmTypeChange}
+				selectedType={selectedType}
+				setSelectedType={setSelectedType}
+			/>
 		</motion.section>
 	)
 }

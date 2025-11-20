@@ -83,18 +83,14 @@ model Provider {
 
 model CompanyInfo {
   id                 Int       @id @default(autoincrement())
-  legalName          String
+  legalForm          String?
   registrationNumber String?
   taxNumber          String?
-  legalAddress       String?
   website            String?
-  email              String?
-  phone              String?
   bankDetails        Json?
   licenses           Json?
   certificates       Json?
   foundedYear        Int?
-  staffCount         Int       @default(0)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   provider           Provider?

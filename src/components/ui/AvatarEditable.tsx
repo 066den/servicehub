@@ -122,7 +122,7 @@ const AvatarEditable = ({
 	const iconClassName = cn(
 		'absolute hover:scale-110 transition-all duration-300 ease-in-out',
 		isExecutor
-			? 'rounded-lg bottom-[-2px] right-[-2px]'
+			? 'rounded-lg bottom-[-1px] right-[-1px]'
 			: 'rounded-full bottom-0 right-0',
 		{
 			'text-2xl': size === 'lg',

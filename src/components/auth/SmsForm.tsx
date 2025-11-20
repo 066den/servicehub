@@ -10,12 +10,12 @@ import { Label } from '../ui/label'
 import { phoneMask } from '@/utils/phoneNumber'
 import { AnimatePresence, motion } from 'framer-motion'
 import { containerVariants } from '../ui/animate/variants'
-import { useAuthStore } from '@/stores/authStore'
 import { useSession } from 'next-auth/react'
 import Notification from '../ui/Notification'
 import { useResendTimer } from '@/hooks/useResendTimer'
 import { ArrowLeft, Clock, RefreshCw } from 'lucide-react'
 import CodeDigits from '../ui/forms/CodeDigits'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
 
 type FormData = {
 	code: string
@@ -26,7 +26,7 @@ type FormData = {
 const SmsForm = () => {
 	const t = useTranslations()
 	const tMain = useTranslations()
-	const { setStep, verifyCode, error, clearError, isLoading } = useAuthStore()
+	const { error, isLoading, setStep, verifyCode, clearError } = useUserProfile()
 
 	const { canResend, formattedTime, resendCode } = useResendTimer()
 	const { data: session } = useSession()

@@ -1,7 +1,6 @@
 'use client'
 import { ROUTES } from '@/lib/constants'
-import { signOut } from 'next-auth/react'
-import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
 import { ProviderType, Role } from '@prisma/client'
 import SidebarSection from './SidebarSection'
 import { Card } from '../ui/card'
@@ -16,7 +15,7 @@ import {
 	Briefcase,
 	Building,
 } from 'lucide-react'
-import { useProvider } from '@/hooks/storeHooks/useProvider'
+import { useProvider } from '@/stores/provider/useProvider'
 
 const providerItems = [
 	{
@@ -62,31 +61,32 @@ const profileItems = [
 	},
 ]
 
-const settingsItems = [
-	{
-		icon: <Settings className='size-5' />,
-		title: 'settings',
-		url: ROUTES.SETTINGS,
-	},
-	{
-		icon: <LogOut className='size-5' />,
-		title: 'logout',
-		action: () => {
-			signOut()
-		},
-	},
-]
-
 const Sidebar = () => {
-	const { user, isLoading } = useUserProfile()
+	const { user, isLoading, logout } = useUserProfile()
 	const { provider } = useProvider()
+
+	const settingsItems = [
+		{
+			icon: <Settings className='size-5' />,
+			title: 'settings',
+			url: ROUTES.SETTINGS,
+		},
+		{
+			icon: <LogOut className='size-5' />,
+			title: 'logout',
+			action: () => {
+				void logout()
+			},
+		},
+	]
 
 	const isProvider = user?.role === Role.PROVIDER
 
 	return (
 		<Card className='sticky top-20 h-fit'>
 			{!isLoading &&
-				(isProvider && provider?.type === ProviderType.INDIVIDUAL ? (
+				isProvider &&
+				(provider?.type === ProviderType.INDIVIDUAL ? (
 					<SidebarSection title='dashboard' items={providerItems} />
 				) : (
 					<SidebarSection title='dashboard' items={companyItems} />

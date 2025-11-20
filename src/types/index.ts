@@ -105,4 +105,7 @@ export interface Suggestion {
 		main_text: string
 		secondary_text: string
 	}
+	// Для нового API AutocompleteSuggestion
+	placePrediction?: google.maps.places.AutocompletePrediction
+	suggestion?: google.maps.places.AutocompleteSuggestion
 }

@@ -2,7 +2,7 @@
 import { useEffect } from 'react'
 import PhoneForm from '@/components/auth/PhoneForm'
 import SmsForm from '@/components/auth/SmsForm'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore } from '@/stores/auth/authStore'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/lib/constants'

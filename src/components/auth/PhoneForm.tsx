@@ -1,6 +1,5 @@
 'use client'
 
-import { useAuthStore } from '@/stores/authStore'
 import { useTranslations } from 'next-intl'
 import InputPhone, { VALID_PHONE_PATTERN } from '../ui/forms/InputPhone'
 import Link from 'next/link'
@@ -10,6 +9,7 @@ import { containerVariants } from '../ui/animate/variants'
 import { Button } from '../ui/button'
 import { useForm, useController } from 'react-hook-form'
 import { Smartphone } from 'lucide-react'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
 
 type FormData = {
 	phone: string
@@ -17,7 +17,7 @@ type FormData = {
 
 const PhoneForm = () => {
 	const t = useTranslations()
-	const { error, isLoading, setPhone, sendCode } = useAuthStore()
+	const { error, isLoading, setPhone, sendCode } = useUserProfile()
 	const {
 		control,
 		handleSubmit,

@@ -1,7 +1,7 @@
 import { formatDateToString } from '@/utils/dateFormat'
 import { Badge } from '../ui/badge'
 import AvatarEditable from '../ui/AvatarEditable'
-import { useProvider } from '@/hooks/storeHooks/useProvider'
+import { useProvider } from '@/stores/provider/useProvider'
 
 const ExecutorProfileHero = () => {
 	const { provider, uploadAvatar, removeAvatar } = useProvider()

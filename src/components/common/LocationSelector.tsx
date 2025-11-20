@@ -10,7 +10,7 @@ import { LocationData } from '@/types'
 import useFlag from '@/hooks/useFlag'
 import { fadeScaleVariants } from '../ui/animate/variants'
 import { useTranslations } from 'next-intl'
-import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
 import { Button } from '../ui/button'
 import { toast } from 'sonner'
 
@@ -75,7 +75,7 @@ const LocationSelector = () => {
 				<span>{t('getCurrentLocation')}</span>
 			</Button>
 
-			<div className='grid grid-cols-2 gap-2'>
+			<div className='grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2'>
 				{!userLocation?.city && (
 					<Button variant='outline-secondary' size='lg' onClick={handleSkip}>
 						{t('skip')}
@@ -120,6 +120,7 @@ const LocationSelector = () => {
 				<PlacesAutocomplete
 					location={location}
 					onLocationSelect={setLocation}
+					types={['(cities)']}
 				/>
 
 				{location && (

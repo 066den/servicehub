@@ -18,6 +18,7 @@ type Props = {
 	footer?: ReactNode
 	onClose?: NoneToVoidFunction
 	className?: string
+	classNameContent?: string
 	headerColor?: 'default' | 'primary'
 	position?: 'center' | 'top'
 	size?: 'sm' | 'md' | 'lg'
@@ -35,6 +36,7 @@ const Modal = ({
 	headerColor = 'default',
 	position = 'center',
 	size = 'md',
+	classNameContent,
 }: Props) => {
 	useBodyScrollLock(isOpen)
 
@@ -105,7 +107,7 @@ const Modal = ({
 								<X size={20} />
 							</Button>
 							{renderHeader()}
-							<div className='px-8 py-6 flex-1 overflow-y-auto'>
+							<div className={cn('px-8 py-6 flex-1', classNameContent)}>
 								{children}
 								{footer && <div className='pt-7'>{footer}</div>}
 							</div>

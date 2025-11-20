@@ -6,7 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import PlacesAutocomplete from '@/components/ui/forms/PlacesAutocomplete'
-import { useUserProfile } from '@/hooks/storeHooks/useUserProfile'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
 import { phoneMask } from '@/utils/phoneNumber'
 import { LocationData } from '@/types'
 import { containerVariants } from '@/components/ui/animate/variants'
@@ -127,6 +127,7 @@ const ProfilePage = () => {
 						label={t('Form.city')}
 						helperText={`${t('chooseLocation')}. ${t('chooseLocationHelper')}`}
 						onLocationSelect={setSelectedLocation}
+						types={['(cities)']}
 					/>
 
 					<Input
@@ -137,7 +138,7 @@ const ProfilePage = () => {
 						helperText={t('Form.phoneDisabled')}
 					/>
 				</div>
-				<Button type='submit' size='md' disabled={!isValid}>
+				<Button type='submit' size='lg' disabled={!isValid}>
 					{t('Profile.save')}
 				</Button>
 			</form>
