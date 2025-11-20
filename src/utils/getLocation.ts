@@ -39,11 +39,17 @@ export const getLocationFromPlace = (place: google.maps.places.Place) => {
 	})
 
 	const formattedAddress = place.formattedAddress || ''
-	const coordinates = place.geometry?.location
+	// Используем type assertion, так как типы могут не включать geometry
+	const placeWithGeometry = place as google.maps.places.Place & {
+		geometry?: {
+			location?: google.maps.LatLng
+		}
+	}
+	const coordinates = placeWithGeometry.geometry?.location
 		? {
-				lat: place.geometry.location.lat(),
-				lng: place.geometry.location.lng(),
-			}
+				lat: placeWithGeometry.geometry.location.lat(),
+				lng: placeWithGeometry.geometry.location.lng(),
+		  }
 		: undefined
 
 	return {
