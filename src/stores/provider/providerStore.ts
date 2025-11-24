@@ -130,10 +130,18 @@ export const useProviderStore = create<ProviderStore>()(
 							throw new Error('Provider not found')
 						}
 
-						const { companyInfo, ...restProvider } = provider
+						const { companyInfo, location, ...restProvider } = provider
+						const normalizedLocation = location
+							? {
+									...location,
+									coordinates: location.coordinates ?? undefined,
+									skiped: location.skiped ?? undefined,
+							  }
+							: undefined
 						const updatedProvider: Executor = {
 							...currentProvider,
 							...restProvider,
+							location: normalizedLocation,
 							companyInfo: currentProvider.companyInfo,
 						}
 

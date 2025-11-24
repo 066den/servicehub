@@ -8,4 +8,5 @@ export const ROUTES = {
 	MY_ORDERS: '/profile/orders',
 	FAVORITES: '/profile/favorites',
 	SETTINGS: '/settings',
+	STAFF: '/profile/staff',
 } as const

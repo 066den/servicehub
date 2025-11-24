@@ -25,6 +25,7 @@ const AvatarCompany = ({
 	const [bgColor, setBgColor] = useState('')
 
 	const { businessName, type, avatar, companyInfo } = provider
+
 	useEffect(() => {
 		let initials = getFirstLetters('Виконавець')
 
@@ -83,9 +84,7 @@ const AvatarCompany = ({
 				<div className='text-sm font-semibold'>{businessName}</div>
 				<div className='text-xs text-primary font-medium'>
 					{type === ProviderType.COMPANY
-						? companyInfo?.legal_form
-							? companyInfo?.legal_form
-							: 'Компанія'
+						? companyInfo?.legalForm ?? 'Компанія'
 						: 'Виконавець'}
 				</div>
 			</div>

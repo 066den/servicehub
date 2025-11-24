@@ -40,7 +40,8 @@
 		"favorites": "Обрані послуги",
 		"myReviews": "Мої відгуки",
 		"profileExecutor": "Профіль виконавця",
-		"profileCompany": "Профіль компанії"
+		"profileCompany": "Профіль компанії",
+		"staff": "Співробітники"
 	},
 	"Form": {
 		"phone": "Номер телефону",

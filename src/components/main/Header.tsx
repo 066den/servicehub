@@ -16,29 +16,32 @@ import { Skeleton } from '../ui/skeleton'
 import { Bell } from 'lucide-react'
 import { ROUTES } from '@/lib/constants'
 import { useProvider } from '@/stores/provider/useProvider'
-import { ProviderType } from '@prisma/client'
 import AvatarCompany from '../ui/AvatarCompany'
+import { useMemo } from 'react'
 
 const Header = () => {
 	const t = useTranslations()
 
 	const router = useRouter()
-	const navigationItems = [
-		{
-			label: t('Link.services'),
-			href: '/services',
-		},
-		{
-			label: t('Link.about'),
-			href: '/about',
-		},
-		{
-			label: t('Link.contact'),
-			href: '/contact',
-		},
-	]
+	const navigationItems = useMemo(
+		() => [
+			{
+				label: t('Link.services'),
+				href: '/services',
+			},
+			{
+				label: t('Link.about'),
+				href: '/about',
+			},
+			{
+				label: t('Link.contact'),
+				href: '/contact',
+			},
+		],
+		[t]
+	)
 	const { user, isLoading, logout } = useUserProfile()
-	const { isProvider, provider } = useProvider()
+	const { provider } = useProvider()
 	const [isModalProfileOpen, openModalProfile, closeModalProfile] = useFlag()
 
 	const handleAvatarClick = () => {
@@ -74,51 +77,55 @@ const Header = () => {
 					<Navigation items={navigationItems} />
 					<div className='flex items-center gap-4'>
 						{isLoading ? (
-							<Skeleton className='h-10 w-20' />
-						) : !user || !user.isVerified ? (
-							<Button
-								variant='outline-primary'
-								size='md'
-								onClick={() => router.push('/auth/signin')}
-							>
-								Увійти
-							</Button>
+							<>
+								<Skeleton className='h-10 w-20' />
+								<Skeleton className='h-10 w-20' />
+							</>
 						) : (
 							<>
-								<button className='notification-btn'>
-									<Bell className='size-5' />
-									{0 > 0 && (
-										<motion.span
-											variants={bounceVariants}
-											animate='bounce'
-											className='notification-badge'
-										>
-											3
-										</motion.span>
-									)}
-								</button>
-								<Avatar user={user} onClick={handleAvatarClick} />
+								{!user || !user.isVerified ? (
+									<Button
+										variant='outline-primary'
+										size='md'
+										onClick={() => router.push('/auth/signin')}
+									>
+										Увійти
+									</Button>
+								) : (
+									<>
+										<button className='notification-btn'>
+											<Bell className='size-5' />
+											{0 > 0 && (
+												<motion.span
+													variants={bounceVariants}
+													animate='bounce'
+													className='notification-badge'
+												>
+													3
+												</motion.span>
+											)}
+										</button>
+										{provider ? (
+											<AvatarCompany
+												provider={provider}
+												onClick={handleCompanyProfileClick}
+											/>
+										) : (
+											<Avatar user={user} onClick={handleAvatarClick} />
+										)}
+									</>
+								)}
+								{!provider && (
+									<Button
+										variant='accent'
+										size='md'
+										onClick={() => router.push(ROUTES.EXECUTOR)}
+										className='min-w-[160px] font-semibold'
+									>
+										{t('becomeProvider')}
+									</Button>
+								)}
 							</>
-						)}
-
-						{isLoading ? (
-							<Skeleton className='h-10 w-20' />
-						) : isProvider ? (
-							provider?.type === ProviderType.COMPANY && (
-								<AvatarCompany
-									provider={provider}
-									onClick={handleCompanyProfileClick}
-								/>
-							)
-						) : (
-							<Button
-								variant='accent'
-								size='md'
-								onClick={() => router.push(ROUTES.EXECUTOR)}
-								className='min-w-[160px] font-semibold'
-							>
-								{t('becomeProvider')}
-							</Button>
 						)}
 					</div>
 				</div>

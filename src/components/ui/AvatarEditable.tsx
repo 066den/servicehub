@@ -9,6 +9,7 @@ import Image from 'next/image'
 import ConfirmDialog from '../modals/ConfirmDialog'
 import useFlag from '@/hooks/useFlag'
 import { validateFile } from '@/lib/validate'
+import { CameraIcon, RefreshCwIcon } from 'lucide-react'
 
 type Props = {
 	className?: string
@@ -120,10 +121,8 @@ const AvatarEditable = ({
 	)
 
 	const iconClassName = cn(
-		'absolute hover:scale-110 transition-all duration-300 ease-in-out',
-		isExecutor
-			? 'rounded-lg bottom-[-1px] right-[-1px]'
-			: 'rounded-full bottom-0 right-0',
+		'bg-accent p-1 rounded-full absolute hover:scale-110 transition-all duration-300 ease-in-out',
+		isExecutor ? 'bottom-[-1px] right-[-1px]' : 'bottom-0 right-0',
 		{
 			'text-2xl': size === 'lg',
 			'text-sm': size === 'md',
@@ -173,7 +172,7 @@ const AvatarEditable = ({
 					onClick={openConfirmDialog}
 					title='Змінити фото'
 				>
-					🔄
+					<RefreshCwIcon size={20} />
 				</div>
 			) : (
 				<div
@@ -181,7 +180,7 @@ const AvatarEditable = ({
 					onClick={handleUploadClick}
 					title='Додати фото'
 				>
-					📷
+					<CameraIcon size={20} />
 				</div>
 			)}
 

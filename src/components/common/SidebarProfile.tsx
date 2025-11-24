@@ -14,6 +14,7 @@ import {
 	LogOut,
 	Briefcase,
 	Building,
+	Users,
 } from 'lucide-react'
 import { useProvider } from '@/stores/provider/useProvider'
 
@@ -30,6 +31,11 @@ const companyItems = [
 		icon: <Building className='size-5' />,
 		title: 'profileCompany',
 		url: ROUTES.EXECUTOR,
+	},
+	{
+		icon: <Users className='size-5' />,
+		title: 'staff',
+		url: ROUTES.STAFF,
 	},
 ]
 
@@ -61,7 +67,7 @@ const profileItems = [
 	},
 ]
 
-const Sidebar = () => {
+const SidebarProfile = () => {
 	const { user, isLoading, logout } = useUserProfile()
 	const { provider } = useProvider()
 
@@ -98,4 +104,4 @@ const Sidebar = () => {
 	)
 }
 
-export default Sidebar
+export default SidebarProfile

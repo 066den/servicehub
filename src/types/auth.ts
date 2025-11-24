@@ -76,6 +76,7 @@ export interface Executor {
 	phone?: string
 	email?: string
 	location?: LocationData
+	serviceAreas?: unknown
 	companyInfo?: CompanyInfo
 	firstName?: string
 	lastName?: string
@@ -83,9 +84,13 @@ export interface Executor {
 }
 
 export interface CompanyInfo {
-	legal_name: string
-	legal_form?: string
-	registration_number?: string
-	tax_number?: string
-	legal_address?: string
+	legalForm?: string
+	registrationNumber?: string
+	taxNumber?: string
+	legalAddress?: string
+	bankDetails: Record<string, unknown>
+	certificates: Record<string, unknown>
+	foundedYear: number
+	licenses: Record<string, unknown>
+	website: string
 }

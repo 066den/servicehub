@@ -88,7 +88,7 @@ const Modal = ({
 							animate='visible'
 							exit='exit'
 							className={cn(
-								'relative flex flex-col bg-white rounded-xl shadow-2xl w-full max-h-[95vh] overflow-hidden',
+								'relative flex flex-col bg-white rounded-xl shadow-2xl w-full max-h-[95vh]',
 								{
 									'max-w-[26rem]': size === 'sm',
 									'max-w-[31.25rem]': size === 'md',
