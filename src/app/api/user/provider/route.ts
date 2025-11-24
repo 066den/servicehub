@@ -79,6 +79,7 @@ export async function POST(req: Request) {
 		const provider = await tx.provider.create({
 			data: {
 				...validationResult.data,
+				location: validationResult.data.location ?? undefined,
 				userId: Number(session.user.id),
 				companyInfoId: companyInfo.id,
 			},
@@ -230,6 +231,8 @@ export async function PUT(req: Request) {
 		// Формируем данные для обновления Provider
 		const finalProviderUpdateData: Prisma.ProviderUncheckedUpdateInput = {
 			...providerUpdateData,
+			location: providerUpdateData.location ?? undefined,
+			serviceAreas: providerUpdateData.serviceAreas ?? undefined,
 		}
 
 		// Удаляем companyInfo из данных Provider, так как это не поле Provider

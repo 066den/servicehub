@@ -41,12 +41,7 @@ const ExecutorRegister = () => {
 		watch,
 		formState: { errors, isValid, isSubmitting },
 	} = useForm<FormData>({
-		resolver: zodResolver<
-			FormData,
-			undefined,
-			FormData,
-			typeof createProviderSchema
-		>(createProviderSchema, undefined, { raw: true }),
+		resolver: zodResolver(createProviderSchema, undefined, { raw: true }),
 		defaultValues: {
 			type: ProviderType.INDIVIDUAL,
 			businessName: '',

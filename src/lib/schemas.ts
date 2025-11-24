@@ -120,7 +120,7 @@ export const createProviderSchema = z.object({
 		.optional()
 		.transform(value => (value === '' ? undefined : value)),
 	phone: z.string().trim().min(1).max(20),
-	location: locationSchema,
+	location: locationSchema.optional(),
 	email: z
 		.email()
 		.trim()

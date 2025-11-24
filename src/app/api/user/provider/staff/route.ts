@@ -3,7 +3,7 @@ import { createStaffSchemaValidate } from '@/lib/schemas'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
-import { StaffStatus } from '@prisma/client'
+import { StaffStatus, Prisma } from '@prisma/client'
 
 export async function POST(req: Request) {
 	const session = await getServerSession(authOptions)
@@ -42,6 +42,7 @@ export async function POST(req: Request) {
 		const staff = await prisma.staff.create({
 			data: {
 				...validationResult.data,
+				workingHours: validationResult.data.workingHours as Prisma.InputJsonValue,
 				providerId: provider.id,
 				status: StaffStatus.ACTIVE, // Автоматически устанавливаем статус "Активний"
 			},
