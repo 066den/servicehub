@@ -31,7 +31,15 @@ type FormData = {
 const ProfilePage = () => {
 	const t = useTranslations()
 
-	const { user, displayName, uploadAvatar, removeAvatar, updateUser, isLoading, userLocation } = useUserProfile()
+	const {
+		user,
+		displayName,
+		uploadAvatar,
+		removeAvatar,
+		updateUser,
+		isLoading,
+		userLocation,
+	} = useUserProfile()
 	const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(
 		null
 	)
@@ -106,7 +114,7 @@ const ProfilePage = () => {
 			<ProfileHero
 				type='user'
 				avatar={user?.avatar}
-				displayName={displayName}
+				displayName={displayName || '—'}
 				onUpload={uploadAvatar}
 				onRemove={removeAvatar}
 				badges={

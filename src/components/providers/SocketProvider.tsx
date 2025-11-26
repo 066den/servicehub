@@ -2,10 +2,13 @@
 
 import { createContext, useContext, ReactNode } from 'react'
 import { useSocket } from '@/hooks/useSocket'
-import { Socket } from 'socket.io-client'
+// @ts-expect-error - socket.io-client exports io but types may not be properly resolved
+import { io } from 'socket.io-client'
 import { ServerToClientEvents, ClientToServerEvents } from '@/types/socket'
 
-type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>
+type TypedSocket = ReturnType<
+	typeof io<ServerToClientEvents, ClientToServerEvents>
+>
 
 interface SocketContextValue {
 	socket: TypedSocket | null
@@ -29,7 +32,10 @@ interface SocketProviderProps {
 	autoConnect?: boolean
 }
 
-export function SocketProvider({ children, autoConnect = true }: SocketProviderProps) {
+export function SocketProvider({
+	children,
+	autoConnect = true,
+}: SocketProviderProps) {
 	const socket = useSocket({
 		autoConnect,
 		onConnect: () => {
@@ -38,15 +44,13 @@ export function SocketProvider({ children, autoConnect = true }: SocketProviderP
 		onDisconnect: () => {
 			console.log('Socket disconnected')
 		},
-		onError: (error) => {
+		onError: error => {
 			console.error('Socket error:', error)
 		},
 	})
 
 	return (
-		<SocketContext.Provider value={socket}>
-			{children}
-		</SocketContext.Provider>
+		<SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
 	)
 }
 
@@ -57,4 +61,3 @@ export function useSocketContext() {
 	}
 	return context
 }
-

@@ -174,7 +174,7 @@ const ExecutorRegister = () => {
 								Організація або команда, що надає професійні послуги
 							</div>
 						</div>
-						<div className='absolute inset-0 bg-white/90 rounded-lg flex items-center justify-center p-4'>
+						<div className='absolute inset-0 bg-white/50 rounded-lg flex items-center justify-center p-4'>
 							<p className='text-sm text-gray-700 text-center font-medium'>
 								Скоро ця можливість буде активована. У профілі можна буде
 								змінити тип.
