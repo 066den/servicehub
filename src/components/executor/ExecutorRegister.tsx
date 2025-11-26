@@ -39,7 +39,7 @@ const ExecutorRegister = () => {
 		setValue,
 		getValues,
 		watch,
-		formState: { errors, isValid, isSubmitting },
+		formState: { errors, isSubmitting },
 	} = useForm<FormData>({
 		resolver: zodResolver(createProviderSchema, undefined, { raw: true }),
 		defaultValues: {
@@ -78,8 +78,14 @@ const ExecutorRegister = () => {
 	const watchedType = watch('type')
 
 	const onSubmit = handleSubmit(async data => {
+		// COMPANY недоступен для выбора, принудительно устанавливаем INDIVIDUAL
+		const providerType =
+			data.type === ProviderType.COMPANY
+				? ProviderType.INDIVIDUAL
+				: data.type
+
 		const payload: Executor = {
-			type: data.type,
+			type: providerType,
 			businessName: data.businessName.trim(),
 			phone: data.phone?.trim() || undefined,
 			description: data.description?.trim() || undefined,
@@ -114,6 +120,9 @@ const ExecutorRegister = () => {
 				</div>
 			</div>
 			<form onSubmit={onSubmit}>
+				<p className='text-sm text-destructive mb-2'>
+					* Поля, позначені зірочкою, є обов&apos;язковими для заповнення
+				</p>
 				<div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
 					<div
 						className={cn(
@@ -142,31 +151,34 @@ const ExecutorRegister = () => {
 						</div>
 					</div>
 
-					<div
-						className={cn(
-							'border-2 border-gray-200 rounded-lg p-4 cursor-pointer text-center relative transition-all hover:border-primary hover:shadow-md hover:translate-y-[-2px]',
-							watchedType === ProviderType.COMPANY &&
-								'border-primary bg-primary/10'
-						)}
-						onClick={() => setValue('type', ProviderType.COMPANY)}
-					>
-						<input
-							type='radio'
-							{...register('type')}
-							value={ProviderType.COMPANY}
-							className='hidden'
-						/>
-						{watchedType === ProviderType.COMPANY && (
-							<Badge variant='success' className='absolute top-2 right-2'>
-								Обраний
-							</Badge>
-						)}
-						<div className='text-5xl mb-4'>🏢</div>
-						<div className='text-xl font-semibold mb-2 text-gray-900'>
-							Компанія
+					<div className='relative'>
+						<div
+							className={cn(
+								'border-2 border-gray-200 rounded-lg p-4 text-center relative opacity-60',
+								watchedType === ProviderType.COMPANY &&
+									'border-primary bg-primary/10'
+							)}
+						>
+							<input
+								type='radio'
+								{...register('type')}
+								value={ProviderType.COMPANY}
+								className='hidden'
+								disabled
+							/>
+							<div className='text-5xl mb-4'>🏢</div>
+							<div className='text-xl font-semibold mb-2 text-gray-900'>
+								Компанія
+							</div>
+							<div className='text-sm text-gray-500 leading-relaxed'>
+								Організація або команда, що надає професійні послуги
+							</div>
 						</div>
-						<div className='text-sm text-gray-500 leading-relaxed'>
-							Організація або команда, що надає професійні послуги
+						<div className='absolute inset-0 bg-white/90 rounded-lg flex items-center justify-center p-4'>
+							<p className='text-sm text-gray-700 text-center font-medium'>
+								Скоро ця можливість буде активована. У профілі можна буде
+								змінити тип.
+							</p>
 						</div>
 					</div>
 				</div>
@@ -183,7 +195,13 @@ const ExecutorRegister = () => {
 				/>
 
 				<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-					<Input {...register('email')} type='email' label='Email' />
+					<Input
+						{...register('email')}
+						type='email'
+						label='Email'
+						required
+						placeholder='Введіть ваш email'
+					/>
 
 					<InputPhone
 						value={watch('phone')}
@@ -218,7 +236,7 @@ const ExecutorRegister = () => {
 				<Button
 					variant='accent'
 					size='lg'
-					disabled={!isValid || isSubmitting}
+					disabled={isSubmitting}
 					type='submit'
 					loading={isLoadingProvider}
 				>

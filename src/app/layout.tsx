@@ -7,7 +7,7 @@ import { GoogleMapsProvider } from '@/components/providers/GoogleMapsProvider'
 import { Toaster } from '@/components/ui/sonner'
 
 const t = await getTranslations('home')
-import './globals.css'
+import './globals.scss'
 
 const inter = Inter({
 	variable: '--font-inter',
@@ -29,7 +29,7 @@ export default async function RootLayout({
 	const locale = await getLocale()
 
 	return (
-		<html lang={locale}>
+		<html lang={locale} suppressHydrationWarning>
 			<body className={`${inter.variable} custom-scroll`}>
 				<div id='portal_root' />
 				<AuthProvider>

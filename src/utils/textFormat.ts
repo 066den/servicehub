@@ -1,4 +1,5 @@
 import { UserProfile } from '@/types/auth'
+import { StaffMember } from '@/types'
 
 export const getFirstLetters = (phrase: string, count = 2) => {
 	return phrase
@@ -37,7 +38,7 @@ export const getAvatarColor = (name: string): string => {
 	return avatarColors[index]
 }
 
-export const getDisplayName = (user: UserProfile): string => {
+export const getDisplayName = (user: UserProfile | StaffMember): string => {
 	const { firstName, lastName } = user
 	if (firstName && lastName) {
 		return `${firstName} ${lastName}`

@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/sceletons'
 import { toast } from 'sonner'
 import ProfileHero from '@/components/profile/ProfileHero'
+import { Badge } from '@/components/ui/badge'
+import { formatDateToString } from '@/utils/dateFormat'
 
 type FormData = {
 	firstName: string
@@ -29,7 +31,7 @@ type FormData = {
 const ProfilePage = () => {
 	const t = useTranslations()
 
-	const { user, updateUser, isLoading, userLocation } = useUserProfile()
+	const { user, displayName, uploadAvatar, removeAvatar, updateUser, isLoading, userLocation } = useUserProfile()
 	const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(
 		null
 	)
@@ -101,7 +103,31 @@ const ProfilePage = () => {
 				</div>
 			</div>
 
-			<ProfileHero />
+			<ProfileHero
+				type='user'
+				avatar={user?.avatar}
+				displayName={displayName}
+				onUpload={uploadAvatar}
+				onRemove={removeAvatar}
+				badges={
+					<>
+						{user?.location?.city && (
+							<Badge variant='outline' className='text-primary' size='md'>
+								📍 {user.location.city}
+							</Badge>
+						)}
+						<Badge variant='outline' className='text-primary' size='md'>
+							📅 На платформі з{' '}
+							{user?.createdAt ? formatDateToString(user.createdAt) : '—'}
+						</Badge>
+						<Badge variant='outline' className='text-primary' size='md'>
+							{user?.isVerified
+								? '✅ Підтверджений профіль'
+								: '❌ Непідтверджений профіль'}
+						</Badge>
+					</>
+				}
+			/>
 
 			<form onSubmit={onSubmit}>
 				<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>

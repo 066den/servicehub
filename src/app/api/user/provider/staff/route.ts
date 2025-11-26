@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 				...validationResult.data,
 				workingHours: validationResult.data.workingHours as Prisma.InputJsonValue,
 				providerId: provider.id,
-				status: StaffStatus.ACTIVE, // Автоматически устанавливаем статус "Активний"
+				status: StaffStatus.FREE, // Автоматически устанавливаем статус "Вільний"
 			},
 		})
 

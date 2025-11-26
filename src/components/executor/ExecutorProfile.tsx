@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useProvider } from '@/stores/provider/useProvider'
-import ExecutorRegister from '../profile/ExecutorRegister'
+import ExecutorRegister from '@/components/executor/ExecutorRegister'
 import { motion } from 'motion/react'
 import { containerVariants } from '../ui/animate/variants'
 import { useTranslations } from 'next-intl'
-import ExecutorProfileHero from '../profile/ExecutorProfileHero'
+import ProfileHero from '@/components/profile/ProfileHero'
+import { Badge } from '../ui/badge'
+import { formatDateToString } from '@/utils/dateFormat'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { updateProviderSchema } from '@/lib/schemas'
@@ -26,7 +28,7 @@ import {
 	SkeletonProfileHero,
 	SkeletonSectionHeader,
 } from '../ui/sceletons'
-import { Skeleton } from '../ui/skeleton'
+import { Skeleton } from '../ui/sceletons/skeleton'
 import { Button } from '../ui/button'
 import { toast } from 'sonner'
 import useFlag from '@/hooks/useFlag'
@@ -42,8 +44,14 @@ import { Label } from '../ui/label'
 import { X } from 'lucide-react'
 
 const ExecutorProfile = () => {
-	const { provider, isLoadingProvider, updateProvider, changeProviderType } =
-		useProvider()
+	const {
+		provider,
+		uploadAvatar,
+		removeAvatar,
+		isLoadingProvider,
+		updateProvider,
+		changeProviderType,
+	} = useProvider()
 	const { userLocation, isLoading } = useUserProfile()
 	const t = useTranslations()
 	const [isTypeModalOpen, openTypeModal, closeTypeModal] = useFlag()
@@ -151,7 +159,12 @@ const ExecutorProfile = () => {
 
 	const handleOpenTypeModal = () => {
 		if (provider?.type) {
-			setSelectedType(provider.type)
+			// Если текущий тип COMPANY, устанавливаем INDIVIDUAL, так как COMPANY недоступен
+			setSelectedType(
+				provider.type === ProviderType.COMPANY
+					? ProviderType.INDIVIDUAL
+					: provider.type
+			)
 		}
 		openTypeModal()
 	}
@@ -161,13 +174,19 @@ const ExecutorProfile = () => {
 			return
 		}
 
-		if (selectedType === provider.type) {
+		// COMPANY недоступен для выбора, принудительно устанавливаем INDIVIDUAL
+		const newType =
+			selectedType === ProviderType.COMPANY
+				? ProviderType.INDIVIDUAL
+				: selectedType
+
+		if (newType === provider.type) {
 			closeTypeModal()
 			return
 		}
 
 		try {
-			await changeProviderType(selectedType)
+			await changeProviderType(newType)
 			toast.success(t('Profile.changeTypeSuccess'))
 			closeTypeModal()
 		} catch (error) {
@@ -216,8 +235,45 @@ const ExecutorProfile = () => {
 				</div>
 				<Button onClick={handleOpenTypeModal}>{t('Profile.changeType')}</Button>
 			</div>
-			<ExecutorProfileHero />
+			<ProfileHero
+				type='executor'
+				avatar={provider?.avatar}
+				displayName={
+					provider?.businessName ||
+					[provider?.firstName, provider?.lastName].filter(Boolean).join(' ') ||
+					'—'
+				}
+				alt={provider?.businessName}
+				onUpload={uploadAvatar}
+				onRemove={removeAvatar}
+				badges={
+					<>
+						{typeof provider?.location === 'object' &&
+							(provider.location as { city?: string })?.city && (
+								<Badge variant='default' size='md'>
+									📍 {(provider.location as { city?: string }).city}
+								</Badge>
+							)}
+						<Badge variant='default' size='md'>
+							На платформі з{' '}
+							{(provider as unknown as { createdAt?: string })?.createdAt
+								? formatDateToString(
+										(provider as unknown as { createdAt?: string }).createdAt!
+								  )
+								: '—'}
+						</Badge>
+						<Badge variant='default' size='md'>
+							{(provider as unknown as { isVerified?: boolean })?.isVerified
+								? '✅ Підтверджений'
+								: '❌ Непідтверджений'}
+						</Badge>
+					</>
+				}
+			/>
 			<form onSubmit={onSubmit}>
+				<p className='text-sm text-destructive mb-2'>
+					* Поля, позначені зірочкою, є обов&apos;язковими для заповнення
+				</p>
 				<div className='grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4'>
 					<Input
 						{...register('businessName')}
@@ -285,7 +341,8 @@ const ExecutorProfile = () => {
 						{...register('email')}
 						type='email'
 						label='Email'
-						placeholder='Введіть ваш email (опціонально)'
+						placeholder='Введіть ваш email'
+						required
 						errorMessage={errors.email?.message}
 					/>
 					<InputPhone

@@ -109,3 +109,22 @@ export interface Suggestion {
 	placePrediction?: google.maps.places.AutocompletePrediction
 	suggestion?: google.maps.places.AutocompleteSuggestion
 }
+
+export interface StaffMember {
+	id: number
+	firstName: string
+	lastName: string
+	phone?: string | null
+	role: string
+	status: string
+	position?: string | null
+	department?: string | null
+	specialization?: string | null
+	experience?: number | null
+	avatar?: string | null
+	// Added fields for UI
+	rating?: number
+	reviewCount?: number
+	completedJobs?: number
+	earnings?: number
+}

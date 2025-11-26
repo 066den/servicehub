@@ -1,6 +1,10 @@
 import axios from 'axios'
+import { config } from 'dotenv'
 import { EStatus } from '@/types'
 import { SMSResult } from '@/types/auth'
+
+// Загружаем переменные окружения при импорте модуля
+config({ path: '.env.local' })
 
 interface TurboSMSResponse {
 	success: boolean

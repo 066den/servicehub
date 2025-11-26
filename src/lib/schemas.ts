@@ -177,10 +177,10 @@ export const staffRoleSchema = z.enum([
 ])
 
 export const staffStatusSchema = z.enum([
-	StaffStatus.ACTIVE,
-	StaffStatus.INACTIVE,
+	StaffStatus.FREE,
+	StaffStatus.BUSY,
 	StaffStatus.ON_VACATION,
-	StaffStatus.SUSPENDED,
+	StaffStatus.INACTIVE,
 ])
 
 export const createStaffSchema = z.object({

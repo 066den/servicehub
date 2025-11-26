@@ -1,4 +1,4 @@
-import { Skeleton } from '../skeleton'
+import { Skeleton } from './skeleton'
 
 interface SkeletonProps {
 	className?: string
@@ -57,6 +57,32 @@ export const SkeletonProfileHero = () => {
 					<Skeleton className='h-6 w-36' />
 				</div>
 			</div>
+		</div>
+	)
+}
+
+export const SkeletonStatCard = () => {
+	return (
+		<div className='bg-white border border-gray-200 rounded-lg p-4'>
+			{/* Icon and title skeleton */}
+			<div className='flex items-center gap-2 mb-2'>
+				<Skeleton className='w-5 h-5 rounded' />
+				<Skeleton className='h-4 w-20' />
+			</div>
+			{/* Value skeleton */}
+			<Skeleton className='h-8 w-16 mb-2' />
+			{/* Subtitle skeleton */}
+			<Skeleton className='h-4 w-24' />
+		</div>
+	)
+}
+
+export const SkeletonStatsGrid = ({ count = 2 }: { count?: number }) => {
+	return (
+		<div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
+			{Array.from({ length: count }).map((_, index) => (
+				<SkeletonStatCard key={index} />
+			))}
 		</div>
 	)
 }

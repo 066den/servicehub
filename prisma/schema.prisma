@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -47,7 +46,7 @@ model Provider {
   businessName          String
   description           String?
   avatar                String?
-  status                ProviderStatus   @default(PENDING)
+  status                ProviderStatus   @default(APPROVED)
   rating                Float            @default(0)
   reviewCount           Int              @default(0)
   companyInfoId         Int?             @unique
@@ -103,13 +102,15 @@ model Staff {
   lastName        String
   phone           String?
   role            StaffRole       @default(WORKER)
-  status          StaffStatus     @default(ACTIVE)
+  status          StaffStatus     @default(FREE)
   position        String?
   department      String?
   specialization  String?
   experience      Int?
   workingHours    Json?
   avatar          String?
+  rating          Float?
+  reviewCount     Int?            @default(0)
   hireDate        DateTime        @default(now())
   terminationDate DateTime?
   createdAt       DateTime        @default(now())
@@ -407,8 +408,8 @@ enum StaffRole {
 }
 
 enum StaffStatus {
-  ACTIVE
-  INACTIVE
+  FREE
+  BUSY
   ON_VACATION
-  SUSPENDED
+  INACTIVE
 }

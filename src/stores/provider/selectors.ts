@@ -12,3 +12,10 @@ export const providerErrorSelector = (state: ProviderStore) =>
 
 export const providerLastUpdateSelector = (state: ProviderStore) =>
 	state.lastProviderUpdate
+
+export const staffSelector = (state: ProviderStore) => state.staff
+
+export const staffIsLoadingSelector = (state: ProviderStore) =>
+	state.isLoadingStaff
+
+export const staffErrorSelector = (state: ProviderStore) => state.staffError

@@ -26,8 +26,7 @@ export async function apiRequest<T>(
 		// Check if response is HTML (error page) instead of JSON
 		const contentType = response.headers.get('content-type')
 		if (contentType && !contentType.includes('application/json')) {
-			const text = await response.text()
-			console.error('Received non-JSON response:', text.substring(0, 200))
+			await response.text()
 			throw new ApiError(
 				'Server returned HTML instead of JSON. This usually indicates a server error.',
 				response.status,
@@ -38,7 +37,7 @@ export async function apiRequest<T>(
 		const data = await response.json()
 		if (!response.ok) {
 			throw new ApiError(
-				data.error || 'Request failed',
+				data.error || data.message || 'Request failed',
 				response.status,
 				data.code
 			)
@@ -69,12 +68,18 @@ export async function apiRequestAuth<T>(
 		throw new Error('Not access token')
 	}
 
+	// Если body является FormData, не устанавливаем Content-Type,
+	// чтобы браузер мог автоматически установить правильный Content-Type с boundary
+	const isFormData = options.body instanceof FormData
+	const headers: HeadersInit = {
+		...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+		...options.headers,
+		Authorization: `Bearer ${session.accessToken}`,
+	}
+
 	try {
 		const response = await fetch(url, {
-			headers: {
-				...options.headers,
-				Authorization: `Bearer ${session.accessToken}`,
-			},
+			headers,
 			...options,
 		})
 
@@ -92,7 +97,7 @@ export async function apiRequestAuth<T>(
 		const data = await response.json()
 		if (!response.ok) {
 			throw new ApiError(
-				data.error || 'Request failed',
+				data.error || data.message || 'Request failed',
 				response.status,
 				data.code
 			)

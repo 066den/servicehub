@@ -6,7 +6,7 @@ import { turboSmsService } from './sms/turboSmsService'
 import { prisma } from '@/lib/prisma'
 import { SMSResult } from '@/types/auth'
 import { EStatus } from '@/types'
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 
 interface DeviceInfo {
 	ipAddress?: string
@@ -554,7 +554,7 @@ class AuthService {
 			where: { userId, deviceId, isRevoked: false },
 		})
 
-		const refreshTokenIds = refreshTokens.map(rt => rt.id)
+		const refreshTokenIds = refreshTokens.map((rt: { id: number }) => rt.id)
 
 		await Promise.all([
 			prisma.refreshToken.updateMany({

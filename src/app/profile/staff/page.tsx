@@ -1,4 +1,4 @@
-import Staff from '@/components/providers/Staff'
+import Staff from '@/components/staff/Staff'
 
 const StaffPage = () => {
 	return <Staff />

@@ -19,6 +19,7 @@ type Props = {
 const SidebarSection = ({ title, items }: Props) => {
 	const t = useTranslations('Link')
 	const pathname = usePathname()
+
 	const router = useRouter()
 	const handleClick = (item: { url?: string; action?: () => void }) => {
 		if (item.url) {

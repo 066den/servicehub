@@ -1,4 +1,4 @@
-import ExecutorProfile from '@/components/providers/ExecutorProfile'
+import ExecutorProfile from '@/components/executor/ExecutorProfile'
 
 const ProviderPage = () => {
 	return <ExecutorProfile />

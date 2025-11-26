@@ -80,31 +80,34 @@ const ChangeTypeModal = ({
 					</div>
 				</div>
 
-				<div
-					className={cn(
-						'border-2 border-gray-200 rounded-lg p-4 cursor-pointer text-center relative transition-all hover:border-primary hover:shadow-md hover:translate-y-[-2px]',
-						selectedType === ProviderType.COMPANY &&
-							'border-primary bg-primary/10'
-					)}
-					onClick={() => setSelectedType(ProviderType.COMPANY)}
-				>
-					<input
-						type='radio'
-						checked={selectedType === ProviderType.COMPANY}
-						onChange={() => setSelectedType(ProviderType.COMPANY)}
-						className='hidden'
-					/>
-					{selectedType === ProviderType.COMPANY && (
-						<Badge variant='success' className='absolute top-2 right-2'>
-							{t('Profile.selected')}
-						</Badge>
-					)}
-					<div className='text-5xl mb-4'>🏢</div>
-					<div className='text-xl font-semibold mb-2 text-gray-900'>
-						{t('Profile.company')}
+				<div className='relative'>
+					<div
+						className={cn(
+							'border-2 border-gray-200 rounded-lg p-4 text-center relative opacity-60',
+							selectedType === ProviderType.COMPANY &&
+								'border-primary bg-primary/10'
+						)}
+					>
+						<input
+							type='radio'
+							checked={selectedType === ProviderType.COMPANY}
+							onChange={() => {}}
+							className='hidden'
+							disabled
+						/>
+						<div className='text-5xl mb-4'>🏢</div>
+						<div className='text-xl font-semibold mb-2 text-gray-900'>
+							{t('Profile.company')}
+						</div>
+						<div className='text-sm text-gray-500 leading-relaxed'>
+							{t('Profile.companyDescription')}
+						</div>
 					</div>
-					<div className='text-sm text-gray-500 leading-relaxed'>
-						{t('Profile.companyDescription')}
+					<div className='absolute inset-0 bg-white/50 rounded-lg flex items-center justify-center p-4'>
+						<p className='text-sm text-gray-700 text-center font-medium'>
+							Скоро ця можливість буде активована. У профілі можна буде змінити
+							тип.
+						</p>
 					</div>
 				</div>
 			</div>

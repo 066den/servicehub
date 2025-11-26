@@ -9,7 +9,7 @@ import Image from 'next/image'
 import ConfirmDialog from '../modals/ConfirmDialog'
 import useFlag from '@/hooks/useFlag'
 import { validateFile } from '@/lib/validate'
-import { CameraIcon, RefreshCwIcon } from 'lucide-react'
+import { CameraIcon, Loader2, RefreshCwIcon } from 'lucide-react'
 
 type Props = {
 	className?: string
@@ -37,6 +37,7 @@ const AvatarEditable = ({
 	const [content, setContent] = useState('')
 	const [bgColor, setBgColor] = useState('')
 	const [isCropping, setIsCropping] = useState(false)
+	const [cropModalOpen, openCropModal, closeCropModal] = useFlag()
 	const [selectedImageUrl, setSelectedImageUrl] = useState<string>('')
 	const [isOpenConfirmDialog, openConfirmDialog, closeConfirmDialog] = useFlag()
 
@@ -65,28 +66,32 @@ const AvatarEditable = ({
 
 		const imageUrl = URL.createObjectURL(file)
 		setSelectedImageUrl(imageUrl)
-		setIsCropping(true)
+		openCropModal()
 
 		e.target.value = ''
 	}
 
 	const handleCropComplete = async (croppedFile: File) => {
+		closeCropModal()
+		setIsCropping(true)
 		try {
 			await onUpload?.(croppedFile)
 			toast.success(t('Success.upload'))
 			setIsCropping(false)
-
 			if (selectedImageUrl) {
 				URL.revokeObjectURL(selectedImageUrl)
 				setSelectedImageUrl('')
 			}
+			setIsCropping(false)
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : t('errors.upload'))
+		} finally {
+			setIsCropping(false)
 		}
 	}
 
 	const handleCropCancel = () => {
-		setIsCropping(false)
+		closeCropModal()
 		if (selectedImageUrl) {
 			URL.revokeObjectURL(selectedImageUrl)
 			setSelectedImageUrl('')
@@ -128,6 +133,7 @@ const AvatarEditable = ({
 			'text-sm': size === 'md',
 		}
 	)
+
 	return (
 		<div
 			className={fullClassName}
@@ -166,7 +172,11 @@ const AvatarEditable = ({
 				</span>
 			)}
 
-			{src ? (
+			{isCropping ? (
+				<div className={iconClassName}>
+					<Loader2 size={20} className='animate-spin' />
+				</div>
+			) : src ? (
 				<div
 					className={iconClassName}
 					onClick={openConfirmDialog}
@@ -184,7 +194,7 @@ const AvatarEditable = ({
 				</div>
 			)}
 
-			{isCropping && selectedImageUrl && (
+			{cropModalOpen && selectedImageUrl && (
 				<ImageCropper
 					src={selectedImageUrl}
 					aspectRatio={1}
