@@ -15,10 +15,22 @@ import {
 	Briefcase,
 	Building,
 	Users,
+	LayoutDashboard,
+	Package,
 } from 'lucide-react'
 import { useProvider } from '@/stores/provider/useProvider'
 
 const providerItems = [
+	{
+		icon: <LayoutDashboard className='size-5' />,
+		title: 'home',
+		url: ROUTES.DASHBOARD,
+	},
+	{
+		icon: <Package className='size-5' />,
+		title: 'services',
+		url: ROUTES.SERVICES,
+	},
 	{
 		icon: <Briefcase className='size-5' />,
 		title: 'profileExecutor',

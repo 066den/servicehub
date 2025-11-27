@@ -9,5 +9,6 @@ export const ROUTES = {
 	FAVORITES: '/profile/favorites',
 	SETTINGS: '/settings',
 	STAFF: '/profile/staff',
+	SERVICES: '/profile/services',
 	STAFF_PROFILE: (id: number) => `/profile/staff/${id}`,
 } as const

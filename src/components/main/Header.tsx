@@ -49,7 +49,7 @@ const Header = () => {
 	}
 
 	const handleCompanyProfileClick = () => {
-		router.push(ROUTES.EXECUTOR)
+		router.push(ROUTES.DASHBOARD)
 	}
 
 	const handleProfileClick = () => {

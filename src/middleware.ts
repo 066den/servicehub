@@ -14,7 +14,7 @@ export default withAuth(
 		}
 
 		// Логика для защищенных маршрутов
-		if (pathname.startsWith('/dashboard') || pathname.startsWith('/profile')) {
+		if (pathname.startsWith('/profile')) {
 			if (!token || !token.isVerified) {
 				return NextResponse.redirect(new URL('/auth/signin', request.url))
 			}
@@ -35,14 +35,17 @@ export default withAuth(
 				if (
 					pathname.startsWith('/api/auth/') ||
 					pathname === '/' ||
-					pathname.startsWith('/auth') ||
-					pathname !== '/profile'
+					pathname.startsWith('/auth')
 				) {
 					return true
 				}
 
 				// Защищенные маршруты требуют токен
-				return !!token
+				if (pathname.startsWith('/profile')) {
+					return !!token
+				}
+
+				return true
 			},
 		},
 	}

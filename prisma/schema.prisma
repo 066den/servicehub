@@ -228,19 +228,20 @@ model Order {
 }
 
 model Category {
-  id          Int       @id @default(autoincrement())
-  name        String
-  slug        String?   @unique
-  icon        String?
-  image       String?
-  description String?
-  services    Service[]
-  types       Type[]
+  id           Int            @id @default(autoincrement())
+  name         String
+  slug         String?        @unique
+  icon         String?
+  image        String?
+  description  String?
+  services     Service[]
+  types        Type[]
+  subcategories Subcategory[]
 
   @@index([slug])
 }
 
-model Type {
+model Subcategory {
   id          Int       @id @default(autoincrement())
   name        String
   slug        String?   @unique
@@ -248,11 +249,29 @@ model Type {
   icon        String?
   description String?
   categoryId  Int
-  services    Service[]
+  types       Type[]
   category    Category  @relation(fields: [categoryId], references: [id])
 
   @@index([slug])
   @@index([categoryId])
+}
+
+model Type {
+  id            Int          @id @default(autoincrement())
+  name          String
+  slug          String?      @unique
+  image         String?
+  icon          String?
+  description   String?
+  categoryId    Int
+  subcategoryId Int?
+  services      Service[]
+  category      Category     @relation(fields: [categoryId], references: [id])
+  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id])
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([subcategoryId])
 }
 
 model Tag {
