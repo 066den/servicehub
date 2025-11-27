@@ -84,13 +84,13 @@ export const Dropzone = ({
 		>
 			<Button
 				className={cn(
-					'relative h-auto flex-col overflow-hidden p-4 hover:bg-muted hover:text-primary-foreground',
+					'relative h-auto flex-col overflow-hidden p-0 whitespace-wrap',
 					isDragActive && 'outline-none ring-1 ring-ring',
 					className
 				)}
 				disabled={disabled}
 				type='button'
-				variant='outline'
+				variant='outline-white'
 				{...getRootProps()}
 			>
 				<input {...getInputProps()} disabled={disabled} />
@@ -141,7 +141,9 @@ export const DropzoneContent = ({
 				{src.length > maxLabelItems
 					? `${new Intl.ListFormat('uk').format(
 							src.slice(0, maxLabelItems).map(file => file.name)
-						)} ${t('And')} ${src.length - maxLabelItems} ${t('Dropzone.uploadFiles').toLowerCase()}`
+					  )} ${t('And')} ${src.length - maxLabelItems} ${t(
+							'Dropzone.uploadFiles'
+					  ).toLowerCase()}`
 					: new Intl.ListFormat('uk').format(src.map(file => file.name))}
 			</p>
 			<p className='w-full text-wrap text-muted-foreground text-xs'>
@@ -178,7 +180,9 @@ export const DropzoneEmptyState = ({
 	}
 
 	if (minSize && maxSize) {
-		caption += ` ${t('Dropzone.between')} ${renderBytes(minSize)} ${t('Dropzone.and')} ${renderBytes(maxSize)}`
+		caption += ` ${t('Dropzone.between')} ${renderBytes(minSize)} ${t(
+			'Dropzone.and'
+		)} ${renderBytes(maxSize)}`
 	} else if (minSize) {
 		caption += ` ${t('Dropzone.atLeast')} ${renderBytes(minSize)}`
 	} else if (maxSize) {
@@ -202,4 +206,3 @@ export const DropzoneEmptyState = ({
 		</div>
 	)
 }
-

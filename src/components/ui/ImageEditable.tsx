@@ -1,14 +1,9 @@
-import {
-	Dropzone,
-	DropzoneContent,
-	DropzoneEmptyState,
-} from '@/components/ui/dropzone'
+import { Dropzone, DropzoneEmptyState } from '@/components/ui/dropzone'
 import { ImageCropper } from './ImageCropper'
 
 import { toast } from 'sonner'
 import Image from 'next/image'
-import { UploadIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { validateFile } from '@/lib/validate'
 import { ASPECT_RATIOS } from '@/lib/aspectRatios'
 import { useTranslations } from 'next-intl'
@@ -36,6 +31,18 @@ const ImageEditable = ({
 	const [cropImage, setCropImage] = useState<string | null>(null)
 	const [isCropping, setIsCropping] = useState(false)
 	const [imgUrl, setImgUrl] = useState<string>(src || '')
+	const [hasLocalImage, setHasLocalImage] = useState(false)
+
+	// Синхронизируем imgUrl с внешним src
+	useEffect(() => {
+		if (src) {
+			setImgUrl(src)
+			setHasLocalImage(false)
+		} else if (!hasLocalImage && !cropImage && !isCropping) {
+			// Очищаем только если нет локального изображения и не идет процесс кропа
+			setImgUrl('')
+		}
+	}, [cropImage, isCropping, src, hasLocalImage])
 
 	const handleDrop = async (files: File[]) => {
 		const file = files[0]
@@ -67,11 +74,16 @@ const ImageEditable = ({
 			URL.revokeObjectURL(cropImage)
 			setCropImage(null)
 		}
+		// Если отменили кроп и нет локального изображения, очищаем imgUrl
+		if (!hasLocalImage && !src) {
+			setImgUrl('')
+		}
 	}
 
 	const onSelectFile = (file: File) => {
 		const imgUrl = URL.createObjectURL(file)
 		setImgUrl(imgUrl)
+		setHasLocalImage(true)
 		onUpload?.(file)
 	}
 
@@ -79,7 +91,7 @@ const ImageEditable = ({
 		toast.error(error.message)
 	}
 
-	const maxFileSize = 5 * 1024 * 1024 // 5MB
+	const maxFileSize = 10 * 1024 * 1024 // 10MB
 
 	return (
 		<div className={className}>
@@ -88,31 +100,45 @@ const ImageEditable = ({
 				accept={{ 'image/*': ['.png', '.jpg', '.jpeg', '.webp'] }}
 				maxSize={maxFileSize}
 				onError={handleError}
-				className={`${aspectRatio === ASPECT_RATIOS.SQUARE ? 'aspect-[1/1]' : aspectRatio === ASPECT_RATIOS.LANDSCAPE ? 'aspect-[16/9]' : aspectRatio === ASPECT_RATIOS.PORTRAIT ? 'aspect-[3/4]' : 'aspect-[1/1]'} ${size === 'small' ? 'w-[200px]' : size === 'medium' ? 'w-[300px]' : 'w-[400px]'}`}
+				className={`relative w-full ${
+					aspectRatio === ASPECT_RATIOS.SQUARE
+						? 'aspect-[1/1]'
+						: aspectRatio === ASPECT_RATIOS.LANDSCAPE
+						? 'aspect-[16/9]'
+						: aspectRatio === ASPECT_RATIOS.PORTRAIT
+						? 'aspect-[3/4]'
+						: 'aspect-[1/1]'
+				} ${
+					size === 'small'
+						? 'max-w-[200px]'
+						: size === 'medium'
+						? 'max-w-[300px]'
+						: 'max-w-[400px]'
+				}`}
 			>
-				<DropzoneEmptyState>
-					<div className='flex flex-col w-full items-center gap-4'>
-						<div className='flex size-16 items-center justify-center rounded-lg bg-muted text-muted-foreground'>
-							<UploadIcon size={20} />
+				{!imgUrl ? (
+					<DropzoneEmptyState>
+						<div className='border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer w-full h-full flex flex-col items-center justify-center whitespace-normal'>
+							<div className='text-4xl mb-2'>📁</div>
+							<div className='font-medium text-gray-700 mb-1'>
+								{t('ImageEditable.dragDropOrClick')}
+							</div>
+							<div className='text-sm text-gray-500'>
+								{t('ImageEditable.between')}
+							</div>
 						</div>
-						<div className='text-left'>
-							<p className='font-medium text-sm'>{t('ImageEditable.uploadFile')}</p>
-							<p className='text-muted-foreground text-xs'>
-								{t('ImageEditable.dragDropOrClick')} <br /> {t('ImageEditable.between')}
-							</p>
-						</div>
+					</DropzoneEmptyState>
+				) : (
+					<div className='relative w-full h-full rounded-lg overflow-hidden'>
+						<Image
+							alt={alt || 'Preview'}
+							className='w-full h-full object-cover'
+							fill
+							src={imgUrl}
+							priority
+						/>
 					</div>
-				</DropzoneEmptyState>
-				{imgUrl && (
-					<Image
-						alt={alt || t('ImageEditable.preview')}
-						className='absolute top-0 left-0 h-full w-full object-cover'
-						fill
-						src={imgUrl}
-						priority
-					/>
 				)}
-				<DropzoneContent />
 			</Dropzone>
 
 			{isCropping && cropImage && (
@@ -128,4 +154,3 @@ const ImageEditable = ({
 }
 
 export default ImageEditable
-

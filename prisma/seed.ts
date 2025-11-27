@@ -6,6 +6,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
 import 'dotenv/config'
+import { authService } from '../src/services/authService'
+import { normalizePhone } from '../src/utils/phoneUtils'
 
 // Получаем __dirname в ESM
 const __filename = fileURLToPath(import.meta.url)
@@ -187,9 +189,84 @@ async function mainTypes() {
 	console.log('🎉 Все типы успешно загружены!')
 }
 
+async function createAdmin() {
+	console.log('✅ Запуск создания администратора...')
+
+	const adminEmail = process.env.ADMIN_EMAIL || 'admin@servicehub.com'
+	const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
+	const adminFirstName = process.env.ADMIN_FIRST_NAME || 'Admin'
+	const adminLastName = process.env.ADMIN_LAST_NAME || 'User'
+	const adminPhone = process.env.ADMIN_PHONE || '0500000000'
+
+	// Проверяем, существует ли уже админ с таким email
+	const existingAdmin = await prisma.user.findUnique({
+		where: { email: adminEmail },
+	})
+
+	if (existingAdmin) {
+		console.log(`⚠️ Администратор с email ${adminEmail} уже существует`)
+		return
+	}
+
+	// Хешируем пароль
+	const hashedPassword = await authService.hashPassword(adminPassword)
+
+	// Нормализуем телефон
+	const normalizedPhone = normalizePhone(adminPhone)
+
+	// Создаем администратора
+	const admin = await prisma.user.create({
+		data: {
+			email: adminEmail,
+			password: hashedPassword,
+			phone: adminPhone,
+			phoneNormalized: normalizedPhone,
+			firstName: adminFirstName,
+			lastName: adminLastName,
+			role: 'ADMIN',
+			isVerified: true,
+			isActive: true,
+			isBlocked: false,
+		},
+	})
+
+	console.log(`✅ Администратор успешно создан:`)
+	console.log(`   Email: ${admin.email}`)
+	console.log(`   ID: ${admin.id}`)
+	console.log(`   Имя: ${admin.firstName} ${admin.lastName}`)
+	console.log(`   ⚠️ Пароль: ${adminPassword} (сохраните его в безопасном месте!)`)
+}
+
+async function clearTables() {
+	console.log('🧹 Очистка таблиц...')
+	
+	try {
+		// Удаляем в обратном порядке из-за внешних ключей
+		// Сначала Type (зависит от Subcategory и Category)
+		const deletedTypes = await prisma.type.deleteMany({})
+		console.log(`✅ Удалено ${deletedTypes.count} типов услуг`)
+
+		// Затем Subcategory (зависит от Category)
+		const deletedSubcategories = await prisma.subcategory.deleteMany({})
+		console.log(`✅ Удалено ${deletedSubcategories.count} подкатегорий`)
+
+		// Затем Category
+		const deletedCategories = await prisma.category.deleteMany({})
+		console.log(`✅ Удалено ${deletedCategories.count} категорий`)
+
+		console.log('🎉 Таблицы успешно очищены!')
+	} catch (e) {
+		console.error('❌ Ошибка при очистке таблиц:', e)
+		throw e
+	}
+}
+
 async function runSeed() {
 	try {
-		// Сначала загружаем категории
+		// Сначала очищаем таблицы
+		await clearTables()
+
+		// Затем загружаем категории
 		await main()
 		console.log('🎉 Все категории успешно добавлены!')
 
@@ -198,6 +275,9 @@ async function runSeed() {
 
 		// Затем загружаем типы
 		await mainTypes()
+
+		// Создаем администратора
+		await createAdmin()
 	} catch (e) {
 		console.error('❌ Ошибка:', e)
 		process.exit(1)

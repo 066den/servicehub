@@ -141,20 +141,17 @@ export const updateProviderSchema = z.object({
 		if (val === null || val === '') return undefined
 		return val
 	}, z.union([z.string().email().trim(), z.literal('')]).optional()),
-	serviceAreas: z.preprocess(
-		(val: unknown) => {
-			if (val === null || val === '') return undefined
-			if (typeof val === 'string') {
-				try {
-					return JSON.parse(val)
-				} catch {
-					return undefined
-				}
+	serviceAreas: z.preprocess((val: unknown) => {
+		if (val === null || val === '') return undefined
+		if (typeof val === 'string') {
+			try {
+				return JSON.parse(val)
+			} catch {
+				return undefined
 			}
-			return val
-		},
-		z.unknown().optional().nullable()
-	),
+		}
+		return val
+	}, z.unknown().optional().nullable()),
 	companyInfo: companyInfoSchema,
 })
 
@@ -201,10 +198,31 @@ export const createStaffSchema = z.object({
 	workingHours: z.unknown().optional().nullable(),
 })
 
-export type CreateStaffSchema = z.infer<typeof createStaffSchema>
+export const createCategorySchema = z.object({
+	name: z.string().min(1).max(255),
+	slug: z.string().optional().nullable(),
+	icon: z.string().optional().nullable(),
+	description: z.string().optional().nullable(),
+	isActive: z.boolean().optional(),
+})
 
+export const updateCategorySchema = z.object({
+	name: z.string().min(1).max(255),
+	slug: z.string().optional().nullable(),
+	icon: z.string().optional().nullable(),
+	description: z.string().optional().nullable(),
+	isActive: z.boolean().optional(),
+})
+
+export const createCategorySchemaValidate = createCategorySchema.safeParse
+export const updateCategorySchemaValidate = updateCategorySchema.safeParse
 export const createStaffSchemaValidate = createStaffSchema.safeParse
 
+export type CreateStaffSchema = z.infer<typeof createStaffSchema>
 export type CreateProviderSchema = z.infer<typeof createProviderSchema>
 export type UpdateProviderSchema = z.infer<typeof updateProviderSchema>
 export type ChangeProviderTypeSchema = z.infer<typeof changeProviderTypeSchema>
+export type CreateCategorySchema = z.infer<typeof createCategorySchema>
+export type StaffRoleSchema = z.infer<typeof staffRoleSchema>
+export type StaffStatusSchema = z.infer<typeof staffStatusSchema>
+export type UpdateCategorySchema = z.infer<typeof updateCategorySchema>

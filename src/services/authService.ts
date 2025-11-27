@@ -588,6 +588,104 @@ class AuthService {
 			}),
 		])
 	}
+
+	// Хеширование пароля
+	async hashPassword(password: string): Promise<string> {
+		const { hashPassword: hash } = await import('@/lib/bcrypt')
+		return await hash(password)
+	}
+
+	// Проверка пароля
+	async verifyPassword(password: string, hash: string): Promise<boolean> {
+		const { verifyPassword: verify } = await import('@/lib/bcrypt')
+		return await verify(password, hash)
+	}
+
+	// Авторизация администратора по email и паролю
+	async adminLogin(
+		email: string,
+		password: string,
+		deviceInfo: DeviceInfo = {}
+	) {
+		try {
+			// Находим пользователя по email
+			const user = await prisma.user.findUnique({
+				where: { email },
+			})
+
+			if (!user) {
+				return { error: 'invalid_credentials' }
+			}
+
+			// Проверяем роль
+			if (user.role !== 'ADMIN') {
+				return { error: 'access_denied' }
+			}
+
+			// Проверяем, что пользователь активен и не заблокирован
+			if (!user.isActive || user.isBlocked) {
+				return { error: 'account_blocked' }
+			}
+
+			// Проверяем наличие пароля
+			if (!user.password) {
+				return { error: 'password_not_set' }
+			}
+
+			// Проверяем пароль
+			const isPasswordValid = await this.verifyPassword(
+				password,
+				user.password
+			)
+
+			if (!isPasswordValid) {
+				return { error: 'invalid_credentials' }
+			}
+
+			// Обновляем время последнего входа
+			await prisma.user.update({
+				where: { id: user.id },
+				data: { lastLoginAt: new Date() },
+			})
+
+			// Создаем токены
+			const tokens = await this.createTokenPair(
+				user.id,
+				user.phoneNormalized ?? user.phone,
+				deviceInfo
+			)
+
+			return {
+				user: {
+					id: user.id,
+					phone: user.phone,
+					phoneNormalized: user.phoneNormalized,
+					email: user.email,
+					firstName: user.firstName,
+					lastName: user.lastName,
+					isVerified: user.isVerified,
+					createdAt: user.createdAt,
+					role: user.role,
+				},
+				tokens,
+				message: 'success_login',
+			}
+		} catch (error) {
+			if (this.isDatabaseConnectionError(error)) {
+				console.error(
+					'[AuthService] Database connection error in adminLogin:',
+					error
+				)
+				return {
+					error: 'database_unavailable',
+					message:
+						'Database is temporarily unavailable. Please try again later.',
+				}
+			}
+			console.error('Error in adminLogin:', error)
+			return { error: 'login_failed' }
+		}
+	}
 }
 
 export const authService = new AuthService()

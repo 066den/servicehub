@@ -96,6 +96,61 @@ export const authOptions: NextAuthOptions = {
 				}
 			},
 		}),
+		CredentialsProvider({
+			id: 'admin-login',
+			name: 'Admin Login',
+			credentials: {
+				email: { label: 'Email', type: 'email' },
+				password: { label: 'Password', type: 'password' },
+			},
+			async authorize(credentials, req) {
+				if (!credentials?.email || !credentials?.password) {
+					return null
+				}
+
+				const headers = req?.headers || {}
+				const deviceInfo = {
+					ipAddress:
+						headers['x-forwarded-for'] || headers['x-real-ip'] || 'unknown',
+					userAgent: headers['user-agent'] || 'unknown',
+					deviceId: headers['x-device-id'] || 'unknown',
+				}
+
+				try {
+					const result = await authService.adminLogin(
+						credentials.email,
+						credentials.password,
+						deviceInfo
+					)
+
+					if (result?.error) {
+						throw new Error(result.error)
+					}
+
+					if (!result.user || result.user.role !== 'ADMIN') {
+						throw new Error('Access denied')
+					}
+
+					return {
+						id: result.user.id.toString(),
+						phone: result.user.phone || '',
+						phoneNormalized: result.user.phoneNormalized || '',
+						email: result.user.email || '',
+						firstName: result.user.firstName,
+						lastName: result.user.lastName || '',
+						role: result.user.role,
+						isVerified: result.user.isVerified,
+						accessToken: result.tokens.accessToken,
+						refreshToken: result.tokens.refreshToken,
+					}
+				} catch (error) {
+					console.error('Admin auth error:', error)
+					throw new Error(
+						error instanceof Error ? error.message : 'Authentication failed'
+					)
+				}
+			},
+		}),
 	],
 	session: {
 		strategy: 'jwt',

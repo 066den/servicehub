@@ -11,4 +11,16 @@ export const ROUTES = {
 	STAFF: '/profile/staff',
 	SERVICES: '/profile/services',
 	STAFF_PROFILE: (id: number) => `/profile/staff/${id}`,
+	//ADMIN
+	ADMIN: {
+		CATEGORIES: '/admin/categories',
+		SERVICE_TYPES: '/admin/service-types',
+		SERVICES: '/admin/services',
+		ORDERS: '/admin/orders',
+		REVIEWS: '/admin/reviews',
+		USERS: '/admin/users',
+		SETTINGS: '/admin/settings',
+		STAFF: '/admin/staff',
+		STAFF_PROFILE: (id: number) => `/admin/staff/${id}`,
+	},
 } as const

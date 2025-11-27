@@ -128,3 +128,34 @@ export interface StaffMember {
 	completedJobs?: number
 	earnings?: number
 }
+
+export interface Subcategory {
+	id: number
+	name: string
+	slug: string | null
+	icon: string | null
+	description: string | null
+	isActive: boolean
+	servicesCount: number
+	averagePrice: number
+	_count: {
+		types: number
+	}
+}
+
+export interface Category {
+	id: number
+	name: string
+	slug: string | null
+	icon: string | null
+	image: string | null
+	description: string | null
+	isActive: boolean
+	servicesCount: number
+	averagePrice: number
+	subcategories: Subcategory[]
+	_count: {
+		services: number
+		subcategories: number
+	}
+}

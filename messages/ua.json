@@ -41,7 +41,9 @@
 		"myReviews": "Мої відгуки",
 		"profileExecutor": "Профіль виконавця",
 		"profileCompany": "Профіль компанії",
-		"staff": "Співробітники"
+		"staff": "Співробітники",
+		"categories": "Категорії",
+		"serviceTypes": "Типи послуг"
 	},
 	"Form": {
 		"phone": "Номер телефону",

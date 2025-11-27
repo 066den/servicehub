@@ -234,11 +234,13 @@ model Category {
   icon         String?
   image        String?
   description  String?
+  isActive     Boolean        @default(true)
   services     Service[]
   types        Type[]
   subcategories Subcategory[]
 
   @@index([slug])
+  @@index([isActive])
 }
 
 model Subcategory {
@@ -248,12 +250,14 @@ model Subcategory {
   image       String?
   icon        String?
   description String?
+  isActive    Boolean   @default(true)
   categoryId  Int
   types       Type[]
   category    Category  @relation(fields: [categoryId], references: [id])
 
   @@index([slug])
   @@index([categoryId])
+  @@index([isActive])
 }
 
 model Type {

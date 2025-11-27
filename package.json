@@ -18,8 +18,7 @@
 		"db:seed": "tsx prisma/seed.ts",
 		"db:backup": "powershell -ExecutionPolicy Bypass -File scripts/backup-db.ps1",
 		"db:check": "powershell -ExecutionPolicy Bypass -File scripts/check-db.ps1",
-		"db:test": "powershell -ExecutionPolicy Bypass -File scripts/test-db-connection.ps1",
-		"prepare": "husky"
+		"db:test": "powershell -ExecutionPolicy Bypass -File scripts/test-db-connection.ps1"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.2.1",
@@ -46,6 +45,7 @@
 		"@types/socket.io": "^3.0.1",
 		"@types/socket.io-client": "^1.4.36",
 		"axios": "^1.10.0",
+		"bcryptjs": "^2.4.3",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"croppie": "^2.6.5",
@@ -75,6 +75,7 @@
 	},
 	"devDependencies": {
 		"@eslint/eslintrc": "^3",
+		"@types/bcryptjs": "^2.4.6",
 		"@types/croppie": "^2.6.4",
 		"@types/google.maps": "^3.58.1",
 		"@types/node": "^20",
@@ -88,6 +89,7 @@
 		"dotenv": "^17.2.3",
 		"eslint": "^9",
 		"eslint-config-next": "15.3.5",
+		"husky": "^9.1.7",
 		"prisma": "^7.0.0",
 		"sass": "^1.89.2",
 		"tailwindcss": "^3.4.0",
