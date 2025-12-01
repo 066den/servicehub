@@ -13,6 +13,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select'
 import { Category } from '@/types'
+import { useService } from '@/stores/service/useService'
 
 interface Subcategory {
 	id: number
@@ -44,7 +45,7 @@ export default function AddSubcategoryModal({
 	const [categoryId, setCategoryId] = useState<string>(
 		initialCategoryId?.toString() || ''
 	)
-	const [categories, setCategories] = useState<Category[]>([])
+	const { categories, fetchCategories } = useService()
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState('')
 
@@ -52,7 +53,7 @@ export default function AddSubcategoryModal({
 		if (isOpen) {
 			fetchCategories()
 		}
-	}, [isOpen])
+	}, [isOpen, fetchCategories])
 
 	useEffect(() => {
 		if (subcategory) {
@@ -72,18 +73,6 @@ export default function AddSubcategoryModal({
 		}
 		setError('')
 	}, [subcategory, isOpen, initialCategoryId])
-
-	const fetchCategories = async () => {
-		try {
-			const response = await fetch('/api/admin/categories')
-			const data = await response.json()
-			if (data.success) {
-				setCategories(data.categories)
-			}
-		} catch (error) {
-			console.error('Error fetching categories:', error)
-		}
-	}
 
 	const generateSlug = (text: string) => {
 		return text
@@ -113,8 +102,8 @@ export default function AddSubcategoryModal({
 		try {
 			const slug = generateSlug(name)
 			const url = subcategory
-				? `/api/admin/subcategories/${subcategory.id}`
-				: '/api/admin/subcategories'
+				? `/api/services/subcategories/${subcategory.id}`
+				: '/api/services/subcategories'
 			const method = subcategory ? 'PUT' : 'POST'
 
 			const response = await fetch(url, {

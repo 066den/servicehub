@@ -68,6 +68,7 @@ const config = {
 				'primary-gradient': 'var(--primary-gradient)',
 				'secondary-gradient': 'var(--secondary-gradient)',
 				'light-gradient': 'var(--primary-gradient-light)',
+				'accent-gradient-light': 'var(--accent-gradient-light)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

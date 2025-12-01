@@ -51,9 +51,9 @@ const PhoneForm = () => {
 			animate='visible'
 			exit='hidden'
 		>
-			<h2 className='text-3xl font-bold text-primary-dark text-center mb-2'>
+			<h3 className='text-primary-dark text-center mb-2'>
 				{t('Auth.phoneForm.title')}
-			</h2>
+			</h3>
 			<p className='text-md text-secondary-foreground text-center mb-6'>
 				{t('Auth.phoneForm.subtitle')}
 			</p>

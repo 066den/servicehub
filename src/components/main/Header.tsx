@@ -26,16 +26,12 @@ const Header = () => {
 	const navigationItems = useMemo(
 		() => [
 			{
-				label: t('Link.services'),
+				label: t('Link.catalog'),
 				href: '/services',
 			},
 			{
 				label: t('Link.about'),
 				href: '/about',
-			},
-			{
-				label: t('Link.contact'),
-				href: '/contact',
 			},
 		],
 		[t]
@@ -68,65 +64,70 @@ const Header = () => {
 	return (
 		<header className='flex justify-between shadow-sm items-center bg-white/95 sticky top-0 z-50 backdrop-blur-sm '>
 			<div className='container py-2'>
-				<div className='flex justify-between items-center'>
-					<div className='flex items-center gap-4'>
+				<div className='flex flex-col lg:flex-row justify-between items-center gap-2 lg:gap-4'>
+					<div className='flex items-center gap-2 lg:gap-4 flex-shrink-0 w-full lg:w-auto justify-between lg:justify-start'>
 						<Logo withSlogan isLink size='sm' />
-						<LocationSelector />
+						<div className='flex items-center gap-2'>
+							<LocationSelector />
+						</div>
 					</div>
 
-					<Navigation items={navigationItems} />
-					<div className='flex items-center gap-4'>
-						{isLoading ? (
-							<>
-								<Skeleton className='h-10 w-20' />
-								<Skeleton className='h-10 w-20' />
-							</>
-						) : (
-							<>
-								{!user || !user.isVerified ? (
-									<Button
-										variant='outline-primary'
-										size='md'
-										onClick={() => router.push('/auth/signin')}
-									>
-										Увійти
-									</Button>
-								) : (
-									<>
-										<button className='notification-btn'>
-											<Bell className='size-5' />
-											{0 > 0 && (
-												<motion.span
-													variants={bounceVariants}
-													animate='bounce'
-													className='notification-badge'
-												>
-													3
-												</motion.span>
+					<div className='flex flex-1 items-center gap-2 lg:gap-4 flex-shrink-0 w-full lg:w-auto justify-end'>
+						<Navigation items={navigationItems} />
+
+						<div className='flex items-center gap-2 lg:gap-4'>
+							{isLoading ? (
+								<>
+									<Skeleton className='h-10 w-20' />
+									<Skeleton className='h-10 w-20' />
+								</>
+							) : (
+								<>
+									{!user || !user.isVerified ? (
+										<Button
+											variant='outline-primary'
+											size='md'
+											onClick={() => router.push('/auth/signin')}
+										>
+											Увійти
+										</Button>
+									) : (
+										<>
+											<button className='notification-btn'>
+												<Bell className='size-5' />
+												{0 > 0 && (
+													<motion.span
+														variants={bounceVariants}
+														animate='bounce'
+														className='notification-badge'
+													>
+														3
+													</motion.span>
+												)}
+											</button>
+											{provider ? (
+												<AvatarCompany
+													provider={provider}
+													onClick={handleCompanyProfileClick}
+												/>
+											) : (
+												<Avatar user={user} onClick={handleAvatarClick} />
 											)}
-										</button>
-										{provider ? (
-											<AvatarCompany
-												provider={provider}
-												onClick={handleCompanyProfileClick}
-											/>
-										) : (
-											<Avatar user={user} onClick={handleAvatarClick} />
-										)}
-									</>
-								)}
-								{!provider && (
-									<Button
-										variant='accent'
-										size='md'
-										onClick={() => router.push(ROUTES.EXECUTOR)}
-										className='min-w-[160px] font-semibold'
-									>
-										{t('becomeProvider')}
-									</Button>
-								)}
-							</>
-						)}
+										</>
+									)}
+									{!provider && (
+										<Button
+											variant='accent'
+											size='md'
+											onClick={() => router.push(ROUTES.EXECUTOR)}
+											className='min-w-[160px] font-semibold'
+										>
+											{t('becomeProvider')}
+										</Button>
+									)}
+								</>
+							)}
+						</div>
 					</div>
 				</div>
 				<Modal

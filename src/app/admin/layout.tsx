@@ -1,4 +1,4 @@
-import SidebarAdmin from '@/components/common/SidebarAdmin'
+import SidebarAdmin from '@/components/admin/SidebarAdmin'
 
 export default function AdminLayout({
 	children,
@@ -8,7 +8,7 @@ export default function AdminLayout({
 	return (
 		<div className='grid grid-cols-[17.5rem_1fr] gap-6'>
 			<SidebarAdmin />
-			<div>{children}</div>
+			{children}
 		</div>
 	)
 }

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { getSession } from 'next-auth/react'
 import { Category } from '@/types'
-import { useAdmin } from '@/stores/admin/useAdmin'
+import { useService } from '@/stores/service/useService'
 import {
 	createCategorySchema,
 	updateCategorySchema,
@@ -36,7 +36,7 @@ export default function AddCategoryModal({
 	onSave,
 	category,
 }: AddCategoryModalProps) {
-	const { createCategory, updateCategory, fetchCategories } = useAdmin()
+	const { createCategory, updateCategory, fetchCategories } = useService()
 	const [imageFile, setImageFile] = useState<File | null>(null)
 	const [currentImage, setCurrentImage] = useState<string | null>(null)
 	const [uploadingImage, setUploadingImage] = useState(false)
@@ -106,7 +106,7 @@ export default function AddCategoryModal({
 			formData.append('image', imageFile)
 
 			const response = await fetch(
-				`/api/admin/categories/${categoryId}/image`,
+				`/api/services/categories/${categoryId}/image`,
 				{
 					method: 'POST',
 					headers: {
@@ -145,7 +145,7 @@ export default function AddCategoryModal({
 				}
 
 				const response = await fetch(
-					`/api/admin/categories/${categoryId}/image`,
+					`/api/services/categories/${categoryId}/image`,
 					{
 						method: 'DELETE',
 						headers: {

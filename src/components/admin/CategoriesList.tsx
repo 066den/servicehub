@@ -1,29 +1,22 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Plus, Edit, EyeOff, Eye } from 'lucide-react'
 import AddCategoryModal from './AddCategoryModal'
 import { Category } from '@/types'
-import { useAdmin } from '@/stores/admin/useAdmin'
+import { useService } from '@/stores/service/useService'
 import Image from 'next/image'
 import { PagePreloader } from '../ui/preloader'
-import TopBarAdmin from './TopBarAdmin'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select'
+
 import { cn } from '@/lib/utils'
 import useFlag from '@/hooks/useFlag'
+import { SearchCategory } from './SearchCategory'
 
 export default function CategoriesList() {
 	const { categories, isLoading, fetchCategories, toggleCategoryStatus } =
-		useAdmin()
+		useService()
 
 	const [filteredCategories, setFilteredCategories] = useState<Category[]>([])
 	const [searchQuery, setSearchQuery] = useState('')
@@ -91,33 +84,13 @@ export default function CategoriesList() {
 	}
 
 	return (
-		<div className='space-y-6'>
-			<TopBarAdmin title='Категорії' />
-			{/* Поиск и фильтры */}
-			<Card className='p-4'>
-				<div className='flex flex-wrap gap-4'>
-					<div className='flex-1 min-w-[200px]'>
-						<Input
-							placeholder='Пошук категорій...'
-							value={searchQuery}
-							onChange={handleSearch}
-							className='mb-0'
-						/>
-					</div>
-					<div className='flex-1 max-w-[200px]'>
-						<Select value={statusFilter} onValueChange={setStatusFilter}>
-							<SelectTrigger className='h-13'>
-								<SelectValue placeholder='Всі статуси' />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value='all'>Всі статуси</SelectItem>
-								<SelectItem value='active'>Активні</SelectItem>
-								<SelectItem value='hidden'>Приховані</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
-				</div>
-			</Card>
+		<>
+			<SearchCategory
+				searchQuery={searchQuery}
+				handleSearch={handleSearch}
+				statusFilter={statusFilter}
+				setStatusFilter={setStatusFilter}
+			/>
 			{/* Действия */}
 			<Card className='p-4'>
 				<div className='flex items-center justify-between'>
@@ -157,6 +130,7 @@ export default function CategoriesList() {
 												src={category.image}
 												alt={category.name}
 												fill
+												sizes='100px'
 												className='object-cover'
 											/>
 										</div>
@@ -216,6 +190,6 @@ export default function CategoriesList() {
 				onSave={handleCategorySaved}
 				category={editingCategory}
 			/>
-		</div>
+		</>
 	)
 }

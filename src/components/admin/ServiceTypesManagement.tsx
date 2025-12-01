@@ -8,76 +8,38 @@ import { Plus, Search } from 'lucide-react'
 import SubcategoryGroup from './SubcategoryGroup'
 import AddSubcategoryModal from './AddSubcategoryModal'
 import AddTypeModal from './AddTypeModal'
-import { Category } from '@/types'
 import { Type } from '@/stores/admin/types'
-
-interface SubcategoryWithTypes {
-	id: number
-	name: string
-	slug: string | null
-	icon: string | null
-	description: string | null
-	isActive: boolean
-	servicesCount: number
-	averagePrice: number
-	categoryId: number
-	types: Array<{
-		id: number
-		name: string
-		slug: string | null
-		icon: string | null
-		description: string | null
-		isActive: boolean
-		servicesCount: number
-	}>
-	category: Category
-	_count: {
-		types: number
-	}
-}
+import { useService } from '@/stores/service/useService'
+import { SubcategoryWithTypes } from '@/stores/admin/types'
 
 export default function ServiceTypesManagement() {
-	const [subcategories, setSubcategories] = useState<SubcategoryWithTypes[]>([])
+	const { subcategories, fetchSubcategories } = useService()
 	const [filteredSubcategories, setFilteredSubcategories] = useState<
 		SubcategoryWithTypes[]
 	>([])
 	const [searchQuery, setSearchQuery] = useState('')
 	const [statusFilter, setStatusFilter] = useState('')
-	const [expandedSubcategories, setExpandedSubcategories] = useState<Set<number>>(
-		new Set()
-	)
+	const [expandedSubcategories, setExpandedSubcategories] = useState<
+		Set<number>
+	>(new Set())
 	const [isSubcategoryModalOpen, setIsSubcategoryModalOpen] = useState(false)
 	const [isTypeModalOpen, setIsTypeModalOpen] = useState(false)
 	const [editingSubcategory, setEditingSubcategory] =
 		useState<SubcategoryWithTypes | null>(null)
 	const [editingType, setEditingType] = useState<{
 		subcategoryId: number
-		type: { id: number; name: string; slug: string | null; icon: string | null; description: string | null; isActive: boolean } | null
+		type: {
+			id: number
+			name: string
+			slug: string | null
+			icon: string | null
+			description: string | null
+			isActive: boolean
+		} | null
 	} | null>(null)
 	const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<
 		number | null
 	>(null)
-	const [loading, setLoading] = useState(true)
-
-	const fetchSubcategories = async () => {
-		try {
-			setLoading(true)
-			const response = await fetch('/api/admin/subcategories')
-			const data = await response.json()
-
-			if (data.success) {
-				setSubcategories(data.subcategories)
-				// По умолчанию разворачиваем все подкатегории
-				setExpandedSubcategories(
-					new Set(data.subcategories.map((sub: SubcategoryWithTypes) => sub.id))
-				)
-			}
-		} catch (error) {
-			console.error('Error fetching subcategories:', error)
-		} finally {
-			setLoading(false)
-		}
-	}
 
 	const filterSubcategories = useCallback(() => {
 		let filtered = [...subcategories]
@@ -122,7 +84,14 @@ export default function ServiceTypesManagement() {
 
 	useEffect(() => {
 		fetchSubcategories()
-	}, [])
+	}, [fetchSubcategories])
+
+	useEffect(() => {
+		if (subcategories.length > 0) {
+			// По умолчанию разворачиваем все подкатегории
+			setExpandedSubcategories(new Set(subcategories.map(sub => sub.id)))
+		}
+	}, [subcategories])
 
 	useEffect(() => {
 		filterSubcategories()
@@ -141,9 +110,7 @@ export default function ServiceTypesManagement() {
 	}
 
 	const expandAllSubcategories = () => {
-		setExpandedSubcategories(
-			new Set(subcategories.map(sub => sub.id))
-		)
+		setExpandedSubcategories(new Set(subcategories.map(sub => sub.id)))
 	}
 
 	const collapseAllSubcategories = () => {
@@ -188,7 +155,7 @@ export default function ServiceTypesManagement() {
 	const handleToggleSubcategory = async (subcategoryId: number) => {
 		try {
 			const response = await fetch(
-				`/api/admin/subcategories/${subcategoryId}/toggle`,
+				`/api/services/subcategories/${subcategoryId}/toggle`,
 				{
 					method: 'PATCH',
 				}
@@ -220,7 +187,7 @@ export default function ServiceTypesManagement() {
 		}
 
 		try {
-			const response = await fetch(`/api/admin/types/${typeId}`, {
+			const response = await fetch(`/api/services/types/${typeId}`, {
 				method: 'DELETE',
 			})
 
@@ -233,26 +200,15 @@ export default function ServiceTypesManagement() {
 			fetchSubcategories()
 		} catch (error) {
 			alert(
-				error instanceof Error ? error.message : 'Помилка видалення типу послуги'
+				error instanceof Error
+					? error.message
+					: 'Помилка видалення типу послуги'
 			)
 		}
 	}
 
-	if (loading) {
-		return (
-			<div className='p-6'>
-				<div className='text-center py-12'>Завантаження...</div>
-			</div>
-		)
-	}
-
 	return (
-		<div className='p-6 space-y-6'>
-			{/* Заголовок */}
-			<div className='flex items-center justify-between'>
-				<h1 className='text-2xl font-bold text-gray-900'>Типи послуг</h1>
-			</div>
-
+		<>
 			{/* Поиск и фильтры */}
 			<Card className='p-4'>
 				<div className='flex flex-wrap gap-4'>
@@ -282,9 +238,7 @@ export default function ServiceTypesManagement() {
 			{/* Действия */}
 			<Card className='p-4'>
 				<div className='flex items-center justify-between'>
-					<h3 className='text-lg font-semibold text-gray-900'>
-						Типи послуг
-					</h3>
+					<h3 className='text-lg font-semibold text-gray-900'>Типи послуг</h3>
 					<div className='flex gap-2'>
 						<Button
 							variant='outline'
@@ -341,11 +295,7 @@ export default function ServiceTypesManagement() {
 					setEditingSubcategory(null)
 				}}
 				onSave={handleSubcategorySaved}
-				categoryId={
-					editingSubcategory?.category?.id ||
-					editingSubcategory?.categoryId ||
-					null
-				}
+				categoryId={editingSubcategory?.category?.id || null}
 				subcategory={editingSubcategory}
 			/>
 
@@ -360,7 +310,6 @@ export default function ServiceTypesManagement() {
 				subcategoryId={selectedSubcategoryId}
 				type={editingType?.type || null}
 			/>
-		</div>
+		</>
 	)
 }
-

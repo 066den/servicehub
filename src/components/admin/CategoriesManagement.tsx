@@ -34,7 +34,7 @@ export default function CategoriesManagement() {
 	const fetchCategories = async () => {
 		try {
 			setLoading(true)
-			const response = await fetch('/api/admin/categories')
+			const response = await fetch('/api/services/categories')
 			const data = await response.json()
 
 			if (data.success) {
@@ -175,7 +175,7 @@ export default function CategoriesManagement() {
 	const handleToggleCategory = async (categoryId: number) => {
 		try {
 			const response = await fetch(
-				`/api/admin/categories/${categoryId}/toggle`,
+				`/api/services/categories/${categoryId}/toggle`,
 				{
 					method: 'PATCH',
 				}
@@ -200,7 +200,7 @@ export default function CategoriesManagement() {
 	const handleToggleSubcategory = async (subcategory: Subcategory) => {
 		try {
 			const response = await fetch(
-				`/api/admin/subcategories/${subcategory.id}/toggle`,
+				`/api/services/subcategories/${subcategory.id}/toggle`,
 				{
 					method: 'PATCH',
 				}
@@ -233,7 +233,7 @@ export default function CategoriesManagement() {
 
 		try {
 			const response = await fetch(
-				`/api/admin/subcategories/${subcategory.id}`,
+				`/api/services/subcategories/${subcategory.id}`,
 				{
 					method: 'DELETE',
 				}

@@ -15,9 +15,8 @@ function LoadingSpinner({ color, size }: LoadingSpinnerProps) {
 				className={cn(
 					'w-10 h-10 border-4 border-white/20 rounded-full border-t-white',
 					{
-						'border-primary/50 border-t-transparent border-4':
-							color === 'primary',
-						'border-t-secondary': color === 'secondary',
+						'border-primary/50 border-t-transparent': color === 'primary',
+						'border-gray-400/50 border-t-transparent': color === 'secondary',
 						'border-t-accent': color === 'accent',
 						'border-t-error': color === 'error',
 						'border-t-warning': color === 'warning',

@@ -9,6 +9,7 @@ interface InputProps extends React.ComponentProps<'input'> {
 	placeholder?: string
 	required?: boolean
 	className?: string
+	containerClassName?: string
 	errorMessage?: string
 	withClear?: boolean
 	helperText?: string
@@ -21,6 +22,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 	(
 		{
 			className,
+			containerClassName,
 			type = 'text',
 			label,
 			placeholder,
@@ -43,7 +45,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		const inputId = id ?? `input-${sanitizedGeneratedId || 'field'}`
 
 		return (
-			<div className={cn('space-y-2 mb-4', className)}>
+			<div className={cn('space-y-2 mb-4', containerClassName)}>
 				{label && (
 					<Label htmlFor={inputId} required={required}>
 						{label}

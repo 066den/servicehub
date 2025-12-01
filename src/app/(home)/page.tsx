@@ -1,13 +1,21 @@
+import HeroSection from '@/components/common/HeroSection'
+import HomeStats from '@/components/main/HomeStats'
+
 const HomePage = () => {
 	return (
 		<div className='flex-1'>
-			{/* Hero Section */}
-			<section className='min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-16'>
+			<HeroSection
+				title='Всі послуги в одному місці'
+				description='Знайдіть надійних фахівців для будь-яких завдань або запропонуйте свої послуги тисячам клієнтів'
+				image='/assets/images/main-hero-2-2.jpeg'
+			/>
+			<HomeStats />
+			<section className='min-h-[80vh] flex items-center justify-center bg-background py-16'>
 				<div className='text-center max-w-4xl mx-auto px-6'>
 					{/* Main Heading */}
 					<h1 className='text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight'>
 						<span className='bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'>
-							UslugiUA
+							ServiceHub
 						</span>
 					</h1>
 

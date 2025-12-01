@@ -76,12 +76,12 @@ export default function AddTypeModal({
 
 		try {
 			const slug = generateSlug(name)
-			const url = type ? `/api/admin/types/${type.id}` : '/api/admin/types'
+			const url = type ? `/api/services/types/${type.id}` : '/api/services/types'
 			const method = type ? 'PUT' : 'POST'
 
 			// Получаем categoryId из subcategory
 			const subcategoryResponse = await fetch(
-				`/api/admin/subcategories/${subcategoryId}`
+				`/api/services/subcategories/${subcategoryId}`
 			)
 			const subcategoryData = await subcategoryResponse.json()
 

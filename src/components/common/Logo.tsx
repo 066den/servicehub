@@ -66,34 +66,34 @@ const Logo: React.FC<LogoProps> = ({
 
 	// Logo main container styles
 	const logoMainClassName = cn(
-		'font-bold no-underline',
+		'font-bold no-underline font-plus-jakarta-sans',
 		color === 'default' && 'text-primary',
 		color === 'white' && 'text-white',
 		size === 'lg' && 'items-center'
 	)
 
 	const sloganClassName = cn(
-		'text-[0.275em] font-medium text-secondary-foreground uppercase tracking-wider ml-0.5 -mt-1 leading-4',
+		'text-[0.275em] font-semibold text-secondary-foreground uppercase tracking-wider ml-0.5 -mt-1 leading-4',
 		size === 'lg' && 'text-white text-xl font-light lowercase',
-		withImage && 'text-right'
+		withImage && 'text-left'
 	)
 
 	return (
 		<Wrapper {...wrapperProps} className={logoClassName}>
 			<div className={logoMainClassName}>
-				<div className='flex items-center gap-1 font'>
+				<div className='flex items-center gap-0.5'>
+					Service
 					{withImage && (
 						<Image
-							src='/logo-img.png'
+							src='/logo-2.png'
 							alt='Logo'
-							width={size === 'lg' ? 80 : 40}
-							height={size === 'lg' ? 80 : 40}
+							width={size === 'lg' ? 80 : 34}
+							height={size === 'lg' ? 80 : 34}
 							className='h-auto w-auto'
 							priority
 						/>
 					)}
-					Uslugi
-					<span className='text-accent'>UA</span>
+					<span className='text-accent'>Hub</span>
 				</div>
 			</div>
 

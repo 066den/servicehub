@@ -17,6 +17,7 @@ interface Subcategory {
 	isActive: boolean
 	servicesCount: number
 	averagePrice: number
+	categoryId?: number
 	types: Type[]
 	category: Category
 	_count: {

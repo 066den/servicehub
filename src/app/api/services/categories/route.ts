@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth/authOptions'
 import { prisma } from '@/lib/prisma'
+import { createCategorySchemaValidate } from '@/lib/schemas'
+import { checkAdminAccess } from '@/lib/auth/adminAuth'
 
 export async function GET() {
 	try {
@@ -125,6 +129,42 @@ export async function GET() {
 		console.error('Error fetching categories:', error)
 		return NextResponse.json(
 			{ error: 'Failed to fetch categories' },
+			{ status: 500 }
+		)
+	}
+}
+
+export async function POST(req: Request) {
+	const session = await getServerSession(authOptions)
+
+	const adminCheck = await checkAdminAccess(session)
+	if (adminCheck) {
+		return adminCheck
+	}
+
+	try {
+		const body = await req.json()
+
+		const validationResult = createCategorySchemaValidate(body)
+		if (!validationResult.success) {
+			return NextResponse.json(
+				{
+					error: 'Invalid request body',
+					details: validationResult.error.issues,
+				},
+				{ status: 400 }
+			)
+		}
+
+		const category = await prisma.category.create({
+			data: validationResult.data,
+		})
+
+		return NextResponse.json({ success: true, category }, { status: 201 })
+	} catch (error) {
+		console.error('Error creating category:', error)
+		return NextResponse.json(
+			{ error: 'Failed to create category' },
 			{ status: 500 }
 		)
 	}

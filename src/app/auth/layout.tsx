@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl'
 import Logo from '@/components/common/Logo'
-import '@/components/auth/auth.scss'
+//import '@/components/auth/auth.scss'
 import Link from 'next/link'
 import { CheckCircle, Home, Smartphone, ShieldCheck, Star } from 'lucide-react'
 
@@ -21,7 +21,7 @@ export default function AuthLayout({
 			<div className='grid grid-cols-2 bg-white max-w-5xl mx-auto rounded-lg overflow-hidden shadow-lg min-h-[37.5rem]'>
 				<div className='auth-visual relative flex flex-col items-center justify-center p-8 bg-primary-gradient text-white text-center'>
 					<Logo color='white' size='lg' withImage={false} />
-					<h2 className='text-3xl font-bold mb-2'>{t('authVisual.title')}</h2>
+					<h3 className='mb-2'>{t('authVisual.title')}</h3>
 					<p className='text-xl font-medium mb-4'>{t('authVisual.subtitle')}</p>
 
 					<ul className='list-none relative'>

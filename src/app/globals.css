@@ -1,5 +1,5 @@
 /* @import '../styles/_variables.scss'; */
-@import '../styles/_common.scss';
+/* @import '../styles/_common.scss'; */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -46,7 +46,12 @@
 		--accent: 38 92% 50%; /* #F59E0B */
 		--accent-foreground: 210 40% 98%;
 		--accent-dark: 38 92% 42.5%; /* #d97706 */
-
+		--accent-gradient-light: linear-gradient(
+			to bottom right,
+			hsl(var(--primary) / 0.15),
+			transparent,
+			hsl(var(--accent) / 0.15)
+		);
 		/* Muted цвета */
 		--muted: 210 40% 96%;
 		--muted-foreground: 215.4 16.3% 46.9%;
@@ -75,12 +80,6 @@
 		--color-text-secondary: 215 25% 27%; /* #64748b */
 		--color-text-tertiary: 215 25% 22.1%; /* #374151 */
 		--color-text-title: 222.2 84% 4.9%; /* #1f2937 */
-
-		/* Gray цвета */
-		--color-light-gray: 210 40% 98%; /* #f8fafc */
-		--color-light-gray-hover: 210 40% 96.1%; /* #f1f5f9 */
-		--color-gray: 215 25% 27%; /* #94a3b8 */
-		--color-dark-gray: 222.2 84% 4.9%; /* #1f2937 */
 
 		/* Black и White */
 		--color-black: 0 0% 2.7%; /* #070708 */
@@ -228,10 +227,64 @@
 @layer base {
 	* {
 		@apply border-border outline-ring/50;
+		scrollbar-width: thin;
+		scrollbar-color: var(--theme-background-color-secondary) transparent;
 	}
+
 	body {
 		@apply bg-background text-foreground;
 		scrollbar-gutter: stable both-edges;
+	}
+
+	body.no-scroll {
+		overflow: hidden;
+	}
+
+	::-webkit-scrollbar {
+		width: 4px;
+		height: 4px;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background-color: var(--theme-background-color-secondary);
+		border-radius: 4px;
+	}
+
+	::-webkit-scrollbar-track {
+		background-color: transparent;
+	}
+
+	h1 {
+		@apply font-plus-jakarta-sans font-bold text-6xl;
+	}
+
+	h2 {
+		@apply font-semibold text-4xl;
+	}
+
+	h2 strong {
+		@apply font-medium text-accent;
+	}
+
+	h3,
+	h4,
+	h5,
+	h6 {
+		@apply font-semibold;
+	}
+
+	h3 {
+		@apply text-3xl;
+	}
+
+	section {
+		@apply container mx-auto px-4;
+	}
+}
+
+@layer utilities {
+	.font-plus-jakarta-sans {
+		font-family: var(--font-plus-jakarta-sans), sans-serif;
 	}
 }
 
@@ -279,4 +332,22 @@
 		transform: scale(1.1);
 		box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
 	}
+}
+
+.auth-visual ::after {
+	content: '';
+	position: absolute;
+	top: -50%;
+	right: -50%;
+	width: 160%;
+	height: 160%;
+	background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="1" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="1" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+	animation: float 20s ease-in-out infinite;
+}
+
+/* CROP - Croppie styles */
+
+/* Градиенты */
+.custom-primary-gradient {
+	background: var(--primary-gradient);
 }

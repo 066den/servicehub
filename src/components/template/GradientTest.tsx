@@ -26,18 +26,12 @@ const GradientTest: React.FC = () => {
 			</div>
 
 			{/* Тест 4: Primary Gradient через CSS переменную */}
-			<div
-				className='text-white p-6 rounded-lg'
-				style={{ background: 'var(--primary-gradient)' }}
-			>
+			<div className='text-white p-6 rounded-lg bg-primary-gradient'>
 				<h3 className='text-xl font-bold mb-2'>
 					Primary Gradient (CSS переменная)
 				</h3>
 				<p>
-					<code>
-						style=&#123;&#123; background: &apos;var(--primary-gradient)&apos;
-						&#125;&#125;
-					</code>
+					<code>className=&apos;bg-primary-gradient&apos;</code>
 				</p>
 			</div>
 
@@ -48,6 +42,14 @@ const GradientTest: React.FC = () => {
 
 			{/* Тест 6: Карточка с градиентом */}
 			<div className='bg-secondary-gradient text-white p-6 rounded-lg shadow-lg'>
+				<h3 className='text-xl font-bold mb-2'>
+					Карточка с Secondary Gradient
+				</h3>
+				<p>Это тестовая карточка для проверки работы градиентов</p>
+			</div>
+
+			{/* Тест 7: Карточка с градиентом */}
+			<div className='bg-accent-gradient-light p-6 rounded-lg shadow-lg'>
 				<h3 className='text-xl font-bold mb-2'>
 					Карточка с Secondary Gradient
 				</h3>
