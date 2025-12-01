@@ -1,10 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Modal from '@/components/modals/Modal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { useService } from '@/stores/service/useService'
+import {
+	createTypeSchema,
+	type CreateTypeSchema,
+	type UpdateTypeSchema,
+} from '@/lib/schemas'
+import type { z } from 'zod'
 
 interface Type {
 	id: number
@@ -23,6 +32,8 @@ interface AddTypeModalProps {
 	type: Type | null
 }
 
+type FormData = z.infer<typeof createTypeSchema>
+
 export default function AddTypeModal({
 	isOpen,
 	onClose,
@@ -30,91 +41,93 @@ export default function AddTypeModal({
 	subcategoryId,
 	type,
 }: AddTypeModalProps) {
-	const [name, setName] = useState('')
-	const [icon, setIcon] = useState('')
-	const [description, setDescription] = useState('')
-	const [loading, setLoading] = useState(false)
-	const [error, setError] = useState('')
+	const { subcategories, createType, updateType, fetchSubcategories } =
+		useService()
+
+	const {
+		handleSubmit,
+		reset,
+		register,
+		formState: { errors, isSubmitting },
+	} = useForm<FormData>({
+		resolver: zodResolver(createTypeSchema),
+		defaultValues: {
+			name: '',
+			categoryId: 0,
+			subcategoryId: null,
+			slug: '',
+			icon: '',
+			description: '',
+		},
+	})
 
 	useEffect(() => {
-		if (type) {
-			setName(type.name)
-			setIcon(type.icon || '')
-			setDescription(type.description || '')
-		} else {
-			setName('')
-			setIcon('')
-			setDescription('')
+		if (isOpen) {
+			fetchSubcategories()
 		}
-		setError('')
-	}, [type, isOpen])
+	}, [isOpen, fetchSubcategories])
 
-	const generateSlug = (text: string) => {
-		return text
-			.toLowerCase()
-			.replace(/[^\w\s-]/g, '')
-			.replace(/\s+/g, '-')
-			.replace(/-+/g, '-')
-			.trim()
-	}
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault()
-		setError('')
-
-		if (!name.trim()) {
-			setError("Назва типу послуги обов'язкова")
-			return
-		}
-
-		if (!subcategoryId) {
-			setError('Підкатегорія не вибрана')
-			return
-		}
-
-		setLoading(true)
-
-		try {
-			const slug = generateSlug(name)
-			const url = type ? `/api/services/types/${type.id}` : '/api/services/types'
-			const method = type ? 'PUT' : 'POST'
-
-			// Получаем categoryId из subcategory
-			const subcategoryResponse = await fetch(
-				`/api/services/subcategories/${subcategoryId}`
-			)
-			const subcategoryData = await subcategoryResponse.json()
-
-			if (!subcategoryResponse.ok) {
-				throw new Error('Помилка отримання підкатегорії')
+	useEffect(() => {
+		if (type && subcategoryId) {
+			const subcategory = subcategories.find(sub => sub.id === subcategoryId)
+			if (subcategory) {
+				reset({
+					name: type.name,
+					categoryId: subcategory.category.id,
+					subcategoryId: subcategoryId,
+					slug: type.slug || '',
+					icon: type.icon || '',
+					description: type.description || '',
+				})
 			}
+		} else if (subcategoryId) {
+			const subcategory = subcategories.find(sub => sub.id === subcategoryId)
+			if (subcategory) {
+				reset({
+					name: '',
+					categoryId: subcategory.category.id,
+					subcategoryId: subcategoryId,
+					slug: '',
+					icon: '',
+					description: '',
+				})
+			}
+		}
+	}, [type, subcategoryId, isOpen, subcategories, reset])
 
-			const response = await fetch(url, {
-				method,
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					name: name.trim(),
-					slug,
-					icon: icon.trim() || null,
-					description: description.trim() || null,
-					categoryId: subcategoryData.subcategory.categoryId,
-					subcategoryId,
-				}),
-			})
+	const onSubmit = async (data: FormData) => {
+		try {
+			if (type) {
+				// Обновление типа
+				const updateData: UpdateTypeSchema = {
+					name: data.name.trim(),
+					slug: data.slug?.trim() || null,
+					icon: data.icon?.trim() || null,
+					description: data.description?.trim() || null,
+					...(data.categoryId && { categoryId: data.categoryId }),
+					...(data.subcategoryId !== subcategoryId && {
+						subcategoryId: data.subcategoryId,
+					}),
+				}
 
-			const data = await response.json()
+				await updateType(type.id, updateData)
+			} else {
+				// Создание типа
+				const createData: CreateTypeSchema = {
+					name: data.name.trim(),
+					categoryId: data.categoryId,
+					subcategoryId: data.subcategoryId,
+					slug: data.slug?.trim() || null,
+					icon: data.icon?.trim() || null,
+					description: data.description?.trim() || null,
+				}
 
-			if (!response.ok) {
-				throw new Error(data.error || 'Помилка збереження типу послуги')
+				await createType(createData)
 			}
 
 			onSave()
-		} catch (err) {
-			setError(err instanceof Error ? err.message : 'Помилка збереження')
-		} finally {
-			setLoading(false)
+		} catch (error) {
+			console.error('Error saving type:', error)
 		}
 	}
 
@@ -124,33 +137,30 @@ export default function AddTypeModal({
 			onClose={onClose}
 			title={type ? 'Редагувати тип послуги' : 'Додати тип послуги'}
 			size='md'
+			classNameContent='overflow-y-auto'
 			footer={
 				<div className='flex gap-2 justify-end'>
-					<Button variant='outline' onClick={onClose} disabled={loading}>
+					<Button variant='outline' onClick={onClose} disabled={isSubmitting}>
 						Скасувати
 					</Button>
-					<Button onClick={handleSubmit} loading={loading}>
+					<Button onClick={handleSubmit(onSubmit)} loading={isSubmitting}>
 						Зберегти
 					</Button>
 				</div>
 			}
 		>
-			<form onSubmit={handleSubmit} className='space-y-4'>
+			<form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
 				<Input
 					label='Назва типу послуги'
 					placeholder='Наприклад: Веб-розробка'
-					value={name}
-					onChange={e => setName(e.target.value)}
+					{...register('name')}
 					required
-					error={!!(error && !name.trim())}
-					errorMessage={error && !name.trim() ? error : undefined}
 				/>
 
 				<Input
 					label='Іконка (емодзі)'
 					placeholder='Наприклад: 🌐'
-					value={icon}
-					onChange={e => setIcon(e.target.value)}
+					{...register('icon')}
 					helperText='Введіть емодзі для відображення типу послуги'
 				/>
 
@@ -158,17 +168,21 @@ export default function AddTypeModal({
 					<label className='text-sm font-medium text-gray-900'>Опис</label>
 					<Textarea
 						placeholder='Опис типу послуги...'
-						value={description}
-						onChange={e => setDescription(e.target.value)}
+						{...register('description')}
 						rows={4}
 					/>
 				</div>
 
-				{error && name.trim() && (
-					<div className='text-destructive text-sm'>{error}</div>
+				{Object.keys(errors).length > 0 && (
+					<div className='text-destructive text-sm'>
+						{Object.values(errors)
+							.filter(error => error?.message)
+							.map((error, index) => (
+								<div key={index}>{error?.message}</div>
+							))}
+					</div>
 				)}
 			</form>
 		</Modal>
 	)
 }
-

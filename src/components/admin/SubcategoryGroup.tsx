@@ -1,29 +1,18 @@
 'use client'
 
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ChevronDown, ChevronRight, Plus, Edit, EyeOff } from 'lucide-react'
+import {
+	ChevronDown,
+	ChevronRight,
+	Plus,
+	Edit,
+	EyeOff,
+	Trash2,
+	Eye,
+} from 'lucide-react'
 import TypeItem from './TypeItem'
-import { Category } from '@/types'
-import { Type } from '@/stores/admin/types'
-
-interface Subcategory {
-	id: number
-	name: string
-	slug: string | null
-	icon: string | null
-	description: string | null
-	isActive: boolean
-	servicesCount: number
-	averagePrice: number
-	categoryId?: number
-	types: Type[]
-	category: Category
-	_count: {
-		types: number
-	}
-}
+import { Subcategory, TypeService } from '@/types'
+import { cn } from '@/lib/utils'
 
 interface SubcategoryGroupProps {
 	subcategory: Subcategory
@@ -31,8 +20,9 @@ interface SubcategoryGroupProps {
 	onToggle: () => void
 	onEdit: () => void
 	onToggleActive: () => void
+	onDelete?: () => void
 	onAddType: () => void
-	onEditType: (type: Type) => void
+	onEditType: (type: TypeService) => void
 	onDeleteType?: (typeId: number) => void
 }
 
@@ -42,15 +32,14 @@ export default function SubcategoryGroup({
 	onToggle,
 	onEdit,
 	onToggleActive,
+	onDelete,
 	onAddType,
 	onEditType,
 	onDeleteType,
 }: SubcategoryGroupProps) {
 	// Вычисляем популярность
-	const popularity = Math.min(
-		Math.round((subcategory.servicesCount / 1000) * 100),
-		100
-	)
+	const servicesCount = subcategory.servicesCount ?? 0
+	const popularity = Math.min(Math.round((servicesCount / 1000) * 100), 100)
 
 	const getPopularityColor = (percent: number) => {
 		if (percent >= 70) return 'bg-success'
@@ -59,10 +48,15 @@ export default function SubcategoryGroup({
 	}
 
 	return (
-		<Card className='mb-0 border-b border-gray-200 rounded-none first:rounded-t-lg last:rounded-b-lg overflow-hidden'>
+		<div
+			className={cn(
+				'bg-card border-b bg-white border-gray-200 rounded-none first:rounded-t-lg last:rounded-b-lg overflow-hidden',
+				subcategory.isActive ? 'opacity-100' : 'opacity-50'
+			)}
+		>
 			{/* Заголовок подкатегории */}
 			<div
-				className='flex items-center justify-between p-5 hover:bg-gray-50 transition-colors cursor-pointer'
+				className='flex items-center justify-between p-5 transition-colors cursor-pointer'
 				onClick={onToggle}
 			>
 				<div className='flex items-center gap-3 flex-1'>
@@ -79,8 +73,8 @@ export default function SubcategoryGroup({
 							{subcategory.name}
 						</div>
 						<div className='text-sm text-gray-500 mt-1'>
-							Категорія: {subcategory.category.name} • {subcategory.servicesCount}{' '}
-							послуг • {subcategory.types.length} типів послуг
+							Категорія: {subcategory.category.name} • {servicesCount} послуг •{' '}
+							{subcategory.types?.length || 0} типів послуг
 						</div>
 					</div>
 				</div>
@@ -99,59 +93,54 @@ export default function SubcategoryGroup({
 							{popularity}%
 						</span>
 					</div>
-					<Badge
-						variant={subcategory.isActive ? 'success' : 'secondary'}
-						size='sm'
-					>
-						{subcategory.isActive ? 'Активна' : 'Прихована'}
-					</Badge>
+
 					<div className='flex gap-2' onClick={e => e.stopPropagation()}>
-						<Button
-							variant='outline'
-							size='sm'
-							onClick={onAddType}
-							className='text-xs'
-						>
-							<Plus className='size-3' />
+						<Button onClick={onAddType} className='text-xs'>
+							<Plus className='size-4' />
 							Тип послуги
 						</Button>
-						<Button
-							variant='outline'
-							size='sm'
-							onClick={onEdit}
-							className='text-xs'
-						>
-							<Edit className='size-3' />
+						<Button variant='outline' onClick={onEdit} className='text-xs'>
+							<Edit className='size-4' />
 						</Button>
 						<Button
 							variant='outline'
-							size='sm'
 							className='text-xs'
 							onClick={onToggleActive}
 							title={subcategory.isActive ? 'Приховати' : 'Показати'}
 						>
-							<EyeOff className='size-3' />
+							{subcategory.isActive ? (
+								<Eye className='size-4' />
+							) : (
+								<EyeOff className='size-4' />
+							)}
 						</Button>
+						{onDelete && (
+							<Button
+								variant='outline'
+								className='text-xs text-red-600 hover:text-red-700'
+								onClick={onDelete}
+								title='Видалити підкатегорію'
+							>
+								<Trash2 className='size-4' />
+							</Button>
+						)}
 					</div>
 				</div>
 			</div>
 
 			{/* Список типов услуг */}
-			{isExpanded && subcategory.types.length > 0 && (
+			{isExpanded && subcategory.types && subcategory.types.length > 0 && (
 				<div className='bg-gray-50 border-t border-gray-200'>
 					{subcategory.types.map(type => (
 						<TypeItem
 							key={type.id}
 							type={type}
 							onEdit={() => onEditType(type)}
-							onDelete={
-								onDeleteType ? () => onDeleteType(type.id) : undefined
-							}
+							onDelete={onDeleteType ? () => onDeleteType(type.id) : undefined}
 						/>
 					))}
 				</div>
 			)}
-		</Card>
+		</div>
 	)
 }
-

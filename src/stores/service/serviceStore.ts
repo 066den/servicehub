@@ -386,13 +386,11 @@ export const useServiceStore = create<ServiceStore>()(
 							name: data.name,
 							slug: data.slug || null,
 							icon: data.icon || null,
+							image: null,
 							description: data.description || null,
 							isActive: data.isActive ?? true,
 							servicesCount: 0,
 							averagePrice: 0,
-							_count: {
-								types: 0,
-							},
 							types: [],
 							category: category,
 						}
@@ -434,7 +432,9 @@ export const useServiceStore = create<ServiceStore>()(
 								// Обновляем types массив
 								const allTypes: Type[] = []
 								updatedSubcategories.forEach(sub => {
-									allTypes.push(...sub.types)
+									if (sub.types && Array.isArray(sub.types)) {
+										allTypes.push(...sub.types)
+									}
 								})
 
 								set({
@@ -535,14 +535,41 @@ export const useServiceStore = create<ServiceStore>()(
 							if (fullData.success && fullData.subcategory) {
 								// Обновляем с актуальными данными
 								const { subcategories: currentSubcategories } = get()
-								const updatedSubcategories = currentSubcategories.map(sub =>
-									sub.id === id ? fullData.subcategory! : sub
+								const currentSub = currentSubcategories.find(
+									sub => sub.id === id
 								)
+								const updatedSubcategories = currentSubcategories.map(sub => {
+									if (sub.id === id) {
+										// Сохраняем типы из текущего состояния, если сервер не вернул их
+										const serverSubcategory = fullData.subcategory!
+										return {
+											...serverSubcategory,
+											types:
+												serverSubcategory.types ||
+												currentSub?.types ||
+												originalSubcategory.types ||
+												[],
+											servicesCount:
+												serverSubcategory.servicesCount ??
+												currentSub?.servicesCount ??
+												originalSubcategory.servicesCount ??
+												0,
+											averagePrice:
+												serverSubcategory.averagePrice ??
+												currentSub?.averagePrice ??
+												originalSubcategory.averagePrice ??
+												0,
+										}
+									}
+									return sub
+								})
 
 								// Обновляем types массив
 								const allTypes: Type[] = []
 								updatedSubcategories.forEach(sub => {
-									allTypes.push(...sub.types)
+									if (sub.types && Array.isArray(sub.types)) {
+										allTypes.push(...sub.types)
+									}
 								})
 
 								set({
@@ -658,6 +685,7 @@ export const useServiceStore = create<ServiceStore>()(
 						const optimisticSubcategory: SubcategoryWithTypes = {
 							...currentSubcategory,
 							isActive: !currentSubcategory.isActive,
+							types: currentSubcategory.types || [],
 						}
 
 						set({
@@ -692,14 +720,35 @@ export const useServiceStore = create<ServiceStore>()(
 							if (fullData.success && fullData.subcategory) {
 								// Обновляем с актуальными данными
 								const { subcategories: currentSubcategories } = get()
-								const updatedSubcategories = currentSubcategories.map(sub =>
-									sub.id === id ? fullData.subcategory! : sub
+								const currentSub = currentSubcategories.find(
+									sub => sub.id === id
 								)
+								const updatedSubcategories = currentSubcategories.map(sub => {
+									if (sub.id === id) {
+										// Сохраняем типы из текущего состояния, если сервер не вернул их
+										const serverSubcategory = fullData.subcategory!
+										return {
+											...serverSubcategory,
+											types: serverSubcategory.types || currentSub?.types || [],
+											servicesCount:
+												serverSubcategory.servicesCount ??
+												currentSub?.servicesCount ??
+												0,
+											averagePrice:
+												serverSubcategory.averagePrice ??
+												currentSub?.averagePrice ??
+												0,
+										}
+									}
+									return sub
+								})
 
 								// Обновляем types массив
 								const allTypes: Type[] = []
 								updatedSubcategories.forEach(sub => {
-									allTypes.push(...sub.types)
+									if (sub.types && Array.isArray(sub.types)) {
+										allTypes.push(...sub.types)
+									}
 								})
 
 								set({
@@ -709,11 +758,22 @@ export const useServiceStore = create<ServiceStore>()(
 							} else {
 								// Если не удалось получить полные данные, обновляем только статус
 								const { subcategories: currentSubcategories } = get()
+								const currentSub = currentSubcategories.find(
+									sub => sub.id === id
+								)
 								const updatedSubcategory: SubcategoryWithTypes = {
 									...currentSubcategory,
 									...response.subcategory,
-									types: currentSubcategory.types,
+									types: currentSub?.types || currentSubcategory.types || [],
 									category: currentSubcategory.category,
+									servicesCount:
+										response.subcategory.servicesCount ??
+										currentSubcategory.servicesCount ??
+										0,
+									averagePrice:
+										response.subcategory.averagePrice ??
+										currentSubcategory.averagePrice ??
+										0,
 								}
 								set({
 									subcategories: currentSubcategories.map(sub =>
@@ -780,7 +840,9 @@ export const useServiceStore = create<ServiceStore>()(
 
 							const allTypes: Type[] = []
 							subcategories.forEach(sub => {
-								allTypes.push(...sub.types)
+								if (sub.types && Array.isArray(sub.types)) {
+									allTypes.push(...sub.types)
+								}
 							})
 
 							set({
@@ -830,7 +892,7 @@ export const useServiceStore = create<ServiceStore>()(
 							) {
 								return {
 									...sub,
-									types: [...sub.types, tempType],
+									types: [...(sub.types || []), tempType],
 								}
 							}
 							return sub
@@ -869,7 +931,7 @@ export const useServiceStore = create<ServiceStore>()(
 									) {
 										return {
 											...sub,
-											types: sub.types.map(t =>
+											types: (sub.types || []).map(t =>
 												t.id === tempType.id ? response.type : t
 											),
 										}
@@ -929,7 +991,9 @@ export const useServiceStore = create<ServiceStore>()(
 						// Обновляем subcategories и types
 						const updatedSubcategories = subcategories.map(sub => ({
 							...sub,
-							types: sub.types.map(t => (t.id === id ? optimisticType : t)),
+							types: (sub.types || []).map(t =>
+								t.id === id ? optimisticType : t
+							),
 						}))
 
 						set({
@@ -968,20 +1032,20 @@ export const useServiceStore = create<ServiceStore>()(
 									if (sub.id === oldSubcategoryId) {
 										return {
 											...sub,
-											types: sub.types.filter(t => t.id !== id),
+											types: (sub.types || []).filter(t => t.id !== id),
 										}
 									}
 									// Добавляем в новую подкатегорию
 									if (sub.id === newSubcategoryId) {
 										return {
 											...sub,
-											types: [...sub.types, response.type],
+											types: [...(sub.types || []), response.type],
 										}
 									}
 									// Обновляем в текущей подкатегории
 									return {
 										...sub,
-										types: sub.types.map(t =>
+										types: (sub.types || []).map(t =>
 											t.id === id ? response.type : t
 										),
 									}
@@ -1003,7 +1067,9 @@ export const useServiceStore = create<ServiceStore>()(
 							// Rollback
 							const rollbackSubcategories = subcategories.map(sub => ({
 								...sub,
-								types: sub.types.map(t => (t.id === id ? originalType : t)),
+								types: (sub.types || []).map(t =>
+									t.id === id ? originalType : t
+								),
 							}))
 
 							set({
@@ -1036,7 +1102,7 @@ export const useServiceStore = create<ServiceStore>()(
 						// Optimistic update - удаляем из массивов
 						const updatedSubcategories = subcategories.map(sub => ({
 							...sub,
-							types: sub.types.filter(t => t.id !== id),
+							types: (sub.types || []).filter(t => t.id !== id),
 						}))
 						const updatedTypes = types.filter(t => t.id !== id)
 

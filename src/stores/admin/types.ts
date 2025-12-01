@@ -1,19 +1,7 @@
-import { Category, Subcategory } from '@/types'
-
-export interface Type {
-	id: number
-	name: string
-	slug: string | null
-	icon: string | null
-	description: string | null
-	isActive: boolean
-	servicesCount: number
-	categoryId: number
-	subcategoryId: number | null
-}
+import { Category, Subcategory, TypeService } from '@/types'
 
 export interface SubcategoryWithTypes extends Subcategory {
-	types: Type[]
+	types: TypeService[]
 	category: Category
 }
 

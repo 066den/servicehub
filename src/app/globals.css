@@ -277,6 +277,10 @@
 		@apply text-3xl;
 	}
 
+	h4 {
+		@apply text-2xl;
+	}
+
 	section {
 		@apply container mx-auto px-4;
 	}

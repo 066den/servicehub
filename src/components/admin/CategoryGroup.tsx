@@ -5,36 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ChevronDown, ChevronRight, Plus, Edit, EyeOff } from 'lucide-react'
 import SubcategoryItem from './SubcategoryItem'
-
-interface Subcategory {
-	id: number
-	name: string
-	slug: string | null
-	icon: string | null
-	description: string | null
-	isActive: boolean
-	servicesCount: number
-	averagePrice: number
-	_count: {
-		types: number
-	}
-}
-
-interface Category {
-	id: number
-	name: string
-	slug: string | null
-	icon: string | null
-	description: string | null
-	isActive: boolean
-	servicesCount: number
-	averagePrice: number
-	subcategories: Subcategory[]
-	_count: {
-		services: number
-		subcategories: number
-	}
-}
+import { Category, Subcategory } from '@/types'
 
 interface CategoryGroupProps {
 	category: Category
@@ -44,8 +15,8 @@ interface CategoryGroupProps {
 	onToggleActive: () => void
 	onAddSubcategory: () => void
 	onEditSubcategory: (subcategory: Subcategory) => void
-	onToggleSubcategoryActive?: (subcategory: Subcategory) => void
-	onDeleteSubcategory?: (subcategory: Subcategory) => void
+	onToggleSubcategoryActive?: (subcategory: Subcategory) => void | Promise<void>
+	onDeleteSubcategory?: (subcategory: Subcategory) => void | Promise<void>
 }
 
 export default function CategoryGroup({

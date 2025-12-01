@@ -3,20 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Edit, EyeOff, Trash2 } from 'lucide-react'
-
-interface Subcategory {
-	id: number
-	name: string
-	slug: string | null
-	icon: string | null
-	description: string | null
-	isActive: boolean
-	servicesCount: number
-	averagePrice: number
-	_count: {
-		types: number
-	}
-}
+import { Subcategory } from '@/types'
 
 interface SubcategoryItemProps {
 	subcategory: Subcategory

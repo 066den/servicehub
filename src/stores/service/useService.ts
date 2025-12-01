@@ -10,8 +10,8 @@ import {
 	lastSubcategoriesUpdateSelector,
 	lastTypesUpdateSelector,
 } from './selectors'
-import { Category } from '@/types'
-import { SubcategoryWithTypes, Type } from '@/stores/admin/types'
+import { Category, TypeService } from '@/types'
+import { SubcategoryWithTypes } from '@/stores/admin/types'
 
 export const useService = () => {
 	// State
@@ -19,7 +19,7 @@ export const useService = () => {
 	const subcategories: SubcategoryWithTypes[] = useServiceStore(
 		subcategoriesSelector
 	)
-	const types: Type[] = useServiceStore(typesSelector)
+	const types: TypeService[] = useServiceStore(typesSelector)
 	const isLoading = useServiceStore(isLoadingSelector)
 	const error = useServiceStore(errorSelector)
 	const lastCategoriesUpdate = useServiceStore(lastCategoriesUpdateSelector)
@@ -45,7 +45,7 @@ export const useService = () => {
 		return subcategories.find(sub => sub.id === id)
 	}
 
-	const getTypeById = (id: number): Type | undefined => {
+	const getTypeById = (id: number): TypeService | undefined => {
 		return types.find(type => type.id === id)
 	}
 
@@ -55,11 +55,11 @@ export const useService = () => {
 		return subcategories.filter(sub => sub.category.id === categoryId)
 	}
 
-	const getTypesBySubcategoryId = (subcategoryId: number): Type[] => {
+	const getTypesBySubcategoryId = (subcategoryId: number): TypeService[] => {
 		return types.filter(type => type.subcategoryId === subcategoryId)
 	}
 
-	const getTypesByCategoryId = (categoryId: number): Type[] => {
+	const getTypesByCategoryId = (categoryId: number): TypeService[] => {
 		return types.filter(type => type.categoryId === categoryId)
 	}
 
@@ -91,4 +91,3 @@ export const useService = () => {
 		getTypesByCategoryId,
 	}
 }
-

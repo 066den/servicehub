@@ -214,6 +214,42 @@ export const updateCategorySchema = z.object({
 	isActive: z.boolean().optional(),
 })
 
+export const createSubcategorySchema = z.object({
+	name: z.string().min(1).max(255),
+	categoryId: z.number().int().positive(),
+	slug: z.string().optional().nullable(),
+	icon: z.string().optional().nullable(),
+	description: z.string().optional().nullable(),
+	isActive: z.boolean().optional(),
+})
+
+export const updateSubcategorySchema = z.object({
+	name: z.string().min(1).max(255),
+	categoryId: z.number().int().positive().optional(),
+	slug: z.string().optional().nullable(),
+	icon: z.string().optional().nullable(),
+	description: z.string().optional().nullable(),
+	isActive: z.boolean().optional(),
+})
+
+export const createTypeSchema = z.object({
+	name: z.string().min(1).max(255),
+	categoryId: z.number().int().positive(),
+	subcategoryId: z.number().int().positive().optional().nullable(),
+	slug: z.string().optional().nullable(),
+	icon: z.string().optional().nullable(),
+	description: z.string().optional().nullable(),
+})
+
+export const updateTypeSchema = z.object({
+	name: z.string().min(1).max(255),
+	categoryId: z.number().int().positive().optional(),
+	subcategoryId: z.number().int().positive().optional().nullable(),
+	slug: z.string().optional().nullable(),
+	icon: z.string().optional().nullable(),
+	description: z.string().optional().nullable(),
+})
+
 export const createCategorySchemaValidate = createCategorySchema.safeParse
 export const updateCategorySchemaValidate = updateCategorySchema.safeParse
 export const createStaffSchemaValidate = createStaffSchema.safeParse
@@ -226,3 +262,7 @@ export type CreateCategorySchema = z.infer<typeof createCategorySchema>
 export type StaffRoleSchema = z.infer<typeof staffRoleSchema>
 export type StaffStatusSchema = z.infer<typeof staffStatusSchema>
 export type UpdateCategorySchema = z.infer<typeof updateCategorySchema>
+export type CreateSubcategorySchema = z.infer<typeof createSubcategorySchema>
+export type UpdateSubcategorySchema = z.infer<typeof updateSubcategorySchema>
+export type CreateTypeSchema = z.infer<typeof createTypeSchema>
+export type UpdateTypeSchema = z.infer<typeof updateTypeSchema>

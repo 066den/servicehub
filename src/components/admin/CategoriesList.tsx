@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Plus, Edit, EyeOff, Eye } from 'lucide-react'
+import { Plus, Edit, EyeOff, Eye, Trash2 } from 'lucide-react'
 import AddCategoryModal from './AddCategoryModal'
 import { Category } from '@/types'
 import { useService } from '@/stores/service/useService'
@@ -13,10 +13,16 @@ import { PagePreloader } from '../ui/preloader'
 import { cn } from '@/lib/utils'
 import useFlag from '@/hooks/useFlag'
 import { SearchCategory } from './SearchCategory'
+import ConfirmDialog from '../modals/ConfirmDialog'
 
 export default function CategoriesList() {
-	const { categories, isLoading, fetchCategories, toggleCategoryStatus } =
-		useService()
+	const {
+		categories,
+		isLoading,
+		fetchCategories,
+		toggleCategoryStatus,
+		deleteCategory,
+	} = useService()
 
 	const [filteredCategories, setFilteredCategories] = useState<Category[]>([])
 	const [searchQuery, setSearchQuery] = useState('')
@@ -27,6 +33,10 @@ export default function CategoriesList() {
 		editCategoryModalClose,
 	] = useFlag()
 	const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+	const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
+		null
+	)
 
 	const filterCategories = useCallback(() => {
 		let filtered = [...categories]
@@ -79,6 +89,23 @@ export default function CategoriesList() {
 		await toggleCategoryStatus(categoryId)
 	}
 
+	const handleDeleteClick = (category: Category) => {
+		setCategoryToDelete(category)
+		setDeleteConfirmOpen(true)
+	}
+
+	const handleDeleteConfirm = async () => {
+		if (!categoryToDelete) return
+		await deleteCategory(categoryToDelete.id)
+		setDeleteConfirmOpen(false)
+		setCategoryToDelete(null)
+	}
+
+	const handleDeleteCancel = () => {
+		setDeleteConfirmOpen(false)
+		setCategoryToDelete(null)
+	}
+
 	const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setSearchQuery(e.target.value)
 	}
@@ -94,9 +121,7 @@ export default function CategoriesList() {
 			{/* Действия */}
 			<Card className='p-4'>
 				<div className='flex items-center justify-between'>
-					<h3 className='text-lg font-semibold text-gray-900'>
-						Категорії ({filteredCategories.length})
-					</h3>
+					<h4>Категорії ({filteredCategories.length})</h4>
 					<Button onClick={handleAddCategory}>
 						<Plus className='size-4' />
 						Додати категорію
@@ -119,7 +144,7 @@ export default function CategoriesList() {
 							key={category.id}
 							className={cn(
 								'bg-card border-b bg-white border-gray-200 rounded-none first:rounded-t-lg last:rounded-b-lg overflow-hidden',
-								category.isActive ? 'opacity-100' : 'opacity-50'
+								!category.isActive && 'opacity-100'
 							)}
 						>
 							<div className='flex items-center justify-between p-5 hover:bg-gray-50 transition-colors'>
@@ -173,6 +198,14 @@ export default function CategoriesList() {
 												<EyeOff className='size-5' />
 											)}
 										</Button>
+										<Button
+											variant='outline'
+											className='text-xs text-red-600 hover:text-red-700'
+											onClick={() => handleDeleteClick(category)}
+											title='Видалити категорію'
+										>
+											<Trash2 className='size-5' />
+										</Button>
 									</div>
 								</div>
 							</div>
@@ -189,6 +222,19 @@ export default function CategoriesList() {
 				}}
 				onSave={handleCategorySaved}
 				category={editingCategory}
+			/>
+
+			<ConfirmDialog
+				title='Видалити категорію'
+				text={`Ви впевнені, що хочете видалити категорію "${
+					categoryToDelete?.name || ''
+				}"? Цю дію неможливо скасувати.`}
+				isOpen={deleteConfirmOpen}
+				onClose={handleDeleteCancel}
+				onDestroy={handleDeleteConfirm}
+				onCancel={handleDeleteCancel}
+				destroyText='Видалити'
+				cancelText='Скасувати'
 			/>
 		</>
 	)

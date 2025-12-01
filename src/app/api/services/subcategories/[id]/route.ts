@@ -37,6 +37,15 @@ export async function GET(
 			where: { id },
 			include: {
 				category: true,
+				types: {
+					include: {
+						_count: {
+							select: {
+								services: true,
+							},
+						},
+					},
+				},
 			},
 		})
 
@@ -47,7 +56,61 @@ export async function GET(
 			)
 		}
 
-		return NextResponse.json({ success: true, subcategory })
+		// Подсчитываем статистику
+		const servicesCount = await prisma.service.count({
+			where: {
+				categoryId: subcategory.categoryId,
+				type: {
+					subcategoryId: subcategory.id,
+				},
+				deletedAt: null,
+			},
+		})
+
+		const avgPriceResult =
+			servicesCount > 0
+				? await prisma.service.aggregate({
+						where: {
+							categoryId: subcategory.categoryId,
+							type: {
+								subcategoryId: subcategory.id,
+							},
+							deletedAt: null,
+						},
+						_avg: {
+							price: true,
+						},
+					})
+				: { _avg: { price: null } }
+
+		// Подсчитываем услуги для каждого типа
+		const typesWithStats = await Promise.all(
+			subcategory.types.map(async type => {
+				const typeServicesCount = await prisma.service.count({
+					where: {
+						typeId: type.id,
+						deletedAt: null,
+					},
+				})
+
+				return {
+					...type,
+					servicesCount: typeServicesCount,
+					categoryId: type.categoryId,
+					subcategoryId: type.subcategoryId,
+					isActive: true, // Type model doesn't have isActive field yet
+				}
+			})
+		)
+
+		const subcategoryWithStats = {
+			...subcategory,
+			servicesCount,
+			averagePrice: avgPriceResult._avg.price || 0,
+			types: typesWithStats,
+		}
+
+		return NextResponse.json({ success: true, subcategory: subcategoryWithStats })
 	} catch (error) {
 		console.error('Error fetching subcategory:', error)
 		return NextResponse.json(
@@ -81,12 +144,25 @@ export async function PUT(
 		const validationResult = updateSubcategorySchema.safeParse(body)
 
 		if (!validationResult.success) {
+			console.error('Validation error:', validationResult.error.issues)
 			return NextResponse.json(
 				{
 					error: 'Invalid request body',
 					details: validationResult.error.issues,
 				},
 				{ status: 400 }
+			)
+		}
+
+		// Проверяем, существует ли подкатегория
+		const existingSubcategory = await prisma.subcategory.findUnique({
+			where: { id },
+		})
+
+		if (!existingSubcategory) {
+			return NextResponse.json(
+				{ error: 'Subcategory not found' },
+				{ status: 404 }
 			)
 		}
 
@@ -98,8 +174,10 @@ export async function PUT(
 		return NextResponse.json({ success: true, subcategory })
 	} catch (error) {
 		console.error('Error updating subcategory:', error)
+		const errorMessage =
+			error instanceof Error ? error.message : 'Failed to update subcategory'
 		return NextResponse.json(
-			{ error: 'Failed to update subcategory' },
+			{ error: errorMessage },
 			{ status: 500 }
 		)
 	}

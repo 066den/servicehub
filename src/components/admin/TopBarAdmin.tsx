@@ -18,7 +18,7 @@ const TopBarAdmin = ({ title, description }: TopBarProps) => {
 	return (
 		<div className='sticky top-0 z-10 flex items-center justify-between bg-white p-6 shadow-md md:rounded-b-xl'>
 			<div className='flex-1'>
-				<h1 className='text-3xl font-bold text-primary'>{title}</h1>
+				<h3 className='text-primary'>{title}</h3>
 				{description && (
 					<p className='text-sm text-gray-500 mt-1'>{description}</p>
 				)}
