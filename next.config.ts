@@ -32,10 +32,12 @@ const nextConfig: NextConfig = {
 			},
 		]
 	},
-	webpack: (config) => {
+	webpack: config => {
+		const srcPath = path.resolve(process.cwd(), 'src')
+		config.resolve = config.resolve || {}
 		config.resolve.alias = {
 			...config.resolve.alias,
-			'@': path.resolve(__dirname, './src'),
+			'@': srcPath,
 		}
 		return config
 	},
