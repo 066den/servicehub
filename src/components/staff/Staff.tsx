@@ -27,7 +27,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover'
 import { formatPhone } from '@/utils/phoneNumber'
-import Avatar from '../ui/Avatar'
+import Avatar from '@/components/ui/Avatar'
 import { useProvider } from '@/stores/provider/useProvider'
 import { useProviderStore } from '@/stores/provider/providerStore'
 import { ROUTES } from '@/lib/constants'

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import AvatarEditable from '../ui/AvatarEditable'
+import AvatarEditable from '@/components/ui/AvatarEditable'
 
 type ProfileType = 'user' | 'executor' | 'staff'
 
