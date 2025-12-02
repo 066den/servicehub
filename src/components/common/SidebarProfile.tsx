@@ -19,6 +19,8 @@ import {
 	Package,
 } from 'lucide-react'
 import { useProvider } from '@/stores/provider/useProvider'
+import ConfirmDialog from '../modals/ConfirmDialog'
+import useFlag from '@/hooks/useFlag'
 
 const providerItems = [
 	{
@@ -82,7 +84,7 @@ const profileItems = [
 const SidebarProfile = () => {
 	const { user, isLoading, logout } = useUserProfile()
 	const { provider } = useProvider()
-
+	const [isOpen, openModal, closeModal] = useFlag()
 	const settingsItems = [
 		{
 			icon: <Settings className='size-5' />,
@@ -93,10 +95,15 @@ const SidebarProfile = () => {
 			icon: <LogOut className='size-5' />,
 			title: 'logout',
 			action: () => {
-				void logout()
+				openModal()
 			},
 		},
 	]
+
+	const handleLogout = () => {
+		void logout()
+		closeModal()
+	}
 
 	const isProvider = user?.role === Role.PROVIDER
 
@@ -112,6 +119,16 @@ const SidebarProfile = () => {
 
 			<SidebarSection title='account' items={profileItems} />
 			<SidebarSection title='settings' items={settingsItems} />
+			<ConfirmDialog
+				title='Вийти'
+				isOpen={isOpen}
+				onClose={closeModal}
+				onDestroy={handleLogout}
+				onCancel={closeModal}
+				destroyText='Вийти'
+				text='Ви впевнені, що хочете вийти з аккаунту?'
+				cancelText='Повернутися'
+			/>
 		</Card>
 	)
 }

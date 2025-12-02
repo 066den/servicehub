@@ -1,3 +1,5 @@
+import ServicesList from '@/components/executor/ServicesList'
+
 export default function ServicesPage() {
-	return <div>ServicesPage</div>
+	return <ServicesList />
 }

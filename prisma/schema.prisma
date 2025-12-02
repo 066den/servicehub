@@ -147,7 +147,7 @@ model Service {
   providerId     Int
   name           String
   description    String?
-  categoryId     Int
+  subcategoryId  Int
   typeId         Int
   price          Float?
   duration       Int?
@@ -160,14 +160,14 @@ model Service {
   updatedAt      DateTime       @updatedAt
   deletedAt      DateTime?
   orders         Order[]
-  category       Category       @relation(fields: [categoryId], references: [id])
+  subcategory    Subcategory    @relation(fields: [subcategoryId], references: [id])
   provider       Provider       @relation(fields: [providerId], references: [id])
   type           Type           @relation(fields: [typeId], references: [id])
   photos         ServicePhoto[]
   serviceTags    ServiceTag[]
 
   @@unique([providerId, name])
-  @@index([categoryId])
+  @@index([subcategoryId])
   @@index([typeId])
   @@index([providerId])
   @@index([isActive])
@@ -235,7 +235,6 @@ model Category {
   image        String?
   description  String?
   isActive     Boolean        @default(true)
-  services     Service[]
   types        Type[]
   subcategories Subcategory[]
 
@@ -253,6 +252,7 @@ model Subcategory {
   isActive    Boolean   @default(true)
   categoryId  Int
   types       Type[]
+  services    Service[]
   category    Category  @relation(fields: [categoryId], references: [id])
 
   @@index([slug])

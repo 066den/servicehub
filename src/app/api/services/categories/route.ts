@@ -20,7 +20,6 @@ export async function GET() {
 				},
 				_count: {
 					select: {
-						services: true,
 						subcategories: true,
 					},
 				},
@@ -35,31 +34,35 @@ export async function GET() {
 		// Подсчитываем статистику для каждой категории
 		const categoriesWithStats = await Promise.all(
 			categories.map(async category => {
-				// Подсчитываем услуги в категории и подкатегориях
-				const servicesCount = await prisma.service.count({
-					where: {
+			// Подсчитываем услуги в категории и подкатегориях
+			const servicesCount = await prisma.service.count({
+				where: {
+					subcategory: {
 						categoryId: category.id,
-						deletedAt: null,
 					},
-				})
+					deletedAt: null,
+				},
+			})
 
-				// Подсчитываем среднюю цену услуг в категории
-				const avgPriceResult =
-					servicesCount > 0
-						? await prisma.service.aggregate({
-								where: {
+			// Подсчитываем среднюю цену услуг в категории
+			const avgPriceResult =
+				servicesCount > 0
+					? await prisma.service.aggregate({
+							where: {
+								subcategory: {
 									categoryId: category.id,
-									deletedAt: null,
 								},
-								_avg: {
-									price: true,
-								},
-						  })
-						: { _avg: { price: null } }
+								deletedAt: null,
+							},
+							_avg: {
+								price: true,
+							},
+					  })
+					: { _avg: { price: null } }
 
-				// Подсчитываем услуги в подкатегориях
-				const subcategoriesWithStats = await Promise.all(
-					category.subcategories.map(async subcategory => {
+			// Подсчитываем услуги в подкатегориях
+			const subcategoriesWithStats = await Promise.all(
+				(category.subcategories || []).map(async (subcategory: { id: number; name: string; slug: string | null; icon: string | null; image: string | null; description: string | null; isActive: boolean; categoryId: number; _count: { types: number } }) => {
 						// Находим все типы робіт в этой подкатегории
 						const types = await prisma.type.findMany({
 							where: {
@@ -74,7 +77,7 @@ export async function GET() {
 							typeIds.length > 0
 								? await prisma.service.count({
 										where: {
-											categoryId: category.id,
+											subcategoryId: subcategory.id,
 											typeId: {
 												in: typeIds,
 											},
@@ -87,7 +90,7 @@ export async function GET() {
 							typeIds.length > 0 && subServicesCount > 0
 								? await prisma.service.aggregate({
 										where: {
-											categoryId: category.id,
+											subcategoryId: subcategory.id,
 											typeId: {
 												in: typeIds,
 											},
@@ -102,7 +105,7 @@ export async function GET() {
 						return {
 							...subcategory,
 							servicesCount: subServicesCount,
-							averagePrice: subAvgPriceResult._avg.price || 0,
+							averagePrice: subAvgPriceResult._avg?.price || 0,
 						}
 					})
 				)
@@ -110,7 +113,7 @@ export async function GET() {
 				return {
 					...category,
 					servicesCount,
-					averagePrice: avgPriceResult._avg.price || 0,
+					averagePrice: avgPriceResult._avg?.price || 0,
 					subcategories: subcategoriesWithStats,
 				}
 			})

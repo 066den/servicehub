@@ -59,10 +59,7 @@ export async function GET(
 		// Подсчитываем статистику
 		const servicesCount = await prisma.service.count({
 			where: {
-				categoryId: subcategory.categoryId,
-				type: {
-					subcategoryId: subcategory.id,
-				},
+				subcategoryId: subcategory.id,
 				deletedAt: null,
 			},
 		})
@@ -71,10 +68,7 @@ export async function GET(
 			servicesCount > 0
 				? await prisma.service.aggregate({
 						where: {
-							categoryId: subcategory.categoryId,
-							type: {
-								subcategoryId: subcategory.id,
-							},
+							subcategoryId: subcategory.id,
 							deletedAt: null,
 						},
 						_avg: {
@@ -106,7 +100,7 @@ export async function GET(
 		const subcategoryWithStats = {
 			...subcategory,
 			servicesCount,
-			averagePrice: avgPriceResult._avg.price || 0,
+			averagePrice: avgPriceResult._avg?.price || 0,
 			types: typesWithStats,
 		}
 

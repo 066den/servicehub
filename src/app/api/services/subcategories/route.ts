@@ -47,26 +47,20 @@ export async function GET() {
 		// Подсчитываем статистику для каждой подкатегории
 		const subcategoriesWithStats = await Promise.all(
 			subcategories.map(async subcategory => {
-				// Подсчитываем услуги в подкатегории через типы
-				const servicesCount = await prisma.service.count({
-					where: {
-						categoryId: subcategory.categoryId,
-						type: {
-							subcategoryId: subcategory.id,
-						},
-						deletedAt: null,
-					},
-				})
+			// Подсчитываем услуги в подкатегории
+			const servicesCount = await prisma.service.count({
+				where: {
+					subcategoryId: subcategory.id,
+					deletedAt: null,
+				},
+			})
 
-				// Подсчитываем среднюю цену
-				const avgPriceResult =
-					servicesCount > 0
-						? await prisma.service.aggregate({
-								where: {
-									categoryId: subcategory.categoryId,
-									type: {
-										subcategoryId: subcategory.id,
-									},
+			// Подсчитываем среднюю цену
+			const avgPriceResult =
+				servicesCount > 0
+					? await prisma.service.aggregate({
+							where: {
+								subcategoryId: subcategory.id,
 									deletedAt: null,
 								},
 								_avg: {
@@ -98,7 +92,7 @@ export async function GET() {
 				return {
 					...subcategory,
 					servicesCount,
-					averagePrice: avgPriceResult._avg.price || 0,
+					averagePrice: avgPriceResult._avg?.price || 0,
 					types: typesWithStats,
 				}
 			})

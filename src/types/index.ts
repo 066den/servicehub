@@ -171,3 +171,35 @@ export interface Category {
 		subcategories: number
 	}
 }
+
+export interface ServicePhoto {
+	id: number
+	serviceId: number
+	url: string
+	alt?: string | null
+	order: number
+	isMain: boolean
+	photoType: string
+}
+
+export interface Service {
+	id: number
+	providerId: number
+	name: string
+	description?: string | null
+	subcategoryId: number
+	typeId: number
+	price?: number | null
+	duration?: number | null
+	pricingOptions?: unknown | null
+	location?: unknown | null
+	requirements?: unknown | null
+	isActive: boolean
+	isFeatured: boolean
+	createdAt: Date
+	updatedAt: Date
+	deletedAt?: Date | null
+	subcategory?: Subcategory
+	type?: TypeService
+	photos?: ServicePhoto[]
+}

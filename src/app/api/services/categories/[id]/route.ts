@@ -77,7 +77,11 @@ export async function DELETE(
 
 		// Проверяем, есть ли услуги в этой категории
 		const servicesCount = await prisma.service.count({
-			where: { categoryId: id },
+			where: {
+				subcategory: {
+					categoryId: id,
+				},
+			},
 		})
 
 		if (servicesCount > 0) {

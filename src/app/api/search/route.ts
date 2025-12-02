@@ -48,11 +48,15 @@ export async function GET(request: NextRequest) {
 						reviewCount: true,
 					},
 				},
-				category: {
-					select: {
-						id: true,
-						name: true,
-						slug: true,
+				subcategory: {
+					include: {
+						category: {
+							select: {
+								id: true,
+								name: true,
+								slug: true,
+							},
+						},
 					},
 				},
 				type: {
@@ -143,9 +147,9 @@ export async function GET(request: NextRequest) {
 			description: service.description,
 			price: service.price,
 			category: {
-				id: service.category.id,
-				name: service.category.name,
-				slug: service.category.slug,
+				id: service.subcategory.category.id,
+				name: service.subcategory.category.name,
+				slug: service.subcategory.category.slug,
 			},
 			type: {
 				id: service.type.id,

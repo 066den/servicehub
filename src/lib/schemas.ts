@@ -266,3 +266,126 @@ export type CreateSubcategorySchema = z.infer<typeof createSubcategorySchema>
 export type UpdateSubcategorySchema = z.infer<typeof updateSubcategorySchema>
 export type CreateTypeSchema = z.infer<typeof createTypeSchema>
 export type UpdateTypeSchema = z.infer<typeof updateTypeSchema>
+
+export const createServiceSchema = z.object({
+	name: z.string().trim().min(1).max(255),
+	description: z
+		.string()
+		.trim()
+		.max(2000)
+		.optional()
+		.transform(value => (value === '' ? undefined : value)),
+	subcategoryId: z.number().int().positive(),
+	typeId: z.number().int().positive(),
+	price: z
+		.number()
+		.positive()
+		.optional()
+		.nullable()
+		.transform(value => (value === null || value === undefined ? null : value)),
+	duration: z
+		.number()
+		.int()
+		.positive()
+		.optional()
+		.nullable()
+		.transform(value => (value === null || value === undefined ? null : value)),
+	pricingOptions: z.preprocess(
+		(val: unknown) => {
+			if (val === null || val === '' || val === undefined) return undefined
+			if (typeof val === 'string') {
+				try {
+					return JSON.parse(val)
+				} catch {
+					return undefined
+				}
+			}
+			return val
+		},
+		z.unknown().optional().nullable()
+	),
+	location: locationSchema,
+	requirements: z.preprocess(
+		(val: unknown) => {
+			if (val === null || val === '' || val === undefined) return undefined
+			if (typeof val === 'string') {
+				try {
+					return JSON.parse(val)
+				} catch {
+					return undefined
+				}
+			}
+			return val
+		},
+		z.unknown().optional().nullable()
+	),
+	isActive: z.boolean().optional().default(true),
+	isFeatured: z.boolean().optional().default(false),
+})
+
+export const updateServiceSchema = z.object({
+	name: z.string().trim().min(1).max(255).optional(),
+	description: z.preprocess(
+		(val: unknown) => (val === null || val === '' ? undefined : val),
+		z.string().trim().max(2000).optional()
+	),
+	subcategoryId: z.number().int().positive().optional(),
+	typeId: z.number().int().positive().optional(),
+	price: z.preprocess(
+		(val: unknown) => (val === null || val === '' ? null : val),
+		z
+			.number()
+			.positive()
+			.optional()
+			.nullable()
+			.transform(value => (value === null || value === undefined ? null : value))
+	),
+	duration: z.preprocess(
+		(val: unknown) => (val === null || val === '' ? null : val),
+		z
+			.number()
+			.int()
+			.positive()
+			.optional()
+			.nullable()
+			.transform(value => (value === null || value === undefined ? null : value))
+	),
+	pricingOptions: z.preprocess(
+		(val: unknown) => {
+			if (val === null || val === '' || val === undefined) return undefined
+			if (typeof val === 'string') {
+				try {
+					return JSON.parse(val)
+				} catch {
+					return undefined
+				}
+			}
+			return val
+		},
+		z.unknown().optional().nullable()
+	),
+	location: locationSchema.optional(),
+	requirements: z.preprocess(
+		(val: unknown) => {
+			if (val === null || val === '' || val === undefined) return undefined
+			if (typeof val === 'string') {
+				try {
+					return JSON.parse(val)
+				} catch {
+					return undefined
+				}
+			}
+			return val
+		},
+		z.unknown().optional().nullable()
+	),
+	isActive: z.boolean().optional(),
+	isFeatured: z.boolean().optional(),
+})
+
+export type CreateServiceSchema = z.infer<typeof createServiceSchema>
+export type UpdateServiceSchema = z.infer<typeof updateServiceSchema>
+
+// Validate
+export const createServiceSchemaValidate = createServiceSchema.safeParse
+export const updateServiceSchemaValidate = updateServiceSchema.safeParse
