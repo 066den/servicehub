@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
+import path from 'path'
 
 const nextConfig: NextConfig = {
 	reactStrictMode: true,
@@ -30,6 +31,13 @@ const nextConfig: NextConfig = {
 				destination: '/api/socketio/:path*',
 			},
 		]
+	},
+	webpack: (config) => {
+		config.resolve.alias = {
+			...config.resolve.alias,
+			'@': path.resolve(__dirname, './src'),
+		}
+		return config
 	},
 }
 
