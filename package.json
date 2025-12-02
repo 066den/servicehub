@@ -6,8 +6,9 @@
 	"scripts": {
 		"dev": "tsx server.ts",
 		"dev:next": "next dev --turbopack",
-		"postinstall": "prisma generate",
-		"build": "prisma generate && next build",
+		"postinstall": "prisma generate || true",
+		"prebuild": "prisma generate",
+		"build": "next build",
 		"start": "tsx server.ts",
 		"start:next": "next start",
 		"lint": "next lint",
