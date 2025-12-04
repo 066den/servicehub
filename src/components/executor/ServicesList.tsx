@@ -19,7 +19,10 @@ import { Badge } from '../ui/badge'
 import { useProviderService } from '@/stores/service/useProviderService'
 import { Service } from '@/types'
 import Image from 'next/image'
-import { PagePreloader } from '../ui/preloader'
+import useFlag from '@/hooks/useFlag'
+import { SkeletonForm } from '../ui/sceletons'
+import { Skeleton } from '../ui/sceletons/skeleton'
+import { type PricingOptions } from '@/lib/schemas'
 
 const ServicesList = () => {
 	const router = useRouter()
@@ -31,7 +34,7 @@ const ServicesList = () => {
 		toggleActive,
 		toggleFeatured,
 	} = useProviderService()
-	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+	const [isDeleteConfirmOpen, openDeleteConfirm, closeDeleteConfirm] = useFlag()
 	const [serviceToDelete, setServiceToDelete] = useState<{
 		id: number
 		name: string
@@ -54,7 +57,7 @@ const ServicesList = () => {
 			id: service.id,
 			name: service.name,
 		})
-		setDeleteConfirmOpen(true)
+		openDeleteConfirm()
 	}
 
 	const handleDeleteConfirm = async () => {
@@ -62,13 +65,13 @@ const ServicesList = () => {
 
 		const success = await deleteService(serviceToDelete.id)
 		if (success) {
-			setDeleteConfirmOpen(false)
+			closeDeleteConfirm()
 			setServiceToDelete(null)
 		}
 	}
 
 	const handleDeleteCancel = () => {
-		setDeleteConfirmOpen(false)
+		closeDeleteConfirm()
 		setServiceToDelete(null)
 	}
 
@@ -80,9 +83,39 @@ const ServicesList = () => {
 		await toggleFeatured(service.id)
 	}
 
-	const formatPrice = (price: number | null | undefined) => {
-		if (!price) return 'Договірна'
-		return `${price.toFixed(2)} ₴`
+	const formatPrice = (service: Service): string => {
+		// Проверяем наличие pricingOptions
+		if (
+			service.pricingOptions &&
+			typeof service.pricingOptions === 'object' &&
+			service.pricingOptions !== null
+		) {
+			const options = service.pricingOptions as PricingOptions
+			const price = options.price
+
+			if (!price || price <= 0) return 'Договірна'
+
+			switch (options.format) {
+				case 'FIXED':
+					return `${price.toFixed(2)} ₴`
+				case 'FROM':
+					return `Від ${price.toFixed(2)} ₴`
+				case 'HOURLY':
+					return `${price.toFixed(2)} ₴/год`
+				case 'PER_UNIT':
+					const unit = options.unit || ''
+					return `${price.toFixed(2)} ₴/${unit}`
+				default:
+					return `${price.toFixed(2)} ₴`
+			}
+		}
+
+		// Обратная совместимость: используем старое поле price
+		if (service.price) {
+			return `${service.price.toFixed(2)} ₴`
+		}
+
+		return 'Договірна'
 	}
 
 	const formatDuration = (duration: number | null | undefined) => {
@@ -112,13 +145,15 @@ const ServicesList = () => {
 						Управління вашими послугами
 					</p>
 				</div>
-				<Button onClick={handleCreate}>
+				<Button variant='success' onClick={handleCreate}>
 					<Plus className='size-4' /> Додати послугу
 				</Button>
 			</div>
-
 			{isLoading ? (
-				<PagePreloader />
+				<>
+					<SkeletonForm count={4} />
+					<Skeleton className='h-[300px] w-full rounded-lg' />
+				</>
 			) : services.length === 0 ? (
 				<div className='text-center py-8 text-gray-500'>
 					Послуг поки немає. Додайте першу послугу.
@@ -140,8 +175,7 @@ const ServicesList = () => {
 					<TableBody>
 						{services.map(service => {
 							const mainPhoto = service.photos?.find(photo => photo.isMain)
-							const categoryName =
-								service.subcategory?.category?.name || '—'
+							const categoryName = service.subcategory?.category?.name || '—'
 							const subcategoryName = service.subcategory?.name || '—'
 							const typeName = service.type?.name || '—'
 
@@ -188,7 +222,7 @@ const ServicesList = () => {
 										{typeName}
 									</TableCell>
 									<TableCell className='py-4 text-gray-700 font-medium'>
-										{formatPrice(service.price)}
+										{formatPrice(service)}
 									</TableCell>
 									<TableCell className='py-4 text-gray-700'>
 										{formatDuration(service.duration)}
@@ -201,7 +235,10 @@ const ServicesList = () => {
 												{service.isActive ? 'Активна' : 'Неактивна'}
 											</Badge>
 											{service.isFeatured && (
-												<Badge variant='outline' className='flex items-center gap-1 w-fit'>
+												<Badge
+													variant='outline'
+													className='flex items-center gap-1 w-fit'
+												>
 													<Star className='w-3 h-3 fill-yellow-400 text-yellow-400' />
 													Рекомендована
 												</Badge>
@@ -272,7 +309,7 @@ const ServicesList = () => {
 			<ConfirmDialog
 				title='Видалити послугу'
 				text={`Ви впевнені, що хочете видалити послугу "${serviceToDelete?.name}"? Цю дію неможливо скасувати.`}
-				isOpen={deleteConfirmOpen}
+				isOpen={isDeleteConfirmOpen}
 				onClose={handleDeleteCancel}
 				onDestroy={handleDeleteConfirm}
 				onCancel={handleDeleteCancel}

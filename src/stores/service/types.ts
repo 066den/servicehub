@@ -1,4 +1,5 @@
-import { Category, Subcategory } from '@/types'
+import { CreateServiceSchema, UpdateServiceSchema } from '@/lib/schemas'
+import { Category, Service, Subcategory } from '@/types'
 
 export interface Type {
 	id: number
@@ -58,9 +59,7 @@ export interface ServiceActions {
 	clearCategories: () => void
 
 	// Subcategories actions
-	fetchSubcategories: (
-		force?: boolean
-	) => Promise<SubcategoryWithTypes[] | null>
+	fetchSubcategories: (force?: boolean) => Promise<void>
 	createSubcategory: (data: {
 		name: string
 		categoryId: number
@@ -68,7 +67,7 @@ export interface ServiceActions {
 		icon?: string | null
 		description?: string | null
 		isActive?: boolean
-	}) => Promise<Subcategory | null>
+	}) => Promise<void>
 	updateSubcategory: (
 		id: number,
 		data: {
@@ -79,13 +78,13 @@ export interface ServiceActions {
 			isActive?: boolean
 			categoryId?: number
 		}
-	) => Promise<Subcategory | null>
+	) => Promise<void>
 	deleteSubcategory: (id: number) => Promise<boolean>
 	toggleSubcategoryStatus: (id: number) => Promise<boolean>
 	clearSubcategories: () => void
 
 	// Types actions
-	fetchTypes: (force?: boolean) => Promise<Type[] | null>
+	fetchTypes: (force?: boolean) => Promise<void>
 	createType: (data: {
 		name: string
 		categoryId: number
@@ -93,7 +92,7 @@ export interface ServiceActions {
 		slug?: string | null
 		icon?: string | null
 		description?: string | null
-	}) => Promise<Type | null>
+	}) => Promise<void>
 	updateType: (
 		id: number,
 		data: {
@@ -104,12 +103,38 @@ export interface ServiceActions {
 			categoryId?: number
 			subcategoryId?: number | null
 		}
-	) => Promise<Type | null>
+	) => Promise<void>
 	deleteType: (id: number) => Promise<boolean>
 	clearTypes: () => void
 
 	// Clear all
 	clearAll: () => void
+}
+
+interface ProviderServiceState {
+	services: Service[]
+	currentService: Service | null
+	isLoading: boolean
+	error: string | null
+	lastServicesUpdate: number
+}
+
+export interface ProviderServiceActions {
+	fetchServices: (force?: boolean) => Promise<Service[] | null>
+	fetchService: (id: number) => Promise<Service | null>
+	createService: (data: CreateServiceSchema) => Promise<Service | null>
+	updateService: (
+		id: number,
+		data: UpdateServiceSchema
+	) => Promise<Service | null>
+	deleteService: (id: number) => Promise<boolean>
+	toggleActive: (id: number) => Promise<boolean>
+	toggleFeatured: (id: number) => Promise<boolean>
+	clearServices: () => void
+}
+
+export interface ProviderServiceStore extends ProviderServiceState {
+	actions: ProviderServiceActions
 }
 
 export interface ServiceStore extends ServiceState {

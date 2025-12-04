@@ -182,6 +182,20 @@ export interface ServicePhoto {
 	photoType: string
 }
 
+export interface ServiceAddon {
+	id: number
+	serviceId: number
+	title: string
+	duration: number
+	price: number
+	minQuantity: number
+	maxQuantity: number
+	order: number
+	isActive: boolean
+	createdAt: Date
+	updatedAt: Date
+}
+
 export interface Service {
 	id: number
 	providerId: number
@@ -202,4 +216,28 @@ export interface Service {
 	subcategory?: Subcategory
 	type?: TypeService
 	photos?: ServicePhoto[]
+	addons?: ServiceAddon[]
+}
+
+export type PremiumServiceType = 'SEARCH_BOOST' | 'CATEGORY_ADS' | 'TOP' | 'PRO'
+
+export interface ProviderPremiumService {
+	id: number
+	providerId: number
+	type: PremiumServiceType
+	categoryId?: number | null
+	startsAt: Date
+	expiresAt: Date
+	isActive: boolean
+	createdAt: Date
+	updatedAt: Date
+	category?: Category | null
+}
+
+export interface PremiumServiceInfo {
+	type: PremiumServiceType
+	name: string
+	description: string
+	icon?: string
+	requiresCategory?: boolean
 }

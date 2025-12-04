@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// Вспомогательная функция для удаления служебных полей из результата поиска
+function removeServiceFields<T extends Record<string, unknown>>(
+	obj: T
+): Omit<T, 'premiumPriority' | 'premiumType' | 'isFeatured' | 'createdAt'> {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { premiumPriority, premiumType, isFeatured, createdAt, ...rest } = obj
+	return rest
+}
+
 export async function GET(request: NextRequest) {
 	try {
 		const searchParams = request.nextUrl.searchParams
@@ -17,6 +26,48 @@ export async function GET(request: NextRequest) {
 		}
 
 		const searchTerm = query.trim().toLowerCase()
+		const categoryId = searchParams.get('categoryId')
+			? parseInt(searchParams.get('categoryId') || '0')
+			: null
+
+		// Получаем активные премиум-услуги для всех провайдеров
+		const now = new Date()
+		const activePremiumServices = await prisma.providerPremiumService.findMany({
+			where: {
+				isActive: true,
+				expiresAt: {
+					gte: now,
+				},
+			},
+			include: {
+				category: {
+					select: {
+						id: true,
+						name: true,
+						slug: true,
+					},
+				},
+			},
+		})
+
+		// Создаем карту премиум-услуг по providerId
+		const premiumServicesMap = new Map<
+			number,
+			{
+				type: string
+				categoryId: number | null
+			}[]
+		>()
+
+		activePremiumServices.forEach(service => {
+			if (!premiumServicesMap.has(service.providerId)) {
+				premiumServicesMap.set(service.providerId, [])
+			}
+			premiumServicesMap.get(service.providerId)?.push({
+				type: service.type,
+				categoryId: service.categoryId,
+			})
+		})
 
 		// Поиск услуг (services)
 		const services = await prisma.service.findMany({
@@ -73,15 +124,7 @@ export async function GET(request: NextRequest) {
 					take: 1,
 				},
 			},
-			take: limit,
-			orderBy: [
-				{
-					isFeatured: 'desc',
-				},
-				{
-					createdAt: 'desc',
-				},
-			],
+			take: limit * 2, // Берем больше, чтобы после сортировки осталось достаточно
 		})
 
 		// Поиск категорий
@@ -140,31 +183,106 @@ export async function GET(request: NextRequest) {
 			})
 		})
 
-		// Форматируем результаты для фронтенда
-		const formattedResults = services.map(service => ({
-			id: service.id,
-			name: service.name,
-			description: service.description,
-			price: service.price,
-			category: {
-				id: service.subcategory.category.id,
-				name: service.subcategory.category.name,
-				slug: service.subcategory.category.slug,
-			},
-			type: {
-				id: service.type.id,
-				name: service.type.name,
-				slug: service.type.slug,
-			},
-			provider: {
-				id: service.provider.id,
-				businessName: service.provider.businessName,
-				avatar: service.provider.avatar,
-				rating: service.provider.rating,
-				reviewCount: service.provider.reviewCount,
-			},
-			image: service.photos[0]?.url || null,
-		}))
+		// Функция для определения приоритета премиум-услуги
+		const getPremiumPriority = (
+			providerId: number,
+			serviceCategoryId: number
+		): number => {
+			const providerPremiumServices = premiumServicesMap.get(providerId) || []
+			let maxPriority = 0
+
+			providerPremiumServices.forEach(premium => {
+				let priority = 0
+				switch (premium.type) {
+					case 'TOP':
+						priority = 100
+						break
+					case 'PRO':
+						priority = 80
+						break
+					case 'CATEGORY_ADS':
+						// Реклама в категории имеет приоритет только если соответствует категории поиска
+						if (
+							premium.categoryId &&
+							(categoryId === premium.categoryId ||
+								serviceCategoryId === premium.categoryId)
+						) {
+							priority = 60
+						}
+						break
+					case 'SEARCH_BOOST':
+						priority = 40
+						break
+				}
+				maxPriority = Math.max(maxPriority, priority)
+			})
+
+			return maxPriority
+		}
+
+		// Форматируем результаты для фронтенда и добавляем информацию о премиум-статусе
+		const formattedResults = services
+			.map(service => {
+				const premiumPriority = getPremiumPriority(
+					service.provider.id,
+					service.subcategory.category.id
+				)
+				const providerPremiumServices =
+					premiumServicesMap.get(service.provider.id) || []
+				const activePremiumType = providerPremiumServices.find(
+					premium =>
+						premium.type === 'TOP' ||
+						premium.type === 'PRO' ||
+						(premium.type === 'CATEGORY_ADS' &&
+							premium.categoryId &&
+							(categoryId === premium.categoryId ||
+								service.subcategory.category.id === premium.categoryId)) ||
+						premium.type === 'SEARCH_BOOST'
+				)?.type
+
+				return {
+					id: service.id,
+					name: service.name,
+					description: service.description,
+					price: service.price,
+					category: {
+						id: service.subcategory.category.id,
+						name: service.subcategory.category.name,
+						slug: service.subcategory.category.slug,
+					},
+					type: {
+						id: service.type.id,
+						name: service.type.name,
+						slug: service.type.slug,
+					},
+					provider: {
+						id: service.provider.id,
+						businessName: service.provider.businessName,
+						avatar: service.provider.avatar,
+						rating: service.provider.rating,
+						reviewCount: service.provider.reviewCount,
+					},
+					image: service.photos[0]?.url || null,
+					premiumPriority,
+					premiumType: activePremiumType || null,
+					isFeatured: service.isFeatured,
+					createdAt: service.createdAt,
+				}
+			})
+			.sort((a, b) => {
+				// Сортировка по приоритету премиум-услуг (убывание)
+				if (b.premiumPriority !== a.premiumPriority) {
+					return b.premiumPriority - a.premiumPriority
+				}
+				// Затем по isFeatured
+				if (b.isFeatured !== a.isFeatured) {
+					return b.isFeatured ? 1 : -1
+				}
+				// Затем по дате создания (новые первыми)
+				return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+			})
+			.slice(0, limit) // Берем только нужное количество
+			.map(removeServiceFields) // Убираем служебные поля
 
 		return NextResponse.json({
 			success: true,
@@ -180,4 +298,3 @@ export async function GET(request: NextRequest) {
 		)
 	}
 }
-

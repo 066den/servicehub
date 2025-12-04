@@ -10,6 +10,7 @@ export const ROUTES = {
 	SETTINGS: '/settings',
 	STAFF: '/profile/staff',
 	SERVICES: '/profile/services',
+	PREMIUM_SERVICES: '/profile/premium-services',
 	STAFF_PROFILE: (id: number) => `/profile/staff/${id}`,
 	//ADMIN
 	ADMIN: {

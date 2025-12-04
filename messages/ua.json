@@ -44,7 +44,8 @@
 		"staff": "Співробітники",
 		"categories": "Категорії",
 		"serviceTypes": "Типи послуг",
-		"catalog": "Каталог"
+		"catalog": "Каталог",
+		"premiumServices": "Преміум послуги"
 	},
 	"Form": {
 		"phone": "Номер телефону",

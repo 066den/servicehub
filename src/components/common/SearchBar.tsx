@@ -12,11 +12,14 @@ import LoadingSpinner from '../ui/LoadingSpinner'
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { type PricingOptions } from '@/lib/schemas'
+
 interface SearchResult {
 	id: number
 	name: string
 	description: string | null
 	price: number | null
+	pricingOptions?: unknown | null
 	category: {
 		id: number
 		name: string
@@ -249,6 +252,41 @@ const SearchBar = () => {
 		return -1
 	}
 
+	const formatPrice = (result: SearchResult): string => {
+		// Проверяем наличие pricingOptions
+		if (
+			result.pricingOptions &&
+			typeof result.pricingOptions === 'object' &&
+			result.pricingOptions !== null
+		) {
+			const options = result.pricingOptions as PricingOptions
+			const price = options.price
+
+			if (!price || price <= 0) return 'Договірна'
+
+			switch (options.format) {
+				case 'FIXED':
+					return `${price.toFixed(2)} ₴`
+				case 'FROM':
+					return `Від ${price.toFixed(2)} ₴`
+				case 'HOURLY':
+					return `${price.toFixed(2)} ₴/год`
+				case 'PER_UNIT':
+					const unit = options.unit || ''
+					return `${price.toFixed(2)} ₴/${unit}`
+				default:
+					return `${price.toFixed(2)} ₴`
+			}
+		}
+
+		// Обратная совместимость: используем старое поле price
+		if (result.price) {
+			return `${result.price.toFixed(2)} ₴`
+		}
+
+		return 'Договірна'
+	}
+
 	const hasContent =
 		suggestions.length > 0 || results.length > 0 || categories.length > 0
 
@@ -394,7 +432,7 @@ const SearchBar = () => {
 															</p>
 														)}
 														<div className='flex items-center gap-4 mt-1 text-xs text-gray-400'>
-															{result.price && <span>{result.price} ₴</span>}
+															<span>{formatPrice(result)}</span>
 															<span>{result.provider.businessName}</span>
 														</div>
 													</div>

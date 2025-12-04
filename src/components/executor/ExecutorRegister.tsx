@@ -20,10 +20,7 @@ import { toast } from 'sonner'
 
 import type { Executor } from '@/types/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { createProviderSchema } from '@/lib/schemas'
-import type { z } from 'zod'
-
-type FormData = z.input<typeof createProviderSchema>
+import { CreateProviderSchema, createProviderSchema } from '@/lib/schemas'
 
 const ExecutorRegister = () => {
 	const { user, userLocation } = useUserProfile()
@@ -40,8 +37,9 @@ const ExecutorRegister = () => {
 		getValues,
 		watch,
 		formState: { errors, isSubmitting },
-	} = useForm<FormData>({
-		resolver: zodResolver(createProviderSchema, undefined, { raw: true }),
+	} = useForm<CreateProviderSchema>({
+		// @ts-expect-error - zodResolver with preprocess returns unknown input types
+		resolver: zodResolver(createProviderSchema),
 		defaultValues: {
 			type: ProviderType.INDIVIDUAL,
 			businessName: '',
@@ -80,9 +78,7 @@ const ExecutorRegister = () => {
 	const onSubmit = handleSubmit(async data => {
 		// COMPANY недоступен для выбора, принудительно устанавливаем INDIVIDUAL
 		const providerType =
-			data.type === ProviderType.COMPANY
-				? ProviderType.INDIVIDUAL
-				: data.type
+			data.type === ProviderType.COMPANY ? ProviderType.INDIVIDUAL : data.type
 
 		const payload: Executor = {
 			type: providerType,

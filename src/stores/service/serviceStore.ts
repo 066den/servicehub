@@ -108,17 +108,11 @@ export const useServiceStore = create<ServiceStore>()(
 
 						try {
 							const response = await apiRequestAuth<{
-								success: boolean
 								category: Category
-								error?: string
 							}>('/api/services/categories', {
 								method: 'POST',
 								body: JSON.stringify(data),
 							})
-
-							if (!response.success || !response.category) {
-								throw new Error(response.error || 'Failed to create category')
-							}
 
 							// Обновляем с реальными данными с сервера
 							const { categories: currentCategories } = get()
@@ -327,33 +321,26 @@ export const useServiceStore = create<ServiceStore>()(
 
 					// Subcategories actions
 					fetchSubcategories: async (force = false) => {
-						const { lastSubcategoriesUpdate, subcategories } = get()
+						const { lastSubcategoriesUpdate } = get()
 
 						const now = Date.now()
 						if (!force && now - lastSubcategoriesUpdate < 5 * 60 * 1000) {
-							return subcategories
+							return
 						}
 
 						set({ isLoading: true, error: null })
 
 						try {
 							const data = await apiRequestAuth<{
-								success: boolean
 								subcategories: SubcategoryWithTypes[]
 								error?: string
 							}>('/api/services/subcategories')
-
-							if (!data.success || !data.subcategories) {
-								throw new Error(data.error || 'Failed to fetch subcategories')
-							}
 
 							set({
 								subcategories: data.subcategories,
 								lastSubcategoriesUpdate: now,
 								isLoading: false,
 							})
-
-							return data.subcategories
 						} catch (error) {
 							let message = 'Помилка завантаження підкатегорій'
 							if (error instanceof Error) {
@@ -365,7 +352,6 @@ export const useServiceStore = create<ServiceStore>()(
 							})
 
 							toast.error(message)
-							return null
 						}
 					},
 
@@ -375,7 +361,7 @@ export const useServiceStore = create<ServiceStore>()(
 
 						if (!category) {
 							toast.error('Категорію не знайдено')
-							return null
+							return
 						}
 
 						set({ isLoading: true, error: null })
@@ -401,19 +387,12 @@ export const useServiceStore = create<ServiceStore>()(
 
 						try {
 							const response = await apiRequestAuth<{
-								success: boolean
 								subcategory: Subcategory
 								error?: string
 							}>('/api/services/subcategories', {
 								method: 'POST',
 								body: JSON.stringify(data),
 							})
-
-							if (!response.success || !response.subcategory) {
-								throw new Error(
-									response.error || 'Failed to create subcategory'
-								)
-							}
 
 							// Получаем полные данные с сервера
 							const fullData = await apiRequestAuth<{
@@ -459,7 +438,6 @@ export const useServiceStore = create<ServiceStore>()(
 							}
 
 							toast.success('Підкатегорію успішно створено')
-							return response.subcategory
 						} catch (error) {
 							// Rollback
 							set({
@@ -477,7 +455,6 @@ export const useServiceStore = create<ServiceStore>()(
 									? error.message || 'Помилка створення підкатегорії'
 									: 'Помилка створення підкатегорії'
 							toast.error(message)
-							return null
 						}
 					},
 
@@ -487,7 +464,7 @@ export const useServiceStore = create<ServiceStore>()(
 
 						if (!originalSubcategory) {
 							toast.error('Підкатегорію не знайдено')
-							return null
+							return
 						}
 
 						// Optimistic update
@@ -511,7 +488,6 @@ export const useServiceStore = create<ServiceStore>()(
 
 						try {
 							const response = await apiRequestAuth<{
-								success: boolean
 								subcategory: Subcategory
 								error?: string
 							}>(`/api/services/subcategories/${id}`, {
@@ -519,20 +495,13 @@ export const useServiceStore = create<ServiceStore>()(
 								body: JSON.stringify(data),
 							})
 
-							if (!response.success || !response.subcategory) {
-								throw new Error(
-									response.error || 'Failed to update subcategory'
-								)
-							}
-
 							// Получаем полные данные с сервера
 							const fullData = await apiRequestAuth<{
-								success: boolean
 								subcategory: SubcategoryWithTypes
 								error?: string
 							}>(`/api/services/subcategories/${id}`)
 
-							if (fullData.success && fullData.subcategory) {
+							if (fullData.subcategory) {
 								// Обновляем с актуальными данными
 								const { subcategories: currentSubcategories } = get()
 								const currentSub = currentSubcategories.find(
@@ -592,7 +561,6 @@ export const useServiceStore = create<ServiceStore>()(
 							}
 
 							toast.success('Підкатегорію успішно оновлено')
-							return response.subcategory
 						} catch (error) {
 							// Rollback
 							set({
@@ -611,7 +579,6 @@ export const useServiceStore = create<ServiceStore>()(
 									? error.message || 'Помилка оновлення підкатегорії'
 									: 'Помилка оновлення підкатегорії'
 							toast.error(message)
-							return null
 						}
 					},
 
@@ -637,18 +604,11 @@ export const useServiceStore = create<ServiceStore>()(
 						})
 
 						try {
-							const response = await apiRequestAuth<{
-								success: boolean
+							await apiRequestAuth<{
 								error?: string
 							}>(`/api/services/subcategories/${id}`, {
 								method: 'DELETE',
 							})
-
-							if (!response.success) {
-								throw new Error(
-									response.error || 'Failed to delete subcategory'
-								)
-							}
 
 							toast.success('Підкатегорію успішно видалено')
 							return true
@@ -820,23 +780,22 @@ export const useServiceStore = create<ServiceStore>()(
 
 					// Types actions
 					fetchTypes: async (force = false) => {
-						const { lastTypesUpdate, types } = get()
+						const {
+							lastTypesUpdate,
+							subcategories,
+							actions: { fetchSubcategories },
+						} = get()
 
 						const now = Date.now()
 						if (!force && now - lastTypesUpdate < 5 * 60 * 1000) {
-							return types
+							return
 						}
 
 						set({ isLoading: true, error: null })
 
 						try {
 							// Types are fetched as part of subcategories
-							const subcategories = await get().actions.fetchSubcategories(
-								force
-							)
-							if (!subcategories) {
-								return null
-							}
+							await fetchSubcategories(force)
 
 							const allTypes: Type[] = []
 							subcategories.forEach(sub => {
@@ -850,8 +809,6 @@ export const useServiceStore = create<ServiceStore>()(
 								lastTypesUpdate: now,
 								isLoading: false,
 							})
-
-							return allTypes
 						} catch (error) {
 							let message = 'Помилка завантаження типів послуг'
 							if (error instanceof Error) {
@@ -863,7 +820,6 @@ export const useServiceStore = create<ServiceStore>()(
 							})
 
 							toast.error(message)
-							return null
 						}
 					},
 
@@ -905,17 +861,12 @@ export const useServiceStore = create<ServiceStore>()(
 
 						try {
 							const response = await apiRequestAuth<{
-								success: boolean
 								type: Type
 								error?: string
 							}>('/api/services/types', {
 								method: 'POST',
 								body: JSON.stringify(data),
 							})
-
-							if (!response.success || !response.type) {
-								throw new Error(response.error || 'Failed to create type')
-							}
 
 							// Обновляем с реальными данными
 							const {
@@ -951,7 +902,6 @@ export const useServiceStore = create<ServiceStore>()(
 							})
 
 							toast.success('Тип послуги успішно створено')
-							return response.type
 						} catch (error) {
 							// Rollback
 							set({
@@ -969,7 +919,6 @@ export const useServiceStore = create<ServiceStore>()(
 									? error.message || 'Помилка створення типу послуги'
 									: 'Помилка створення типу послуги'
 							toast.error(message)
-							return null
 						}
 					},
 
@@ -979,7 +928,7 @@ export const useServiceStore = create<ServiceStore>()(
 
 						if (!originalType) {
 							toast.error('Тип послуги не знайдено')
-							return null
+							return
 						}
 
 						// Optimistic update
@@ -1004,17 +953,12 @@ export const useServiceStore = create<ServiceStore>()(
 
 						try {
 							const response = await apiRequestAuth<{
-								success: boolean
 								type: Type
 								error?: string
 							}>(`/api/services/types/${id}`, {
 								method: 'PUT',
 								body: JSON.stringify(data),
 							})
-
-							if (!response.success || !response.type) {
-								throw new Error(response.error || 'Failed to update type')
-							}
 
 							// Обновляем с актуальными данными
 							const {
@@ -1062,7 +1006,6 @@ export const useServiceStore = create<ServiceStore>()(
 							})
 
 							toast.success('Тип послуги успішно оновлено')
-							return response.type
 						} catch (error) {
 							// Rollback
 							const rollbackSubcategories = subcategories.map(sub => ({
@@ -1086,7 +1029,7 @@ export const useServiceStore = create<ServiceStore>()(
 									? error.message || 'Помилка оновлення типу послуги'
 									: 'Помилка оновлення типу послуги'
 							toast.error(message)
-							return null
+							return
 						}
 					},
 

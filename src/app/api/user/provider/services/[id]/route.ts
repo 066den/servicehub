@@ -51,6 +51,11 @@ export async function GET(
 						order: 'asc',
 					},
 				},
+				addons: {
+					orderBy: {
+						order: 'asc',
+					},
+				},
 			},
 		})
 
@@ -249,6 +254,29 @@ export async function PUT(
 			updateData.isFeatured = validationResult.data.isFeatured
 		}
 
+		// Обработка дополнительных услуг (addons)
+		if (validationResult.data.addons !== undefined) {
+			// Удаляем все существующие addons и создаем новые
+			await prisma.serviceAddon.deleteMany({
+				where: { serviceId },
+			})
+
+			if (validationResult.data.addons.length > 0) {
+				// Используем ServiceUncheckedUpdateInput для работы с вложенными отношениями
+				;(updateData as Prisma.ServiceUncheckedUpdateInput).addons = {
+					create: validationResult.data.addons.map((addon, index) => ({
+						title: addon.title,
+						duration: addon.duration,
+						price: addon.price,
+						minQuantity: addon.minQuantity,
+						maxQuantity: addon.maxQuantity,
+						order: addon.order ?? index,
+						isActive: addon.isActive ?? true,
+					})),
+				}
+			}
+		}
+
 		// Проверяем, что есть хотя бы одно поле для обновления
 		if (Object.keys(updateData).length === 0) {
 			return NextResponse.json(
@@ -268,6 +296,11 @@ export async function PUT(
 				},
 				type: true,
 				photos: {
+					orderBy: {
+						order: 'asc',
+					},
+				},
+				addons: {
 					orderBy: {
 						order: 'asc',
 					},

@@ -40,22 +40,22 @@ model User {
 }
 
 model Provider {
-  id                    Int              @id @default(autoincrement())
-  userId                Int              @unique
-  type                  ProviderType     @default(INDIVIDUAL)
+  id                    Int                      @id @default(autoincrement())
+  userId                Int                      @unique
+  type                  ProviderType             @default(INDIVIDUAL)
   businessName          String
   description           String?
   avatar                String?
-  status                ProviderStatus   @default(APPROVED)
-  rating                Float            @default(0)
-  reviewCount           Int              @default(0)
-  companyInfoId         Int?             @unique
+  status                ProviderStatus           @default(APPROVED)
+  rating                Float                    @default(0)
+  reviewCount           Int                      @default(0)
+  companyInfoId         Int?                     @unique
   workingHours          Json?
   serviceAreas          Json?
   documents             Json?
-  isActive              Boolean          @default(true)
-  isDeleted             Boolean          @default(false)
-  subscriptionPlan      SubscriptionPlan @default(FREE)
+  isActive              Boolean                  @default(true)
+  isDeleted             Boolean                  @default(false)
+  subscriptionPlan      SubscriptionPlan         @default(FREE)
   subscriptionExpiresAt DateTime?
   location              Json?
   email                 String?
@@ -63,15 +63,16 @@ model Provider {
   instagram             String?
   facebook              String?
   telegram              String?
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
   deletedAt             DateTime?
   staff                 Staff[]
   orders                Order[]
-  companyInfo           CompanyInfo?     @relation(fields: [companyInfoId], references: [id])
-  user                  User             @relation(fields: [userId], references: [id])
+  companyInfo           CompanyInfo?             @relation(fields: [companyInfoId], references: [id])
+  user                  User                     @relation(fields: [userId], references: [id])
   reviews               Review[]
   services              Service[]
+  premiumServices       ProviderPremiumService[]
 
   @@index([userId])
   @@index([status])
@@ -96,13 +97,13 @@ model CompanyInfo {
 }
 
 model Staff {
-  id              Int             @id @default(autoincrement())
+  id              Int          @id @default(autoincrement())
   providerId      Int
   firstName       String
   lastName        String
   phone           String?
-  role            StaffRole       @default(WORKER)
-  status          StaffStatus     @default(FREE)
+  role            StaffRole    @default(WORKER)
+  status          StaffStatus  @default(FREE)
   position        String?
   department      String?
   specialization  String?
@@ -110,12 +111,12 @@ model Staff {
   workingHours    Json?
   avatar          String?
   rating          Float?
-  reviewCount     Int?            @default(0)
-  hireDate        DateTime        @default(now())
+  reviewCount     Int?         @default(0)
+  hireDate        DateTime     @default(now())
   terminationDate DateTime?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  provider        Provider        @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  provider        Provider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
   assignedOrders  OrderStaff[]
 
   @@index([providerId])
@@ -156,6 +157,7 @@ model Service {
   requirements   Json?
   isActive       Boolean        @default(true)
   isFeatured     Boolean        @default(false)
+  order          Int            @default(0)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   deletedAt      DateTime?
@@ -165,6 +167,7 @@ model Service {
   type           Type           @relation(fields: [typeId], references: [id])
   photos         ServicePhoto[]
   serviceTags    ServiceTag[]
+  addons         ServiceAddon[]
 
   @@unique([providerId, name])
   @@index([subcategoryId])
@@ -173,6 +176,7 @@ model Service {
   @@index([isActive])
   @@index([deletedAt])
   @@index([isFeatured])
+  @@index([order])
 }
 
 model ServicePhoto {
@@ -189,35 +193,54 @@ model ServicePhoto {
   @@index([photoType])
 }
 
+model ServiceAddon {
+  id          Int      @id @default(autoincrement())
+  serviceId   Int
+  title       String
+  duration    Int
+  price       Float
+  minQuantity Int      @default(1)
+  maxQuantity Int      @default(10)
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
+  @@index([isActive])
+  @@index([order])
+}
+
 model Order {
-  id                Int             @id @default(autoincrement())
-  clientId          Int
-  providerId        Int
-  serviceId         Int
-  status            OrderStatus     @default(CREATED)
-  scheduledAt       DateTime?
-  startedAt         DateTime?
-  completedAt       DateTime?
-  serviceDetails    Json?
-  location          Json?
-  clientNotes       String?
-  providerNotes     String?
-  totalAmount       Float?
-  platformFee       Float?
-  paymentStatus     PaymentStatus   @default(PENDING)
-  photos            String[]
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  deletedAt         DateTime?
-  estimatedHours    Float?
-  actualHours       Float?
-  teamNotes         String?
-  workLog           Json?
-  client            User            @relation("ClientOrders", fields: [clientId], references: [id])
-  provider          Provider        @relation(fields: [providerId], references: [id])
-  service           Service         @relation(fields: [serviceId], references: [id])
-  assignedStaff     OrderStaff[]
-  reviews           Review?
+  id             Int           @id @default(autoincrement())
+  clientId       Int
+  providerId     Int
+  serviceId      Int
+  status         OrderStatus   @default(CREATED)
+  scheduledAt    DateTime?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  serviceDetails Json?
+  location       Json?
+  clientNotes    String?
+  providerNotes  String?
+  totalAmount    Float?
+  platformFee    Float?
+  paymentStatus  PaymentStatus @default(PENDING)
+  photos         String[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+  estimatedHours Float?
+  actualHours    Float?
+  teamNotes      String?
+  workLog        Json?
+  client         User          @relation("ClientOrders", fields: [clientId], references: [id])
+  provider       Provider      @relation(fields: [providerId], references: [id])
+  service        Service       @relation(fields: [serviceId], references: [id])
+  assignedStaff  OrderStaff[]
+  reviews        Review?
 
   @@index([clientId])
   @@index([providerId])
@@ -228,15 +251,16 @@ model Order {
 }
 
 model Category {
-  id           Int            @id @default(autoincrement())
-  name         String
-  slug         String?        @unique
-  icon         String?
-  image        String?
-  description  String?
-  isActive     Boolean        @default(true)
-  types        Type[]
-  subcategories Subcategory[]
+  id              Int                      @id @default(autoincrement())
+  name            String
+  slug            String?                  @unique
+  icon            String?
+  image           String?
+  description     String?
+  isActive        Boolean                  @default(true)
+  types           Type[]
+  subcategories   Subcategory[]
+  premiumServices ProviderPremiumService[]
 
   @@index([slug])
   @@index([isActive])
@@ -375,6 +399,27 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model ProviderPremiumService {
+  id         Int                @id @default(autoincrement())
+  providerId Int
+  type       PremiumServiceType
+  categoryId Int?
+  startsAt   DateTime           @default(now())
+  expiresAt  DateTime
+  isActive   Boolean            @default(true)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  provider   Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  category   Category?          @relation(fields: [categoryId], references: [id])
+
+  @@index([providerId])
+  @@index([type])
+  @@index([categoryId])
+  @@index([expiresAt])
+  @@index([isActive])
+  @@index([providerId, type, isActive])
+}
+
 enum Role {
   CLIENT
   PROVIDER
@@ -435,4 +480,11 @@ enum StaffStatus {
   BUSY
   ON_VACATION
   INACTIVE
+}
+
+enum PremiumServiceType {
+  SEARCH_BOOST
+  CATEGORY_ADS
+  TOP
+  PRO
 }

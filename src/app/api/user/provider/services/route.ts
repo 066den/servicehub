@@ -42,6 +42,11 @@ export async function GET() {
 					},
 					take: 1,
 				},
+				addons: {
+					orderBy: {
+						order: 'asc',
+					},
+				},
 			},
 			orderBy: {
 				createdAt: 'desc',
@@ -124,28 +129,35 @@ export async function POST(req: Request) {
 			)
 		}
 
-		const serviceData: Prisma.ServiceCreateInput = {
+		const { addons } = validationResult.data
+
+		const serviceData: Prisma.ServiceUncheckedCreateInput = {
 			name: validationResult.data.name,
 			description: validationResult.data.description ?? null,
-			subcategory: {
-				connect: { id: validationResult.data.subcategoryId },
-			},
-			type: {
-				connect: { id: validationResult.data.typeId },
-			},
-			provider: {
-				connect: { id: provider.id },
-			},
+			subcategoryId: validationResult.data.subcategoryId,
+			typeId: validationResult.data.typeId,
+			providerId: provider.id,
 			price: validationResult.data.price ?? null,
 			duration: validationResult.data.duration ?? null,
 			pricingOptions:
-				validationResult.data.pricingOptions as Prisma.InputJsonValue ?? null,
+				(validationResult.data.pricingOptions as Prisma.InputJsonValue) ?? null,
 			location:
-				validationResult.data.location as Prisma.InputJsonValue ?? null,
+				(validationResult.data.location as Prisma.InputJsonValue) ?? null,
 			requirements:
-				validationResult.data.requirements as Prisma.InputJsonValue ?? null,
+				(validationResult.data.requirements as Prisma.InputJsonValue) ?? null,
 			isActive: validationResult.data.isActive ?? true,
 			isFeatured: validationResult.data.isFeatured ?? false,
+			addons: {
+				create: (addons || []).map((addon, index) => ({
+					title: addon.title,
+					duration: addon.duration,
+					price: addon.price,
+					minQuantity: addon.minQuantity,
+					maxQuantity: addon.maxQuantity,
+					order: addon.order ?? index,
+					isActive: addon.isActive ?? true,
+				})),
+			},
 		}
 
 		const service = await prisma.service.create({
@@ -158,13 +170,18 @@ export async function POST(req: Request) {
 				},
 				type: true,
 				photos: true,
+				addons: {
+					orderBy: {
+						order: 'asc',
+					},
+				},
 			},
 		})
 
 		return NextResponse.json({ success: true, service }, { status: 201 })
 	} catch (error) {
 		console.error('Error creating service:', error)
-		
+
 		if (error instanceof Prisma.PrismaClientKnownRequestError) {
 			if (error.code === 'P2002') {
 				return NextResponse.json(

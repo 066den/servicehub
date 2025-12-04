@@ -10,33 +10,8 @@ import {
 import { toast } from 'sonner'
 import { apiRequestAuth } from '@/lib/api'
 import { Service } from '@/types'
-import {
-	CreateServiceSchema,
-	UpdateServiceSchema,
-} from '@/lib/schemas'
-
-interface ProviderServiceState {
-	services: Service[]
-	currentService: Service | null
-	isLoading: boolean
-	error: string | null
-	lastServicesUpdate: number
-}
-
-interface ProviderServiceActions {
-	fetchServices: (force?: boolean) => Promise<Service[] | null>
-	fetchService: (id: number) => Promise<Service | null>
-	createService: (data: CreateServiceSchema) => Promise<Service | null>
-	updateService: (id: number, data: UpdateServiceSchema) => Promise<Service | null>
-	deleteService: (id: number) => Promise<boolean>
-	toggleActive: (id: number) => Promise<boolean>
-	toggleFeatured: (id: number) => Promise<boolean>
-	clearServices: () => void
-}
-
-interface ProviderServiceStore extends ProviderServiceState {
-	actions: ProviderServiceActions
-}
+import { CreateServiceSchema, UpdateServiceSchema } from '@/lib/schemas'
+import { ProviderServiceStore } from './types'
 
 const persistOptions: PersistOptions<
 	ProviderServiceStore,
@@ -67,7 +42,7 @@ export const useProviderServiceStore = create<ProviderServiceStore>()(
 				lastServicesUpdate: 0,
 
 				actions: {
-					fetchServices: async (force = false): Promise<Service[] | null> => {
+					fetchServices: async (force = false) => {
 						const { lastServicesUpdate, services } = get()
 
 						const now = Date.now()
@@ -247,9 +222,7 @@ export const useProviderServiceStore = create<ProviderServiceStore>()(
 							set({
 								services: services.filter(s => s.id !== id),
 								currentService:
-									get().currentService?.id === id
-										? null
-										: get().currentService,
+									get().currentService?.id === id ? null : get().currentService,
 								isLoading: false,
 							})
 

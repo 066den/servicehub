@@ -17,6 +17,7 @@ import {
 	Users,
 	LayoutDashboard,
 	Package,
+	Sparkles,
 } from 'lucide-react'
 import { useProvider } from '@/stores/provider/useProvider'
 import ConfirmDialog from '../modals/ConfirmDialog'
@@ -32,6 +33,11 @@ const providerItems = [
 		icon: <Package className='size-5' />,
 		title: 'services',
 		url: ROUTES.SERVICES,
+	},
+	{
+		icon: <Sparkles className='size-5' />,
+		title: 'premiumServices',
+		url: ROUTES.PREMIUM_SERVICES,
 	},
 	{
 		icon: <Briefcase className='size-5' />,
