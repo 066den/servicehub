@@ -81,7 +81,7 @@ const PhoneForm = () => {
 					fullWidth
 					type='submit'
 					disabled={!isValid}
-					loading={isLoading}
+					loading={!!isLoading}
 					className='mt-6 mb-4'
 				>
 					{t('Auth.phoneForm.getCode')}

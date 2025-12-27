@@ -18,7 +18,9 @@ import useFlag from '@/hooks/useFlag'
 export default function ServiceTypesManagement() {
 	const {
 		subcategories,
+		categories,
 		fetchSubcategories,
+		fetchCategories,
 		isLoading,
 		deleteType,
 		deleteSubcategory,
@@ -29,6 +31,7 @@ export default function ServiceTypesManagement() {
 	>([])
 	const [searchQuery, setSearchQuery] = useState('')
 	const [statusFilter, setStatusFilter] = useState('')
+	const [categoryFilter, setCategoryFilter] = useState<string>('all')
 	const [expandedSubcategories, setExpandedSubcategories] = useState<
 		Set<number>
 	>(new Set())
@@ -60,6 +63,16 @@ export default function ServiceTypesManagement() {
 
 	const filterSubcategories = useCallback(() => {
 		let filtered = [...subcategories]
+
+		// Фильтр по категории
+		if (categoryFilter && categoryFilter !== 'all') {
+			const categoryId = parseInt(categoryFilter)
+			if (!isNaN(categoryId)) {
+				filtered = filtered.filter(
+					subcategory => subcategory.category.id === categoryId
+				)
+			}
+		}
 
 		// Поиск
 		if (searchQuery) {
@@ -98,7 +111,7 @@ export default function ServiceTypesManagement() {
 		}
 
 		setFilteredSubcategories(filtered)
-	}, [subcategories, searchQuery, statusFilter])
+	}, [subcategories, searchQuery, statusFilter, categoryFilter])
 
 	const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setSearchQuery(e.target.value)
@@ -106,7 +119,8 @@ export default function ServiceTypesManagement() {
 
 	useEffect(() => {
 		fetchSubcategories()
-	}, [fetchSubcategories])
+		fetchCategories()
+	}, [fetchSubcategories, fetchCategories])
 
 	useEffect(() => {
 		if (subcategories.length > 0) {
@@ -222,6 +236,9 @@ export default function ServiceTypesManagement() {
 				handleSearch={handleSearch}
 				statusFilter={statusFilter}
 				setStatusFilter={setStatusFilter}
+				categoryFilter={categoryFilter}
+				setCategoryFilter={setCategoryFilter}
+				categories={categories}
 			/>
 
 			{/* Действия */}

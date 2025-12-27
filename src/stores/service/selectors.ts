@@ -9,7 +9,8 @@ export const lastCategoriesUpdateSelector = (state: ServiceStore) =>
 	state.lastCategoriesUpdate
 
 // Subcategories selectors
-export const subcategoriesSelector = (state: ServiceStore) => state.subcategories
+export const subcategoriesSelector = (state: ServiceStore) =>
+	state.subcategories
 export const lastSubcategoriesUpdateSelector = (state: ServiceStore) =>
 	state.lastSubcategoriesUpdate
 
@@ -18,7 +19,14 @@ export const typesSelector = (state: ServiceStore) => state.types
 export const lastTypesUpdateSelector = (state: ServiceStore) =>
 	state.lastTypesUpdate
 
+// Public services selectors
+export const publicServicesSelector = (state: ServiceStore) =>
+	state.publicServices
+export const publicServicesPaginationSelector = (state: ServiceStore) =>
+	state.publicServicesPagination
+export const publicServicesIsLoadingSelector = (state: ServiceStore) =>
+	state.publicServicesIsLoading
+
 // Common selectors
 export const isLoadingSelector = (state: ServiceStore) => state.isLoading
 export const errorSelector = (state: ServiceStore) => state.error
-

@@ -35,16 +35,24 @@ export async function GET() {
 			prisma.type.count(),
 		])
 
-		return NextResponse.json({
-			success: true,
-			stats: {
-				categoriesCount,
-				servicesCount,
-				performersCount,
-				clientsCount,
-				typesCount,
+		// Кэшируем статистику на 5 минут, так как она не меняется часто
+		return NextResponse.json(
+			{
+				success: true,
+				stats: {
+					categoriesCount,
+					servicesCount,
+					performersCount,
+					clientsCount,
+					typesCount,
+				},
 			},
-		})
+			{
+				headers: {
+					'Cache-Control': 'public, max-age=300, stale-while-revalidate=600',
+				},
+			}
+		)
 	} catch (error) {
 		console.error('Error fetching stats:', error)
 		return NextResponse.json(

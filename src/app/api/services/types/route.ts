@@ -2,16 +2,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/authOptions'
 import { prisma } from '@/lib/prisma'
-import { z } from 'zod'
-
-const createTypeSchema = z.object({
-	name: z.string().min(1).max(255),
-	slug: z.string().optional().nullable(),
-	icon: z.string().optional().nullable(),
-	description: z.string().optional().nullable(),
-	categoryId: z.number().int().positive(),
-	subcategoryId: z.number().int().positive().optional(),
-})
+import { createTypeSchema } from '@/lib/schemas'
+import { generateUniqueSlug } from '@/utils/slug'
 
 export async function POST(req: Request) {
 	const session = await getServerSession(authOptions)
@@ -60,8 +52,18 @@ export async function POST(req: Request) {
 			}
 		}
 
+		// Автоматически генерируем уникальный slug из name
+		const slug = await generateUniqueSlug(
+			prisma,
+			'Type',
+			validationResult.data.name
+		)
+
 		const type = await prisma.type.create({
-			data: validationResult.data,
+			data: {
+				...validationResult.data,
+				slug,
+			},
 		})
 
 		return NextResponse.json({ success: true, type }, { status: 201 })

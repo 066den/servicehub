@@ -5,8 +5,7 @@ import ImageEditable from '../ui/ImageEditable'
 import { Label } from '../ui/label'
 import { apiRequestAuth } from '@/lib/api'
 import { toast } from 'sonner'
-import { X } from 'lucide-react'
-import { Button } from '../ui/button'
+import { ASPECT_RATIOS } from '@/lib/aspectRatios'
 
 interface ServiceMainPhotoProps {
 	serviceId: number | null
@@ -71,42 +70,6 @@ const ServiceMainPhoto = ({
 		}
 	}
 
-	const handleDelete = async () => {
-		if (!serviceId || !mainPhotoUrl) {
-			return
-		}
-
-		// Если фото еще не загружено на сервер (только локальное)
-		if (mainPhotoUrl.startsWith('blob:')) {
-			setMainPhotoFile(null)
-			setMainPhotoUrl(null)
-			onPhotoChange?.(null, null)
-			return
-		}
-
-		setIsUploading(true)
-		try {
-			const response = await apiRequestAuth<{ success: boolean }>(
-				`/api/user/provider/services/${serviceId}/main-photo`,
-				{
-					method: 'DELETE',
-				}
-			)
-
-			if (response.success) {
-				setMainPhotoFile(null)
-				setMainPhotoUrl(null)
-				onPhotoChange?.(null, null)
-				toast.success('Головне фото видалено')
-			}
-		} catch (error) {
-			console.error('Error deleting main photo:', error)
-			toast.error('Помилка видалення головного фото')
-		} finally {
-			setIsUploading(false)
-		}
-	}
-
 	// Автоматически загружаем фото при выборе, если serviceId есть
 	useEffect(() => {
 		if (mainPhotoFile && serviceId) {
@@ -118,33 +81,19 @@ const ServiceMainPhoto = ({
 	return (
 		<div className='space-y-2 mb-4'>
 			<Label>Головне фото (превью)</Label>
-			<div className='flex items-start gap-4'>
-				<ImageEditable
-					src={mainPhotoUrl || undefined}
-					alt='Головне фото послуги'
-					onUpload={handleFileSelect}
-					aspectRatio={16 / 9}
-					showCrop={true}
-					size='medium'
-					className='flex-shrink-0'
-				/>
-				{mainPhotoUrl && (
-					<Button
-						type='button'
-						variant='ghost'
-						size='icon'
-						onClick={handleDelete}
-						disabled={isUploading}
-						className='mt-2'
-					>
-						<X className='size-4' />
-					</Button>
-				)}
-			</div>
+
+			<ImageEditable
+				src={mainPhotoUrl || undefined}
+				alt='Головне фото послуги'
+				onUpload={handleFileSelect}
+				showCrop={true}
+				aspectRatio={ASPECT_RATIOS.LANDSCAPE}
+				size='medium'
+				className='w-full'
+			/>
+
 			{mainPhotoFile && serviceId && isUploading && (
-				<p className='text-sm text-muted-foreground'>
-					Завантаження фото...
-				</p>
+				<p className='text-sm text-muted-foreground'>Завантаження фото...</p>
 			)}
 			{mainPhotoFile && !serviceId && (
 				<p className='text-sm text-muted-foreground'>
@@ -156,4 +105,3 @@ const ServiceMainPhoto = ({
 }
 
 export default ServiceMainPhoto
-

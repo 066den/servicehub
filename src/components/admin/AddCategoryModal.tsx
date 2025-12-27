@@ -28,7 +28,7 @@ interface AddCategoryModalProps {
 	category: Category | null
 }
 
-type FormData = z.infer<typeof createCategorySchema>
+type FormData = z.infer<typeof createCategorySchema> & { slug?: string }
 
 export default function AddCategoryModal({
 	isOpen,
@@ -53,7 +53,6 @@ export default function AddCategoryModal({
 		),
 		defaultValues: {
 			name: '',
-			slug: '',
 			icon: '',
 			description: '',
 		},
@@ -66,12 +65,11 @@ export default function AddCategoryModal({
 				slug: category.slug || '',
 				icon: category.icon || '',
 				description: category.description || '',
-			})
+			} as FormData)
 			setCurrentImage(category.image || null)
 		} else {
 			reset({
 				name: '',
-				slug: '',
 				icon: '',
 				description: '',
 			})
@@ -167,7 +165,7 @@ export default function AddCategoryModal({
 		}
 	}
 
-	const onSubmit = async (data: FormData) => {
+	const onSubmit = async (data: FormData & { slug?: string }) => {
 		try {
 			let categoryId: number | null = null
 
@@ -188,7 +186,6 @@ export default function AddCategoryModal({
 				// Создание категории
 				const createData: CreateCategorySchema = {
 					name: data.name.trim(),
-					slug: data.slug?.trim() || null,
 					icon: data.icon?.trim() || null,
 					description: data.description?.trim() || null,
 				}

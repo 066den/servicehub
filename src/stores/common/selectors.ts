@@ -10,3 +10,5 @@ export const errorSelector = (state: CommonStore) => state.error
 export const lastStatsUpdateSelector = (state: CommonStore) =>
 	state.lastStatsUpdate
 
+export const commonLocationSelector = (state: CommonStore) =>
+	state.commonLocation

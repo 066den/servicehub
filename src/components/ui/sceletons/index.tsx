@@ -86,3 +86,112 @@ export const SkeletonStatsGrid = ({ count = 2 }: { count?: number }) => {
 		</div>
 	)
 }
+
+interface SkeletonTableProps {
+	columns?: number
+	rows?: number
+	showHeader?: boolean
+}
+
+export const SkeletonTable = ({
+	columns = 5,
+	rows = 5,
+	showHeader = true,
+}: SkeletonTableProps) => {
+	return (
+		<div className='relative w-full overflow-x-auto'>
+			<table className='w-full caption-bottom text-sm'>
+				{showHeader && (
+					<thead>
+						<tr className='border-b'>
+							{Array.from({ length: columns }).map((_, index) => (
+								<th
+									key={index}
+									className='h-10 p-3 text-left align-middle font-medium whitespace-nowrap bg-background'
+								>
+									<Skeleton className='h-4 w-24' />
+								</th>
+							))}
+						</tr>
+					</thead>
+				)}
+				<tbody>
+					{Array.from({ length: rows }).map((_, rowIndex) => (
+						<tr
+							key={rowIndex}
+							className='border-b hover:bg-muted/50 transition-colors'
+						>
+							{Array.from({ length: columns }).map((_, colIndex) => (
+								<td
+									key={colIndex}
+									className='p-3 align-middle whitespace-nowrap'
+								>
+									{colIndex === 0 ? (
+										// Первая колонка - может быть изображение или другой контент
+										<div className='flex items-center gap-3'>
+											<Skeleton className='h-16 w-16 rounded-lg' />
+											<div className='space-y-2 flex-1'>
+												<Skeleton className='h-4 w-32' />
+												<Skeleton className='h-3 w-48' />
+											</div>
+										</div>
+									) : (
+										<Skeleton className='h-4 w-20' />
+									)}
+								</td>
+							))}
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	)
+}
+
+export const SkeletonServiceCard = () => {
+	return (
+		<div className='p-4 hover:shadow-md transition-shadow'>
+			{/* Service Header */}
+			<div className='flex justify-between items-start mb-3'>
+				{/* Image */}
+				<Skeleton className='w-24 h-24 rounded-lg flex-shrink-0 mr-3' />
+				<div className='flex-1'>
+					{/* Title */}
+					<Skeleton className='h-6 w-3/4 mb-2' />
+					{/* Meta info */}
+					<div className='flex items-center gap-3 flex-wrap'>
+						<Skeleton className='h-4 w-32' />
+						<Skeleton className='h-5 w-20 rounded-full' />
+					</div>
+				</div>
+				{/* Price */}
+				<Skeleton className='h-6 w-20 ml-4' />
+			</div>
+			{/* Description */}
+			<div className='mb-4 space-y-2'>
+				<Skeleton className='h-4 w-full' />
+				<Skeleton className='h-4 w-5/6' />
+			</div>
+			{/* Actions */}
+			<div className='flex gap-2'>
+				<Skeleton className='h-8 flex-1 rounded-md' />
+			</div>
+		</div>
+	)
+}
+
+interface SkeletonServicesGridProps {
+	count?: number
+}
+
+export const SkeletonServicesGrid = ({
+	count = 6,
+}: SkeletonServicesGridProps) => {
+	return (
+		<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+			{Array.from({ length: count }).map((_, index) => (
+				<SkeletonServiceCard key={index} />
+			))}
+		</div>
+	)
+}

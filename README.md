@@ -118,6 +118,7 @@ cp env.example .env.local
 - `DATABASE_URL` - строка подключения к PostgreSQL
 - `JWT_SECRET` - секретный ключ для JWT токенов
 - `NEXTAUTH_SECRET` - секретный ключ для NextAuth
+- `OPENAI_API_KEY` - API ключ OpenAI для генерации описаний услуг (опционально)
 
 3. Запустите базу данных:
 

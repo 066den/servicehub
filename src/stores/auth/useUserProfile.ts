@@ -13,10 +13,10 @@ import {
 } from '@/stores/auth/selectors'
 import { getDisplayName } from '@/utils/textFormat'
 import { useSession } from 'next-auth/react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 export const useUserProfile = () => {
-	const { data: session, status } = useSession()
+	const { status } = useSession()
 
 	const user = useAuthStore(authUserSelector)
 	const isLoading = useAuthStore(authIsLoadingSelector)
@@ -29,27 +29,38 @@ export const useUserProfile = () => {
 	const resendAttempts = useAuthStore(authResendAttemptsSelector)
 	//actions
 	const actions = useAuthStore(authActionsSelector)
-	const { initialize, logout, fetchUserProfile, refreshUserProfile } = actions
+	const { logout, fetchUserProfile, refreshUserProfile } = actions
+	const logoutRef = useRef(logout)
 
+	// Обновляем ref при изменении logout
 	useEffect(() => {
-		if (status !== 'loading' && !isInitialized) {
-			initialize()
-		}
-	}, [status, isInitialized, initialize])
+		logoutRef.current = logout
+	}, [logout])
 
+	// Обрабатываем изменения статуса аутентификации
 	useEffect(() => {
-		if (status === 'authenticated' && session?.user && !user) {
-			initialize()
-		} else if (status === 'unauthenticated' && user) {
-			logout()
+		if (status === 'unauthenticated' && user) {
+			logoutRef.current()
 		}
-	}, [session, status, user, initialize, logout])
+		// Убрали дублирующую инициализацию - она теперь только в AuthProvider
+	}, [status, user])
+
+	// Оптимизация: для неавторизованных пользователей не показываем loading после инициализации
+	// Показываем loading только если:
+	// 1. Еще не инициализировано
+	// 2. Инициализация в процессе
+	// 3. Загружается профиль для авторизованного пользователя
+	// НЕ показываем loading если инициализировано и пользователь не авторизован
+	const shouldShowLoading = 
+		!isInitialized || // Пока не инициализировано
+		isLoading || // Инициализация в процессе
+		(isLoadingProfile && user) // Загрузка профиля для авторизованного пользователя
 
 	return {
 		user,
 		phone,
 		isAuthenticated: !!user && status === 'authenticated',
-		isLoading: isLoading || isLoadingProfile || status === 'loading',
+		isLoading: shouldShowLoading,
 		error: profileError,
 		isInitialized,
 		resendCountdown,

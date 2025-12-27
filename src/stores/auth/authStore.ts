@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { UserProfile } from '@/types/auth'
 import { useProviderStore } from '@/stores/provider/providerStore'
+import { useCommonStore } from '@/stores/common/commonStore'
 import { getSession, signIn, signOut } from 'next-auth/react'
 import { Role } from '@prisma/client'
 import {
@@ -14,11 +15,15 @@ import {
 import { WindowWithTimer } from '@/@types/global'
 import { AuthStore } from './types'
 
-const persistOptions: PersistOptions<AuthStore, Omit<AuthStore, 'actions'>> = {
+const persistOptions: PersistOptions<
+	AuthStore,
+	Omit<AuthStore, 'actions' | 'isLoading'>
+> = {
 	name: 'auth-storage',
 	partialize: state => {
-		const { actions: _, ...rest } = state
+		const { actions: _, isLoading: __, ...rest } = state
 		void _ // Explicitly mark as intentionally unused
+		void __ // Explicitly mark as intentionally unused
 		return rest
 	},
 }
@@ -131,25 +136,27 @@ export const useAuthStore = create<AuthStore>()(
 
 								const session = await getSession()
 
-							if (session?.user && session.user.id > 0) {
-								const fullUser = await fetchUserProfile(true)
+								if (session?.user && session.user.id > 0) {
+									const fullUser = await fetchUserProfile(true)
 
-								if (fullUser) {
-									set({
-										user: fullUser,
-										step: 'success',
-										isLoading: false,
-										error: null,
-									})
-
-									// Загружаем провайдера, если роль пользователя PROVIDER
-									if (fullUser.role === Role.PROVIDER) {
-										const { actions: { fetchProvider } } = useProviderStore.getState()
-										await fetchProvider(true).catch(error => {
-											console.error('Ошибка загрузки провайдера:', error)
+									if (fullUser) {
+										set({
+											user: fullUser,
+											step: 'success',
+											isLoading: false,
+											error: null,
 										})
-									}
-								} else {
+
+										// Загружаем провайдера, если роль пользователя PROVIDER
+										if (fullUser.role === Role.PROVIDER) {
+											const {
+												actions: { fetchProvider },
+											} = useProviderStore.getState()
+											await fetchProvider(true).catch(error => {
+												console.error('Ошибка загрузки провайдера:', error)
+											})
+										}
+									} else {
 										// Fallback to session data
 										set({
 											user: {
@@ -276,7 +283,7 @@ export const useAuthStore = create<AuthStore>()(
 								canResend: true,
 								resendAttempts: 0,
 								lastCodeSentAt: 0,
-								isInitialized: true,
+								isInitialized: false, // Сбрасываем для повторной инициализации при следующем логине
 							})
 						} catch (error) {
 							if (error instanceof Error) {
@@ -379,18 +386,36 @@ export const useAuthStore = create<AuthStore>()(
 						}
 					},
 
-					initialize: async () => {
+					initialize: async (
+						sessionStatus?: 'authenticated' | 'unauthenticated' | 'loading'
+					) => {
 						const {
 							actions: { fetchUserProfile, handleTokenExpiry },
 							isInitialized,
+							user,
 						} = get()
-						if (isInitialized) {
-							return
-						}
 
 						set({ isLoading: true })
 
 						try {
+							// Для неавторизованных пользователей сразу завершаем инициализацию без запроса
+							if (sessionStatus === 'unauthenticated') {
+								// Если был пользователь, очищаем данные
+								if (user) {
+									set({
+										user: null,
+										isInitialized: true,
+										isLoading: false,
+									})
+									// Очищаем провайдера
+									const { clearProvider } = useProviderStore.getState().actions
+									clearProvider()
+								} else {
+									set({ isInitialized: true, isLoading: false })
+								}
+								return
+							}
+
 							const session = await getSession()
 
 							if (
@@ -398,6 +423,27 @@ export const useAuthStore = create<AuthStore>()(
 								session.user.id > 0 &&
 								session.user.isVerified
 							) {
+								// Проверяем, изменился ли пользователь
+								const userIdChanged = user && user.id !== session.user.id
+
+								// Если пользователь изменился, сбрасываем инициализацию и очищаем данные
+								if (userIdChanged) {
+									set({
+										user: null,
+										isInitialized: false,
+										lastProfileUpdate: 0,
+									})
+									// Очищаем провайдера при смене пользователя
+									const { clearProvider } = useProviderStore.getState().actions
+									clearProvider()
+								}
+
+								// Если уже инициализировано и пользователь не изменился, просто выходим
+								if (isInitialized && !userIdChanged) {
+									set({ isLoading: false })
+									return
+								}
+
 								// check if there is an error with the token
 								if (session.error === 'RefreshAccessTokenError') {
 									await handleTokenExpiry()
@@ -411,12 +457,16 @@ export const useAuthStore = create<AuthStore>()(
 										user: fullUser,
 										step: 'success',
 										isInitialized: true,
+										isLoading: false,
 									})
 
-									// Загружаем провайдера, если роль пользователя PROVIDER
+									// Загружаем провайдера асинхронно, чтобы не блокировать инициализацию
 									if (fullUser.role === Role.PROVIDER) {
-										const { actions: { fetchProvider } } = useProviderStore.getState()
-										await fetchProvider(true).catch(error => {
+										const {
+											actions: { fetchProvider },
+										} = useProviderStore.getState()
+										// Загружаем в фоне, не блокируя инициализацию
+										fetchProvider(true).catch(error => {
 											console.error('Ошибка загрузки провайдера:', error)
 										})
 									}
@@ -442,14 +492,15 @@ export const useAuthStore = create<AuthStore>()(
 										},
 										step: 'success',
 										isInitialized: true,
+										isLoading: false,
 									})
 								}
 							} else {
-								set({ isInitialized: true })
+								set({ isInitialized: true, isLoading: false })
 							}
 						} catch (error) {
 							console.error('Ошибка инициализации авторизации:', error)
-							set({ isInitialized: true })
+							set({ isInitialized: true, isLoading: false })
 						} finally {
 							set({ isLoading: false })
 						}
@@ -504,10 +555,21 @@ export const useAuthStore = create<AuthStore>()(
 								lastProfileUpdate: now,
 							})
 
-							// Загружаем провайдера, если роль пользователя PROVIDER
+							// Синхронизация локации: если в профиле есть локация - обновляем commonLocation
+							if (profile.location && profile.location.city) {
+								const {
+									actions: { setCommonLocation },
+								} = useCommonStore.getState()
+								setCommonLocation(profile.location)
+							}
+
+							// Загружаем провайдера асинхронно, если роль пользователя PROVIDER
 							if (profile.role === Role.PROVIDER) {
-								const { actions: { fetchProvider } } = useProviderStore.getState()
-								await fetchProvider(true).catch(error => {
+								const {
+									actions: { fetchProvider },
+								} = useProviderStore.getState()
+								// Загружаем в фоне, не блокируя ответ
+								fetchProvider(true).catch(error => {
 									console.error('Ошибка загрузки провайдера:', error)
 								})
 							}
@@ -536,6 +598,14 @@ export const useAuthStore = create<AuthStore>()(
 
 						if (!session?.accessToken) {
 							throw new Error('Not access token')
+						}
+
+						// Синхронизация локации: если обновляется location, также обновляем commonLocation
+						if (updates.location) {
+							const {
+								actions: { setCommonLocation },
+							} = useCommonStore.getState()
+							setCommonLocation(updates.location)
 						}
 
 						set({

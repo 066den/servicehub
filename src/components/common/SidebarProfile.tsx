@@ -53,6 +53,11 @@ const companyItems = [
 		url: ROUTES.EXECUTOR,
 	},
 	{
+		icon: <Package className='size-5' />,
+		title: 'servicesCompany',
+		url: ROUTES.SERVICES,
+	},
+	{
 		icon: <Users className='size-5' />,
 		title: 'staff',
 		url: ROUTES.STAFF,

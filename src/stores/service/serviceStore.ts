@@ -10,6 +10,11 @@ import {
 import { toast } from 'sonner'
 import { apiRequest, apiRequestAuth } from '@/lib/api'
 import { Category, Subcategory } from '@/types'
+import {
+	getServices,
+	type GetServicesParams,
+} from '@/services/service/clientServiceServices'
+import type { GetServicesResponse } from '@/services/service/serviceTypes'
 import { ServiceStore, SubcategoryWithTypes, Type } from './types'
 
 const persistOptions: PersistOptions<
@@ -43,6 +48,17 @@ export const useServiceStore = create<ServiceStore>()(
 				lastSubcategoriesUpdate: 0,
 				types: [],
 				lastTypesUpdate: 0,
+				publicServices: [],
+				publicServicesPagination: {
+					total: 0,
+					page: 1,
+					limit: 20,
+					totalPages: 0,
+				},
+				publicServicesFilters: null,
+				publicServicesIsLoading: false,
+				publicServicesError: null,
+				lastPublicServicesUpdate: 0,
 
 				actions: {
 					// Categories actions
@@ -336,8 +352,22 @@ export const useServiceStore = create<ServiceStore>()(
 								error?: string
 							}>('/api/services/subcategories')
 
+							// Синхронизируем типы из подкатегорий в общий массив types
+							const allTypes: Type[] = []
+							data.subcategories.forEach(subcategory => {
+								if (subcategory.types) {
+									subcategory.types.forEach(type => {
+										// Проверяем, нет ли уже такого типа в массиве
+										if (!allTypes.find(t => t.id === type.id)) {
+											allTypes.push(type)
+										}
+									})
+								}
+							})
+
 							set({
 								subcategories: data.subcategories,
+								types: allTypes,
 								lastSubcategoriesUpdate: now,
 								isLoading: false,
 							})
@@ -924,7 +954,19 @@ export const useServiceStore = create<ServiceStore>()(
 
 					updateType: async (id, data) => {
 						const { subcategories, types } = get()
-						const originalType = types.find(t => t.id === id)
+						// Ищем тип сначала в общем массиве types, затем в подкатегориях
+						let originalType = types.find(t => t.id === id)
+
+						// Если не нашли в types, ищем в подкатегориях
+						if (!originalType) {
+							for (const subcategory of subcategories) {
+								const foundType = subcategory.types?.find(t => t.id === id)
+								if (foundType) {
+									originalType = foundType
+									break
+								}
+							}
+						}
 
 						if (!originalType) {
 							toast.error('Тип послуги не знайдено')
@@ -968,31 +1010,63 @@ export const useServiceStore = create<ServiceStore>()(
 
 							// Если изменился subcategoryId или categoryId, нужно переместить тип
 							const oldSubcategoryId = originalType.subcategoryId
-							const newSubcategoryId = response.type.subcategoryId
+							// Используем subcategoryId из ответа, если он есть, иначе берем старое значение
+							const newSubcategoryId =
+								response.type.subcategoryId !== undefined
+									? response.type.subcategoryId
+									: oldSubcategoryId
+
+							// Проверяем, изменился ли subcategoryId (учитываем null)
+							const subcategoryChanged = oldSubcategoryId !== newSubcategoryId
 
 							const updatedSubcategoriesWithRealType = currentSubcategories.map(
 								sub => {
-									// Удаляем из старой подкатегории
-									if (sub.id === oldSubcategoryId) {
-										return {
-											...sub,
-											types: (sub.types || []).filter(t => t.id !== id),
+									if (subcategoryChanged) {
+										// Если subcategoryId изменился, перемещаем тип
+										// Удаляем из старой подкатегории (только если oldSubcategoryId не null)
+										if (
+											oldSubcategoryId !== null &&
+											sub.id === oldSubcategoryId
+										) {
+											return {
+												...sub,
+												types: (sub.types || []).filter(t => t.id !== id),
+											}
+										}
+										// Добавляем в новую подкатегорию (только если newSubcategoryId не null)
+										if (
+											newSubcategoryId !== null &&
+											sub.id === newSubcategoryId
+										) {
+											// Проверяем, нет ли уже этого типа в массиве
+											const typeExists = (sub.types || []).some(
+												t => t.id === id
+											)
+											return {
+												...sub,
+												types: typeExists
+													? (sub.types || []).map(t =>
+															t.id === id ? response.type : t
+													  )
+													: [...(sub.types || []), response.type],
+											}
+										}
+									} else {
+										// Если subcategoryId не изменился, просто обновляем тип в текущей подкатегории
+										if (
+											newSubcategoryId !== null &&
+											sub.id === newSubcategoryId
+										) {
+											return {
+												...sub,
+												types: (sub.types || []).map(t =>
+													t.id === id ? response.type : t
+												),
+											}
 										}
 									}
-									// Добавляем в новую подкатегорию
-									if (sub.id === newSubcategoryId) {
-										return {
-											...sub,
-											types: [...(sub.types || []), response.type],
-										}
-									}
-									// Обновляем в текущей подкатегории
-									return {
-										...sub,
-										types: (sub.types || []).map(t =>
-											t.id === id ? response.type : t
-										),
-									}
+									// Для остальных подкатегорий возвращаем без изменений
+									return sub
 								}
 							)
 
@@ -1010,14 +1084,16 @@ export const useServiceStore = create<ServiceStore>()(
 							// Rollback
 							const rollbackSubcategories = subcategories.map(sub => ({
 								...sub,
-								types: (sub.types || []).map(t =>
-									t.id === id ? originalType : t
-								),
+								types: (sub.types || [])
+									.map(t => (t.id === id ? originalType : t))
+									.filter((t): t is Type => t !== undefined),
 							}))
 
 							set({
 								subcategories: rollbackSubcategories,
-								types: types.map(t => (t.id === id ? originalType : t)),
+								types: types
+									.map(t => (t.id === id ? originalType : t))
+									.filter((t): t is Type => t !== undefined),
 								error:
 									error instanceof Error
 										? error.message
@@ -1098,11 +1174,121 @@ export const useServiceStore = create<ServiceStore>()(
 						})
 					},
 
+					// Public Services actions
+					fetchPublicServices: async (
+						params: GetServicesParams,
+						force = false
+					) => {
+						const { lastPublicServicesUpdate, publicServicesFilters } = get()
+
+						// Проверяем, нужно ли обновлять данные
+						// Обновляем, если:
+						// 1. force = true
+						// 2. Прошло больше 5 минут с последнего обновления
+						// 3. Изменились фильтры
+						const now = Date.now()
+						const filtersChanged =
+							!publicServicesFilters ||
+							JSON.stringify(publicServicesFilters) !== JSON.stringify(params)
+
+						if (
+							!force &&
+							now - lastPublicServicesUpdate < 5 * 60 * 1000 &&
+							!filtersChanged
+						) {
+							return
+						}
+
+						set({
+							publicServicesIsLoading: true,
+							publicServicesError: null,
+						})
+
+						try {
+							const response = await getServices(params)
+
+							if (response.success && response.services) {
+								set({
+									publicServices: response.services,
+									publicServicesPagination: response.pagination,
+									publicServicesFilters: params,
+									lastPublicServicesUpdate: now,
+									publicServicesIsLoading: false,
+								})
+							} else {
+								set({
+									publicServices: [],
+									publicServicesPagination: {
+										total: 0,
+										page: 1,
+										limit: params.limit || 20,
+										totalPages: 0,
+									},
+									publicServicesFilters: params,
+									publicServicesIsLoading: false,
+									publicServicesError: 'Послуги не знайдено',
+								})
+							}
+						} catch (error) {
+							let message = 'Помилка завантаження послуг'
+							if (error instanceof Error) {
+								message = error.message || message
+							}
+							set({
+								publicServicesError: message,
+								publicServicesIsLoading: false,
+							})
+
+							toast.error(message)
+						}
+					},
+
+					setInitialPublicServices: (
+						data: GetServicesResponse,
+						params: GetServicesParams
+					) => {
+						const store = get()
+						// Проверяем, нужно ли обновить данные
+						const shouldUpdate =
+							!store.publicServicesFilters ||
+							JSON.stringify(store.publicServicesFilters) !==
+								JSON.stringify(params) ||
+							store.publicServices.length === 0
+
+						if (shouldUpdate && data.success && data.services) {
+							set({
+								publicServices: data.services,
+								publicServicesPagination: data.pagination,
+								publicServicesFilters: params,
+								publicServicesIsLoading: false,
+								publicServicesError: null,
+								lastPublicServicesUpdate: Date.now(),
+							})
+						}
+					},
+
+					clearPublicServices: () => {
+						set({
+							publicServices: [],
+							publicServicesPagination: {
+								total: 0,
+								page: 1,
+								limit: 20,
+								totalPages: 0,
+							},
+							publicServicesFilters: null,
+							publicServicesIsLoading: false,
+							publicServicesError: null,
+							lastPublicServicesUpdate: 0,
+						})
+					},
+
 					// Clear all
 					clearAll: () => {
 						get().actions.clearCategories()
 						get().actions.clearSubcategories()
 						get().actions.clearTypes()
+						get().actions.clearPublicServices()
 					},
 				},
 			}),

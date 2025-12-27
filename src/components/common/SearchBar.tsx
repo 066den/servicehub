@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { Search, X, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
@@ -13,6 +13,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { type PricingOptions } from '@/lib/schemas'
+import LocationSelector from './LocationSelector'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
+import { useCommon } from '@/stores/common/useCommon'
 
 interface SearchResult {
 	id: number
@@ -55,9 +58,25 @@ interface SearchResponse {
 	categories: SearchCategory[]
 }
 
-const SearchBar = () => {
+interface SearchBarProps {
+	compact?: boolean
+}
+
+const SearchBar = ({ compact = false }: SearchBarProps) => {
 	const t = useTranslations()
 	const router = useRouter()
+	const { user, isAuthenticated } = useUserProfile()
+	const { commonLocation } = useCommon()
+
+	// Определяем текущую локацию в зависимости от авторизации
+	const userLocation = useMemo(() => {
+		if (isAuthenticated && user) {
+			return user.location || commonLocation || null
+		} else {
+			return commonLocation || null
+		}
+	}, [isAuthenticated, user, commonLocation])
+
 	const [query, setQuery] = useState('')
 	const [isOpen, setIsOpen] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
@@ -291,11 +310,34 @@ const SearchBar = () => {
 		suggestions.length > 0 || results.length > 0 || categories.length > 0
 
 	return (
-		<div className='relative flex-1 max-w-2xl w-full' ref={dropdownRef}>
-			<div className='relative flex items-center'>
-				{/* Input с иконкой поиска */}
+		<div className='relative w-full' ref={dropdownRef}>
+			<div
+				className={cn(
+					'flex items-center py-0.5 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-300',
+					compact && 'rounded-sm'
+				)}
+			>
+				{/* LocationSelector */}
+				<LocationSelector variant='compact' />
+
+				{/* Разделитель */}
+				{userLocation?.city && (
+					<div
+						className={cn(
+							'w-px bg-gray-300 flex-shrink-0 transition-all duration-300',
+							compact ? 'h-5' : 'h-6'
+						)}
+					/>
+				)}
+
+				{/* Поле поиска */}
 				<div className='relative flex-1 min-w-0'>
-					<Search className='absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400 pointer-events-none z-10' />
+					<Search
+						className={cn(
+							'absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10 transition-all duration-300',
+							compact ? 'size-4' : 'size-5'
+						)}
+					/>
 					<Input
 						ref={inputRef}
 						type='text'
@@ -305,7 +347,8 @@ const SearchBar = () => {
 						onFocus={handleFocus}
 						onKeyDown={handleKeyDown}
 						className={cn(
-							'pl-10 pr-10 h-11 w-full rounded-r-none',
+							'pl-8 w-full border-0 rounded-none bg-white text-sm focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300',
+							compact ? 'h-9' : 'h-11',
 							query && 'pr-10',
 							isLoading && 'pr-20'
 						)}
@@ -331,12 +374,16 @@ const SearchBar = () => {
 					)}
 				</div>
 
+				{/* Кнопка поиска */}
 				<Button
-					variant='accent'
-					size='md'
+					variant='default'
+					size={compact ? 'sm' : 'md'}
 					onClick={handleSearch}
 					disabled={!query.trim()}
-					className='flex-shrink-0 rounded-l-none hover:translate-y-0 hover:shadow-none'
+					className={cn(
+						'mr-1 flex-shrink-0 hover:translate-y-0 hover:shadow-none transition-all duration-300',
+						compact ? 'h-9 mr-0.5' : 'h-10'
+					)}
 				>
 					<span className='hidden sm:inline'>{t('Search.button')}</span>
 					<span className='sm:hidden'>

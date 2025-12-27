@@ -216,6 +216,9 @@ export async function PUT(
 		if (validationResult.data.name !== undefined) {
 			updateData.name = validationResult.data.name
 		}
+		if (validationResult.data.shortDescription !== undefined) {
+			updateData.shortDescription = validationResult.data.shortDescription ?? null
+		}
 		if (validationResult.data.description !== undefined) {
 			updateData.description = validationResult.data.description ?? null
 		}

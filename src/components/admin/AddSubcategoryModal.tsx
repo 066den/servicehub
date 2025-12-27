@@ -130,7 +130,6 @@ export default function AddSubcategoryModal({
 				const createData: CreateSubcategorySchema = {
 					name: trimmedName,
 					categoryId: data.categoryId,
-					slug: slug || null,
 					icon: data.icon?.trim() || null,
 					description: data.description?.trim() || null,
 				}

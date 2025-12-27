@@ -111,6 +111,28 @@ const companyInfoSchema = z.preprocess(
 		.nullable()
 )
 
+// Схема для валидации TipTap JSON документа
+const tipTapDocumentSchema = z.object({
+	type: z.string(),
+	content: z.array(z.any()).optional(),
+}).passthrough()
+
+// Схема для валидации регионов обслуживания (массив строк)
+export const serviceAreasSchema = z.preprocess((val: unknown) => {
+	if (val === null || val === '') return []
+	if (typeof val === 'string') {
+		try {
+			const parsed = JSON.parse(val)
+			return Array.isArray(parsed) ? parsed : []
+		} catch {
+			return []
+		}
+	}
+	return Array.isArray(val) ? val : []
+}, z
+	.array(z.string().min(1))
+	.min(1, { message: 'Регіон обслуговування є обов\'язковим полем. Додайте принаймні один регіон обслуговування' }))
+
 export const createProviderSchema = z.object({
 	businessName: z.string().trim().min(1).max(100),
 	description: z
@@ -127,14 +149,45 @@ export const createProviderSchema = z.object({
 		.optional()
 		.transform(value => (value === '' ? undefined : value)),
 	type: providerTypeSchema,
+	serviceAreas: serviceAreasSchema,
+	// slug генерируется автоматически на сервере, не передается с клиента
 })
 
 export const updateProviderSchema = z.object({
 	businessName: z.string().trim().min(1).max(100),
-	description: z.preprocess(
-		(val: unknown) => (val === null ? undefined : val),
-		z.string().trim().max(500).optional()
-	),
+	description: z
+		.preprocess((val: unknown) => {
+			if (val === null || val === '' || val === undefined) return undefined
+			if (typeof val === 'string') {
+				// Если это JSON строка, пытаемся распарсить
+				if (val.trim().startsWith('{')) {
+					try {
+						return JSON.parse(val)
+					} catch {
+						// Если не удалось распарсить, возвращаем как есть (обычный текст)
+						return val
+					}
+				}
+				return val
+			}
+			return val
+		}, z
+			.union([
+				// JSON объект TipTap Document (без ограничения размера, т.к. будет преобразован в строку)
+				tipTapDocumentSchema,
+				// Обычная строка (для обратной совместимости) - увеличен лимит для больших описаний
+				z.string().max(50000),
+			])
+			.optional()
+			.transform(value => {
+				if (value === undefined || value === null || value === '') return undefined
+				// Если это объект, преобразуем в JSON строку
+				if (typeof value === 'object') {
+					return JSON.stringify(value)
+				}
+				return value
+			})
+		),
 	phone: z.string().trim().min(1).max(20),
 	location: locationSchema,
 	email: z.preprocess((val: unknown) => {
@@ -142,17 +195,29 @@ export const updateProviderSchema = z.object({
 		return val
 	}, z.union([z.string().email().trim(), z.literal('')]).optional()),
 	serviceAreas: z.preprocess((val: unknown) => {
-		if (val === null || val === '') return undefined
+		if (val === null || val === '') return []
 		if (typeof val === 'string') {
 			try {
-				return JSON.parse(val)
+				const parsed = JSON.parse(val)
+				return Array.isArray(parsed) ? parsed : []
 			} catch {
-				return undefined
+				return []
 			}
 		}
-		return val
-	}, z.unknown().optional().nullable()),
+		return Array.isArray(val) ? val : []
+	}, z
+		.array(z.string().min(1))
+		.min(1, { message: 'Регіон обслуговування є обов\'язковим полем. Додайте принаймні один регіон обслуговування' })),
 	companyInfo: companyInfoSchema,
+	slug: z
+		.string()
+		.trim()
+		.max(100)
+		.regex(/^[a-z0-9-]+$/, {
+			message: 'Slug може містити тільки латинські літери, цифри та дефіси',
+		})
+		.optional()
+		.transform(value => (value === '' ? undefined : value)),
 })
 
 export const changeProviderTypeSchema = z.object({
@@ -200,7 +265,7 @@ export const createStaffSchema = z.object({
 
 export const createCategorySchema = z.object({
 	name: z.string().min(1).max(255),
-	slug: z.string().optional().nullable(),
+	// slug генерируется автоматически на сервере, не передается с клиента
 	icon: z.string().optional().nullable(),
 	description: z.string().optional().nullable(),
 	isActive: z.boolean().optional(),
@@ -217,7 +282,7 @@ export const updateCategorySchema = z.object({
 export const createSubcategorySchema = z.object({
 	name: z.string().min(1).max(255),
 	categoryId: z.number().int().positive(),
-	slug: z.string().optional().nullable(),
+	// slug генерируется автоматически на сервере, не передается с клиента
 	icon: z.string().optional().nullable(),
 	description: z.string().optional().nullable(),
 	isActive: z.boolean().optional(),
@@ -236,7 +301,7 @@ export const createTypeSchema = z.object({
 	name: z.string().min(1).max(255),
 	categoryId: z.number().int().positive(),
 	subcategoryId: z.number().int().positive().optional().nullable(),
-	slug: z.string().optional().nullable(),
+	// slug генерируется автоматически на сервере, не передается с клиента
 	icon: z.string().optional().nullable(),
 	description: z.string().optional().nullable(),
 })
@@ -421,12 +486,45 @@ export const serviceAddonSchemaValidate = z.object({
 
 export const createServiceSchema = z.object({
 	name: z.string().trim().min(1).max(255),
-	description: z
+	shortDescription: z
 		.string()
 		.trim()
-		.max(2000)
+		.max(500)
 		.optional()
 		.transform(value => (value === '' ? undefined : value)),
+	description: z
+		.preprocess((val: unknown) => {
+			if (val === null || val === '' || val === undefined) return undefined
+			if (typeof val === 'string') {
+				// Если это JSON строка, пытаемся распарсить
+				if (val.trim().startsWith('{')) {
+					try {
+						return JSON.parse(val)
+					} catch {
+						// Если не удалось распарсить, возвращаем как есть (обычный текст)
+						return val
+					}
+				}
+				return val
+			}
+			return val
+		}, z
+			.union([
+				// JSON объект TipTap Document (без ограничения размера, т.к. будет преобразован в строку)
+				tipTapDocumentSchema,
+				// Обычная строка (для обратной совместимости) - увеличен лимит для больших описаний
+				z.string().max(50000),
+			])
+			.optional()
+			.transform(value => {
+				if (value === undefined || value === null || value === '') return undefined
+				// Если это объект, преобразуем в JSON строку
+				if (typeof value === 'object') {
+					return JSON.stringify(value)
+				}
+				return value
+			})
+		),
 	subcategoryId: z.number().int().positive(),
 	typeId: z.number().int().positive(),
 	price: z.preprocess(
@@ -492,7 +590,7 @@ export const createServiceSchema = z.object({
 		}
 		return val
 	}, pricingOptionsSchema.optional().nullable()),
-	location: locationSchema,
+	location: serviceAreasSchema.optional(), // Используется для хранения регионов обслуживания (массив строк). Если не указано, берется из provider.serviceAreas
 	requirements: z.preprocess((val: unknown) => {
 		if (val === null || val === '' || val === undefined) return undefined
 		if (typeof val === 'string') {
@@ -511,10 +609,45 @@ export const createServiceSchema = z.object({
 
 export const updateServiceSchema = z.object({
 	name: z.string().trim().min(1).max(255).optional(),
-	description: z.preprocess(
-		(val: unknown) => (val === null || val === '' ? undefined : val),
-		z.string().trim().max(2000).optional()
-	),
+	shortDescription: z
+		.string()
+		.trim()
+		.max(500)
+		.optional()
+		.transform(value => (value === '' ? undefined : value)),
+	description: z
+		.preprocess((val: unknown) => {
+			if (val === null || val === '' || val === undefined) return undefined
+			if (typeof val === 'string') {
+				// Если это JSON строка, пытаемся распарсить
+				if (val.trim().startsWith('{')) {
+					try {
+						return JSON.parse(val)
+					} catch {
+						// Если не удалось распарсить, возвращаем как есть (обычный текст)
+						return val
+					}
+				}
+				return val
+			}
+			return val
+		}, z
+			.union([
+				// JSON объект TipTap Document (без ограничения размера, т.к. будет преобразован в строку)
+				tipTapDocumentSchema,
+				// Обычная строка (для обратной совместимости) - увеличен лимит для больших описаний
+				z.string().max(50000),
+			])
+			.optional()
+			.transform(value => {
+				if (value === undefined || value === null || value === '') return undefined
+				// Если это объект, преобразуем в JSON строку
+				if (typeof value === 'object') {
+					return JSON.stringify(value)
+				}
+				return value
+			})
+		),
 	subcategoryId: z.number().int().positive().optional(),
 	typeId: z.number().int().positive().optional(),
 	price: z.preprocess(
@@ -580,7 +713,7 @@ export const updateServiceSchema = z.object({
 		}
 		return val
 	}, pricingOptionsSchema.optional().nullable()),
-	location: locationSchema.optional(),
+	location: serviceAreasSchema.optional(), // Используется для хранения регионов обслуживания (массив строк)
 	requirements: z.preprocess((val: unknown) => {
 		if (val === null || val === '' || val === undefined) return undefined
 		if (typeof val === 'string') {
@@ -644,3 +777,18 @@ export type CreatePremiumServiceSchema = z.infer<
 
 export const createPremiumServiceSchemaValidate =
 	createPremiumServiceSchema.safeParse
+
+export const reorderServicesSchema = z.object({
+	services: z
+		.array(
+			z.object({
+				id: z.number().int().positive(),
+				order: z.number().int().nonnegative(),
+			})
+		)
+		.min(1, { message: 'Масив послуг не може бути порожнім' }),
+})
+
+export type ReorderServicesSchema = z.infer<typeof reorderServicesSchema>
+
+export const reorderServicesSchemaValidate = reorderServicesSchema.safeParse

@@ -60,7 +60,7 @@ export interface AuthActions {
 	removeAvatar: () => Promise<void>
 
 	// initialize
-	initialize: () => Promise<void>
+	initialize: (sessionStatus?: 'authenticated' | 'unauthenticated' | 'loading') => Promise<void>
 }
 
 export interface AuthStore extends AuthState {

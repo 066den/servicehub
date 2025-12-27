@@ -2,8 +2,16 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { validatePhone, normalizePhone } from '@/utils/phoneUtils'
 import { authService } from '@/services/authService'
+import { JWT } from 'next-auth/jwt'
+
+if (!process.env.NEXTAUTH_SECRET) {
+	console.warn(
+		'⚠️  NEXTAUTH_SECRET не установлен. Это может вызвать проблемы с аутентификацией.'
+	)
+}
 
 export const authOptions: NextAuthOptions = {
+	secret: process.env.NEXTAUTH_SECRET,
 	providers: [
 		CredentialsProvider({
 			id: 'sms-login',
@@ -39,17 +47,30 @@ export const authOptions: NextAuthOptions = {
 							normalizedPhone,
 							deviceInfo.ipAddress
 						)
+						
+						// Если есть ошибка, но есть код, все равно возвращаем данные (код нужен для development режима)
+						// Исключение: если это ошибка базы данных, выбрасываем ошибку
+						if (result?.error && result.error === 'database_unavailable') {
+							throw new Error(result.error)
+						}
+
+						// Если код есть, возвращаем данные (даже при ошибке отправки SMS)
+						if (result?.code) {
+							return {
+								id: result?.userId?.toString() || '0',
+								phone: credentials.phone,
+								phoneNormalized: normalizedPhone,
+								isVerified: false,
+								code: result.code,
+							}
+						}
+
+						// Если кода нет, это критическая ошибка
 						if (result?.error) {
 							throw new Error(result.error)
 						}
 
-						return {
-							id: result?.userId?.toString() || '0',
-							phone: credentials.phone,
-							phoneNormalized: normalizedPhone,
-							isVerified: false,
-							code: result?.code,
-						}
+						throw new Error('Failed to send verification code')
 					}
 
 					if (credentials.step === 'verify-code') {
@@ -177,14 +198,18 @@ export const authOptions: NextAuthOptions = {
 				return token
 			}
 
-			// Проверяем истечение access token
-			if (Date.now() < (token.accessTokenExpires || 0)) {
+			// Проверяем истечение access token (обновляем за 2 минуты до истечения)
+			const expiresAt = token.accessTokenExpires || 0
+			const now = Date.now()
+			const timeUntilExpiry = expiresAt - now
+			
+			// Если токен еще действителен и не скоро истекает (более 2 минут), возвращаем как есть
+			if (timeUntilExpiry > 2 * 60 * 1000) {
 				return token
 			}
 
-			// Обновляем токен
-			//return await refreshAccessToken(token)
-			return token
+			// Обновляем токен, если он истек или скоро истечет
+			return await refreshAccessToken(token)
 		},
 
 		async session({ session, token }) {
@@ -195,10 +220,14 @@ export const authOptions: NextAuthOptions = {
 				session.user.isVerified = token.isVerified
 				session.user.role = token.role
 				session.accessToken = token.accessToken
+				session.refreshToken = token.refreshToken
+				// Передаем ошибку обновления токена в сессию для обработки на клиенте
+				if ('error' in token && typeof token.error === 'string') {
+					session.error = token.error
+				}
 				if (process.env.NODE_ENV === 'development' && token.code) {
 					session.code = token.code
 				}
-				//session.refreshToken = token.refreshToken
 			}
 
 			return session
@@ -226,27 +255,30 @@ export const authOptions: NextAuthOptions = {
 	debug: process.env.NODE_ENV === 'development',
 }
 
-// async function refreshAccessToken(token: JWT) {
-// 	try {
-// 		if (!token.refreshToken) {
-// 			throw new Error('Нет refresh token')
-// 		}
+async function refreshAccessToken(token: JWT) {
+	try {
+		if (!token.refreshToken) {
+			throw new Error('Нет refresh token')
+		}
 
-// 		const response = await authService.refreshAccessToken(token.refreshToken)
+		const response = await authService.refreshAccessToken(
+			token.refreshToken,
+			{} // Пустой deviceInfo для обновления токена
+		)
 
-// 		return {
-// 			...token,
-// 			accessToken: response.tokens.accessToken,
-// 			refreshToken: response.tokens.refreshToken,
-// 			accessTokenExpires: response.tokens.accessTokenExpiresAt.getTime(),
-// 			error: undefined,
-// 		}
-// 	} catch (error: unknown) {
-// 		console.error('Ошибка обновления токена:', error)
+		return {
+			...token,
+			accessToken: response.tokens.accessToken,
+			refreshToken: response.tokens.refreshToken,
+			accessTokenExpires: response.tokens.accessTokenExpiresAt.getTime(),
+			error: undefined,
+		}
+	} catch (error: unknown) {
+		console.error('Ошибка обновления токена:', error)
 
-// 		return {
-// 			...token,
-// 			error: 'RefreshAccessTokenError',
-// 		}
-// 	}
-// }
+		return {
+			...token,
+			error: 'RefreshAccessTokenError',
+		}
+	}
+}

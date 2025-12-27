@@ -53,10 +53,7 @@ const useGeolocation = (): GeolocationHookResult => {
 			}
 
 			const geocoder = new google.maps.Geocoder()
-			const location = new google.maps.LatLng(
-				coords.latitude,
-				coords.longitude
-			)
+			const location = new google.maps.LatLng(coords.latitude, coords.longitude)
 
 			geocoder.geocode(
 				{

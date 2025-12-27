@@ -6,12 +6,12 @@ import Map from '../common/Map'
 import { LocationData } from '@/types'
 import { Button } from '../ui/button'
 import { cn } from '@/lib/utils'
-import { Textarea } from '../ui/textarea'
 import { useUserProfile } from '@/stores/auth/useUserProfile'
 import InputPhone from '../ui/forms/InputPhone'
 import { useProvider } from '@/stores/provider/useProvider'
 import { ProviderType } from '@prisma/client'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
+import ServiceAreasInput from '../ui/forms/ServiceAreasInput'
 import { phoneMask } from '@/utils/phoneNumber'
 import { Badge } from '../ui/badge'
 import { containerVariants } from '../ui/animate/variants'
@@ -21,6 +21,8 @@ import { toast } from 'sonner'
 import type { Executor } from '@/types/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CreateProviderSchema, createProviderSchema } from '@/lib/schemas'
+import { TipTapEditor } from '../ui/tiptap-editor'
+import { Label } from '../ui/label'
 
 const ExecutorRegister = () => {
 	const { user, userLocation } = useUserProfile()
@@ -36,6 +38,8 @@ const ExecutorRegister = () => {
 		setValue,
 		getValues,
 		watch,
+		control,
+		trigger,
 		formState: { errors, isSubmitting },
 	} = useForm<CreateProviderSchema>({
 		// @ts-expect-error - zodResolver with preprocess returns unknown input types
@@ -46,6 +50,7 @@ const ExecutorRegister = () => {
 			email: '',
 			description: '',
 			phone: '',
+			serviceAreas: [],
 		},
 	})
 
@@ -87,6 +92,8 @@ const ExecutorRegister = () => {
 			description: data.description?.trim() || undefined,
 			email: data.email?.trim() || undefined,
 			location: location || undefined,
+			serviceAreas: data.serviceAreas || undefined,
+			// slug генерируется автоматически на сервере
 		}
 
 		try {
@@ -208,14 +215,37 @@ const ExecutorRegister = () => {
 				</div>
 
 				<div className='space-y-2 mb-4'>
-					<label className='text-base font-semibold text-gray-700 leading-none select-none'></label>
-					<Textarea
-						{...register('description')}
-						placeholder='Розкажіть про свої навички та спеціалізацію...'
+					<Label>Опис</Label>
+					<Controller
+						control={control}
+						name='description'
+						render={({ field }) => (
+							<TipTapEditor
+								value={field.value}
+								onChange={field.onChange}
+								placeholder='Розкажіть про свої навички та спеціалізацію...'
+								error={!!errors.description}
+							/>
+						)}
 					/>
+					{errors.description && (
+						<p className='text-sm text-destructive'>
+							{errors.description.message}
+						</p>
+					)}
 					<div className='text-sm text-gray-500'>
 						Опис допоможе клієнтам краще зрозуміти ваші можливості
 					</div>
+				</div>
+
+				<div className='space-y-2 mb-4'>
+					<ServiceAreasInput
+						name='serviceAreas'
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						control={control as any}
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						trigger={trigger as any}
+					/>
 				</div>
 
 				<PlacesAutocomplete

@@ -210,7 +210,7 @@ const SmsForm = () => {
 				<Button
 					type='submit'
 					disabled={!isValid}
-					loading={isLoading}
+					loading={!!isLoading}
 					fullWidth
 					size='lg'
 				>
@@ -239,7 +239,7 @@ const SmsForm = () => {
 				variant='ghost'
 				size='sm'
 				onClick={handleBack}
-				className='absolute top-6 left-6 flex items-center gap-2'
+				className='absolute top-4 left-4 flex items-center gap-2'
 				type='button'
 			>
 				<ArrowLeft className='w-4 h-4' />

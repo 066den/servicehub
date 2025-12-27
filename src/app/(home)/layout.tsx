@@ -1,4 +1,4 @@
-import Header from '@/components/main/Header'
+import HeaderWithCategories from '@/components/main/HeaderWithCategories'
 import Footer from '@/components/main/Footer'
 
 export default function HomeLayout({
@@ -8,7 +8,7 @@ export default function HomeLayout({
 }) {
 	return (
 		<>
-			<Header />
+			<HeaderWithCategories />
 			{children}
 			<Footer />
 		</>

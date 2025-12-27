@@ -1,7 +1,11 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 
 import { cn } from '@/lib/utils'
-import { getAvatarColor, getFirstLetters } from '@/utils/textFormat'
+import {
+	getAvatarColor,
+	getFirstLetters,
+	getTextFromTipTap,
+} from '@/utils/textFormat'
 import { Executor } from '@/types/auth'
 import Image from 'next/image'
 import { ProviderType } from '@prisma/client'
@@ -23,8 +27,8 @@ const AvatarCompany = ({
 }: Props) => {
 	const [content, setContent] = useState('')
 	const [bgColor, setBgColor] = useState('')
-
-	const { businessName, type, avatar, companyInfo } = provider
+	console.log(provider)
+	const { businessName, type, avatar, description } = provider
 
 	useEffect(() => {
 		let initials = getFirstLetters('Виконавець')
@@ -48,6 +52,12 @@ const AvatarCompany = ({
 		}
 	)
 	const imageSrc = avatar ?? undefined
+
+	// Извлекаем первые 5 слов из описания (может быть TipTap JSON или обычный текст)
+	const descriptionPreview = useMemo(
+		() => getTextFromTipTap(description, 5),
+		[description]
+	)
 
 	return (
 		<div
@@ -80,13 +90,15 @@ const AvatarCompany = ({
 					</div>
 				)}
 			</div>
-			<div className='px-1'>
-				<div className='text-sm font-semibold'>{businessName}</div>
-				<div className='text-xs text-primary font-medium'>
-					{type === ProviderType.COMPANY
-						? companyInfo?.legalForm ?? 'Компанія'
-						: 'Виконавець'}
+			<div className='px-1 text-left max-w-[160px]'>
+				<div className='text-sm/[1.1] font-semibold line-clamp-2 hover:text-primary transition-all duration-300 ease-in-out'>
+					{businessName}
 				</div>
+				{descriptionPreview && type !== ProviderType.COMPANY && (
+					<div className='text-xs text-muted-foreground truncate '>
+						{descriptionPreview}
+					</div>
+				)}
 			</div>
 		</div>
 	)

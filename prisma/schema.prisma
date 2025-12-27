@@ -63,6 +63,7 @@ model Provider {
   instagram             String?
   facebook              String?
   telegram              String?
+  slug                  String?                  @unique
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
   deletedAt             DateTime?
@@ -79,6 +80,7 @@ model Provider {
   @@index([rating])
   @@index([subscriptionExpiresAt])
   @@index([deletedAt])
+  @@index([slug])
 }
 
 model CompanyInfo {
@@ -147,6 +149,7 @@ model Service {
   id             Int            @id @default(autoincrement())
   providerId     Int
   name           String
+  shortDescription String?
   description    String?
   subcategoryId  Int
   typeId         Int
@@ -253,7 +256,7 @@ model Order {
 model Category {
   id              Int                      @id @default(autoincrement())
   name            String
-  slug            String?                  @unique
+  slug            String                   @unique
   icon            String?
   image           String?
   description     String?
@@ -269,7 +272,7 @@ model Category {
 model Subcategory {
   id          Int       @id @default(autoincrement())
   name        String
-  slug        String?   @unique
+  slug        String    @unique
   image       String?
   icon        String?
   description String?
@@ -287,7 +290,7 @@ model Subcategory {
 model Type {
   id            Int          @id @default(autoincrement())
   name          String
-  slug          String?      @unique
+  slug          String       @unique
   image         String?
   icon          String?
   description   String?

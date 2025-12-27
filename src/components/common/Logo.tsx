@@ -27,14 +27,14 @@ interface LogoProps {
 }
 
 // Component
-const Logo: React.FC<LogoProps> = ({
+const Logo = ({
 	color = 'default',
 	withSlogan = false,
 	withImage = true,
 	size,
 	isLink = false,
 	className,
-}) => {
+}: LogoProps) => {
 	const t = useTranslations()
 	const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -56,7 +56,7 @@ const Logo: React.FC<LogoProps> = ({
 	// Prepare className with Tailwind classes
 	const logoClassName = cn(
 		// Size variants
-		size === 'sm' && 'text-4xl',
+		size === 'sm' && 'text-3xl',
 		(size === 'md' || !size) && 'text-[2.5em]',
 		size === 'lg' && 'text-[3.5em] mb-3',
 		// Link styles
@@ -73,9 +73,9 @@ const Logo: React.FC<LogoProps> = ({
 	)
 
 	const sloganClassName = cn(
-		'text-[0.275em] font-semibold text-secondary-foreground uppercase tracking-wider ml-0.5 -mt-1 leading-4',
+		'text-[0.275em] font-semibold text-secondary-foreground uppercase tracking-wider -mt-1 leading-4',
 		size === 'lg' && 'text-white text-xl font-light lowercase',
-		withImage && 'text-left'
+		withImage && 'ml-13'
 	)
 
 	return (
@@ -87,9 +87,9 @@ const Logo: React.FC<LogoProps> = ({
 						<Image
 							src='/logo-2.png'
 							alt='Logo'
-							width={size === 'lg' ? 80 : 34}
-							height={size === 'lg' ? 80 : 34}
-							className='h-auto w-auto'
+							width={size === 'lg' ? 80 : 40}
+							height={size === 'lg' ? 80 : 40}
+							sizes='40px'
 							priority
 						/>
 					)}

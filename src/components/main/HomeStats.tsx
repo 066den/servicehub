@@ -1,17 +1,22 @@
 'use client'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import Statistics, { StatItem } from '../common/Statistics'
 import { useCommon } from '@/stores/common/useCommon'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 
 const HomeStats = () => {
-	const { stats, fetchStats } = useCommon()
+	const { stats, fetchStats, lastStatsUpdate } = useCommon()
 	const t = useTranslations()
+	const hasFetched = useRef(false)
 
 	useEffect(() => {
-		fetchStats()
-	}, [fetchStats])
+		// Загружаем статистику только один раз при монтировании или если данных нет
+		if (!hasFetched.current && (!stats || lastStatsUpdate === 0)) {
+			hasFetched.current = true
+			fetchStats()
+		}
+	}, []) // Пустой массив зависимостей - загружаем только один раз
 
 	const statsItems: StatItem[] = useMemo(() => {
 		return [

@@ -13,14 +13,28 @@ export async function GET() {
 	}
 
 	// Получаем provider текущего пользователя
+	const userId = session.user.id
+	if (!userId || userId === 0) {
+		console.error('Invalid user ID in session:', userId)
+		return NextResponse.json({ error: 'Invalid user session' }, { status: 401 })
+	}
+
 	const provider = await prisma.provider.findUnique({
 		where: {
-			userId: Number(session.user.id),
+			userId: userId,
 		},
 	})
 
 	if (!provider) {
-		return NextResponse.json({ error: 'Provider not found' }, { status: 404 })
+		console.error('Provider not found for userId:', userId)
+		return NextResponse.json(
+			{
+				error: 'Provider not found',
+				message:
+					'Профіль виконавця не знайдено. Будь ласка, спочатку створіть профіль виконавця.',
+			},
+			{ status: 404 }
+		)
 	}
 
 	try {
@@ -48,9 +62,14 @@ export async function GET() {
 					},
 				},
 			},
-			orderBy: {
-				createdAt: 'desc',
-			},
+			orderBy: [
+				{
+					order: 'asc',
+				},
+				{
+					createdAt: 'desc',
+				},
+			],
 		})
 
 		return NextResponse.json({ success: true, services })
@@ -86,14 +105,28 @@ export async function POST(req: Request) {
 	}
 
 	// Получаем provider текущего пользователя
+	const userId = session.user.id
+	if (!userId || userId === 0) {
+		console.error('Invalid user ID in session:', userId)
+		return NextResponse.json({ error: 'Invalid user session' }, { status: 401 })
+	}
+
 	const provider = await prisma.provider.findUnique({
 		where: {
-			userId: Number(session.user.id),
+			userId: userId,
 		},
 	})
 
 	if (!provider) {
-		return NextResponse.json({ error: 'Provider not found' }, { status: 404 })
+		console.error('Provider not found for userId:', userId)
+		return NextResponse.json(
+			{
+				error: 'Provider not found',
+				message:
+					'Профіль виконавця не знайдено. Будь ласка, спочатку створіть профіль виконавця.',
+			},
+			{ status: 404 }
+		)
 	}
 
 	try {
@@ -131,8 +164,19 @@ export async function POST(req: Request) {
 
 		const { addons } = validationResult.data
 
+		// Если location (serviceAreas) не передан, автоматически берем из provider.serviceAreas
+		let serviceAreas: string[] = validationResult.data.location || []
+		if (!serviceAreas || serviceAreas.length === 0) {
+			if (Array.isArray(provider.serviceAreas)) {
+				serviceAreas = provider.serviceAreas.filter((item): item is string => typeof item === 'string')
+			} else {
+				serviceAreas = []
+			}
+		}
+
 		const serviceData: Prisma.ServiceUncheckedCreateInput = {
 			name: validationResult.data.name,
+			shortDescription: validationResult.data.shortDescription ?? null,
 			description: validationResult.data.description ?? null,
 			subcategoryId: validationResult.data.subcategoryId,
 			typeId: validationResult.data.typeId,
@@ -141,14 +185,23 @@ export async function POST(req: Request) {
 			duration: validationResult.data.duration ?? null,
 			pricingOptions:
 				(validationResult.data.pricingOptions as Prisma.InputJsonValue) ?? null,
-			location:
-				(validationResult.data.location as Prisma.InputJsonValue) ?? null,
+			location: (serviceAreas as Prisma.InputJsonValue) ?? null,
 			requirements:
 				(validationResult.data.requirements as Prisma.InputJsonValue) ?? null,
 			isActive: validationResult.data.isActive ?? true,
 			isFeatured: validationResult.data.isFeatured ?? false,
-			addons: {
-				create: (addons || []).map((addon, index) => ({
+		}
+
+		// Создаем сервис
+		const createdService = await prisma.service.create({
+			data: serviceData,
+		})
+
+		// Создаем addons, если они есть
+		if (addons && addons.length > 0) {
+			await prisma.serviceAddon.createMany({
+				data: addons.map((addon, index) => ({
+					serviceId: createdService.id,
 					title: addon.title,
 					duration: addon.duration,
 					price: addon.price,
@@ -157,11 +210,12 @@ export async function POST(req: Request) {
 					order: addon.order ?? index,
 					isActive: addon.isActive ?? true,
 				})),
-			},
+			})
 		}
 
-		const service = await prisma.service.create({
-			data: serviceData,
+		// Получаем сервис с полными данными
+		const service = await prisma.service.findUnique({
+			where: { id: createdService.id },
 			include: {
 				subcategory: {
 					include: {

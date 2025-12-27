@@ -21,6 +21,7 @@ const PlacesAutocomplete = ({
 	placeholder,
 	helperText,
 	types,
+	required,
 	className,
 }: PlacesAutocompleteProps) => {
 	const t = useTranslations('Form')
@@ -374,7 +375,11 @@ const PlacesAutocomplete = ({
 
 	return (
 		<div className={cn('space-y-2', className)}>
-			{label && <Label htmlFor={inputRef.current?.id}>{label}</Label>}
+			{label && (
+				<Label htmlFor={inputRef.current?.id}>
+					{label} {required && <span className='text-destructive'>*</span>}
+				</Label>
+			)}
 
 			<div className='relative' ref={dropdownRef}>
 				<Input

@@ -43,12 +43,54 @@ export async function PUT(
 			)
 		}
 
+		const updateData: { name: string; slug?: string; icon?: string | null; description?: string | null; category?: { connect: { id: number } }; subcategory?: { connect: { id: number } } | { disconnect: boolean } } = { name: validationResult.data.name }
+		if (validationResult.data.slug !== null && validationResult.data.slug !== undefined) {
+			updateData.slug = validationResult.data.slug
+		}
+		if (validationResult.data.icon !== undefined) {
+			updateData.icon = validationResult.data.icon
+		}
+		if (validationResult.data.description !== undefined) {
+			updateData.description = validationResult.data.description
+		}
+		if (validationResult.data.categoryId !== undefined) {
+			updateData.category = { connect: { id: validationResult.data.categoryId } }
+		}
+		if (validationResult.data.subcategoryId !== undefined) {
+			if (validationResult.data.subcategoryId === null) {
+				updateData.subcategory = { disconnect: true }
+			} else {
+				updateData.subcategory = { connect: { id: validationResult.data.subcategoryId } }
+			}
+		}
+
 		const type = await prisma.type.update({
 			where: { id },
-			data: validationResult.data,
+			data: updateData,
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				icon: true,
+				description: true,
+				categoryId: true,
+				subcategoryId: true,
+			},
 		})
 
-		return NextResponse.json({ success: true, type })
+		// Подсчитываем количество услуг для этого типа
+		const servicesCount = await prisma.service.count({
+			where: { typeId: id, deletedAt: null },
+		})
+
+		return NextResponse.json({
+			success: true,
+			type: {
+				...type,
+				isActive: true,
+				servicesCount,
+			},
+		})
 	} catch (error) {
 		console.error('Error updating type:', error)
 		return NextResponse.json(

@@ -1,6 +1,7 @@
 export const ROUTES = {
 	HOME: '/',
 	PROFILE: '/profile',
+	ABOUT_US: '/about',
 	EXECUTOR: '/profile/executor',
 	DASHBOARD: '/profile/dashboard',
 	MY_RECORDS: '/profile/records',
@@ -12,6 +13,10 @@ export const ROUTES = {
 	SERVICES: '/profile/services',
 	PREMIUM_SERVICES: '/profile/premium-services',
 	STAFF_PROFILE: (id: number) => `/profile/staff/${id}`,
+	EXECUTOR_PUBLIC: (slug: string) => `/${slug}`,
+	CATELOG: '/catalog',
+	SERVICE_PUBLIC: (executorSlug: string, id: number) =>
+		`/${encodeURIComponent(executorSlug)}/${id}`,
 	//ADMIN
 	ADMIN: {
 		CATEGORIES: '/admin/categories',
@@ -23,5 +28,11 @@ export const ROUTES = {
 		SETTINGS: '/admin/settings',
 		STAFF: '/admin/staff',
 		STAFF_PROFILE: (id: number) => `/admin/staff/${id}`,
+	},
+} as const
+
+export const ERROR_MESSAGES = {
+	PRISMA: {
+		NOT_INITIALIZED: 'Prisma is not initialized',
 	},
 } as const

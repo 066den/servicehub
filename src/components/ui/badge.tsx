@@ -19,6 +19,8 @@ const badgeVariants = cva(
 					'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
 				success:
 					'border-transparent bg-success text-success-foreground [a&]:hover:bg-success/90',
+				accent:
+					'border-transparent bg-accent/10 text-accent [a&]:hover:bg-accent/90',
 			},
 			size: {
 				sm: 'text-xs',

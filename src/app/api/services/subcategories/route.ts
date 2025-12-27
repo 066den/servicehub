@@ -2,16 +2,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/authOptions'
 import { prisma } from '@/lib/prisma'
-import { z } from 'zod'
-
-const createSubcategorySchema = z.object({
-	name: z.string().min(1).max(255),
-	slug: z.string().optional().nullable(),
-	icon: z.string().optional().nullable(),
-	description: z.string().optional().nullable(),
-	isActive: z.boolean().optional(),
-	categoryId: z.number().int().positive(),
-})
+import { createSubcategorySchema } from '@/lib/schemas'
+import { generateUniqueSlug } from '@/utils/slug'
 
 export async function GET() {
 	const session = await getServerSession(authOptions)
@@ -144,8 +136,18 @@ export async function POST(req: Request) {
 			)
 		}
 
+		// Автоматически генерируем уникальный slug из name
+		const slug = await generateUniqueSlug(
+			prisma,
+			'Subcategory',
+			validationResult.data.name
+		)
+
 		const subcategory = await prisma.subcategory.create({
-			data: validationResult.data,
+			data: {
+				...validationResult.data,
+				slug,
+			},
 		})
 
 		return NextResponse.json({ success: true, subcategory }, { status: 201 })

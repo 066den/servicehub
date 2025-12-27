@@ -96,6 +96,7 @@ export interface PlacesAutocompleteProps {
 	location?: LocationData | null
 	label?: string
 	helperText?: string
+	required?: boolean
 }
 
 export interface Suggestion {
@@ -200,7 +201,8 @@ export interface Service {
 	id: number
 	providerId: number
 	name: string
-	description?: string | null
+	shortDescription?: string | null
+	description?: string | null // Может быть JSON строкой (TipTap Document) или обычным текстом
 	subcategoryId: number
 	typeId: number
 	price?: number | null
@@ -210,6 +212,7 @@ export interface Service {
 	requirements?: unknown | null
 	isActive: boolean
 	isFeatured: boolean
+	order: number
 	createdAt: Date
 	updatedAt: Date
 	deletedAt?: Date | null
@@ -240,4 +243,11 @@ export interface PremiumServiceInfo {
 	description: string
 	icon?: string
 	requiresCategory?: boolean
+}
+
+export interface Pagination {
+	total: number
+	page: number
+	limit: number
+	totalPages: number
 }

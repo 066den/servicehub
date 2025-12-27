@@ -18,25 +18,26 @@ const buttonVariants = cva(
 				success:
 					'bg-success text-success-foreground shadow-xs hover:bg-success/90 hover:shadow-[0_8px_25px_rgba(16,185,129,0.3)]',
 				outline:
-					'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground hover:shadow-sm dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+					'border-2 bg-white text-secondary-foreground shadow-xs hover:text-foreground hover:bg-muted hover:shadow-sm dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
 				'outline-primary':
-					'inset-ring-2 ring-primary bg-background text-primary shadow-xs hover:bg-primary/10 hover:shadow-[0_2px_8px_hsl(var(--color-primary-shadow))]',
+					'ring-2 ring-inset ring-primary bg-background text-primary shadow-xs hover:bg-primary/10 hover:shadow-[0_2px_8px_hsl(var(--color-primary-shadow))]',
 				'outline-accent':
-					'border-2 border-accent bg-background text-accent shadow-xs hover:bg-accent hover:text-accent-foreground hover:shadow-[0_8px_25px_hsl(var(--color-accent-shadow))]',
+					'ring-2 ring-inset ring-accent bg-background text-accent shadow-xs hover:bg-accent hover:text-accent-foreground hover:shadow-[0_8px_25px_hsl(var(--color-accent-shadow))]',
 				'outline-destructive':
 					'border-2 border-destructive bg-background text-destructive shadow-xs hover:bg-destructive/10 hover:shadow-[0_2px_8px_hsl(var(--color-default-shadow))]',
 				'outline-secondary':
-					'border-2 border-border bg-background text-secondary-foreground shadow-xs hover:bg-secondary hover:text-secondary-foreground hover:shadow-sm dark:bg-input/30 dark:border-input',
-				'outline-white': 'bg-background hover:translate-none hover:shadow-none',
+					'ring-2 ring-inset ring-secondary bg-secondary/10 text-secondary-foreground shadow-xs hover:bg-secondary/20 hover:shadow-[0_2px_8px_hsl(var(--color-secondary-shadow))]',
+				'outline-muted':
+					'border-2 bg-background text-foreground shadow-xs hover:bg-muted hover:shadow-sm dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
 				secondary:
-					'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 hover:shadow-sm',
+					'bg-secondary text-primary-foreground shadow-xs hover:bg-secondary/80 hover:shadow-sm',
 				ghost:
 					'text-secondary-foreground hover:bg-muted dark:hover:bg-accent/50',
 				link: 'text-primary underline-offset-4 hover:underline hover:translate-y-0 hover:shadow-none',
 			},
 			size: {
 				default: 'h-9 px-4 py-2 has-[>svg]:px-3',
-				sm: 'h-7 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
+				sm: 'h-7 rounded-sm text-sm gap-1.5 px-3 has-[>svg]:px-2.5',
 				lg: 'rounded-md text-lg px-6 py-3 has-[>svg]:px-4',
 				icon: 'size-9 hover:translate-y-0 hover:shadow-none',
 				md: 'h-11 px-5 py-2 has-[>svg]:px-3',
@@ -61,7 +62,7 @@ function Button({
 	className,
 	variant,
 	size,
-	withoutTransform = false,
+	withoutTransform = true,
 	asChild = false,
 	fullWidth = false,
 	loading = false,

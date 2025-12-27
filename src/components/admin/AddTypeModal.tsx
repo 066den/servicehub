@@ -55,7 +55,6 @@ export default function AddTypeModal({
 			name: '',
 			categoryId: 0,
 			subcategoryId: null,
-			slug: '',
 			icon: '',
 			description: '',
 		},
@@ -78,7 +77,7 @@ export default function AddTypeModal({
 					slug: type.slug || '',
 					icon: type.icon || '',
 					description: type.description || '',
-				})
+				} as FormData & { slug?: string })
 			}
 		} else if (subcategoryId) {
 			const subcategory = subcategories.find(sub => sub.id === subcategoryId)
@@ -87,7 +86,6 @@ export default function AddTypeModal({
 					name: '',
 					categoryId: subcategory.category.id,
 					subcategoryId: subcategoryId,
-					slug: '',
 					icon: '',
 					description: '',
 				})
@@ -95,7 +93,7 @@ export default function AddTypeModal({
 		}
 	}, [type, subcategoryId, isOpen, subcategories, reset])
 
-	const onSubmit = async (data: FormData) => {
+	const onSubmit = async (data: FormData & { slug?: string }) => {
 		try {
 			if (type) {
 				// Обновление типа
@@ -117,7 +115,6 @@ export default function AddTypeModal({
 					name: data.name.trim(),
 					categoryId: data.categoryId,
 					subcategoryId: data.subcategoryId,
-					slug: data.slug?.trim() || null,
 					icon: data.icon?.trim() || null,
 					description: data.description?.trim() || null,
 				}

@@ -16,13 +16,21 @@ export default withAuth(
 		// Логика для защищенных маршрутов
 		if (pathname.startsWith('/profile')) {
 			if (!token || !token.isVerified) {
-				return NextResponse.redirect(new URL('/auth/signin', request.url))
+				const callbackUrl = encodeURIComponent(pathname)
+				return NextResponse.redirect(
+					new URL(`/auth/signin?callbackUrl=${callbackUrl}`, request.url)
+				)
 			}
 		}
 
 		//Если пользователь авторизован и заходит на страницу входа
 		if (pathname.startsWith('/auth/signin') && token && token.isVerified) {
-			return NextResponse.redirect(new URL('/profile', request.url))
+			// Проверяем callbackUrl из query параметров
+			const callbackUrl = request.nextUrl.searchParams.get('callbackUrl')
+			const redirectUrl = callbackUrl
+				? decodeURIComponent(callbackUrl)
+				: '/profile'
+			return NextResponse.redirect(new URL(redirectUrl, request.url))
 		}
 
 		// Если админ авторизован и заходит на страницу входа админа

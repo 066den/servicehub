@@ -89,16 +89,30 @@ class AuthService {
 
 			const message = turboSmsService.formatVerificationMessage(code, 'uk')
 
-			const smsResult = await turboSmsService.sendSMS(normalizedPhone, message)
-
-			await this.logSMSResult(normalizedPhone, message, smsResult)
-
-			if (smsResult.status !== EStatus.sent) {
-				return {
-					error: 'sms_send_failed',
+			let smsResult
+			try {
+				smsResult = await turboSmsService.sendSMS(normalizedPhone, message)
+				await this.logSMSResult(normalizedPhone, message, smsResult)
+			} catch (smsError) {
+				console.error('Ошибка отправки SMS:', smsError)
+				// Логируем ошибку, но продолжаем выполнение для возврата кода
+				try {
+					await this.logSMSResult(normalizedPhone, message, {
+						status: EStatus.failed,
+						error: smsError instanceof Error ? smsError.message : String(smsError),
+						provider: 'turbosms',
+					})
+				} catch (logError) {
+					console.error('Ошибка логирования SMS:', logError)
+				}
+				// Создаем фейковый результат для обработки ниже
+				smsResult = {
+					status: EStatus.failed,
+					provider: 'turbosms',
 				}
 			}
 
+			// Получаем информацию о пользователе
 			let user = null
 			try {
 				user = await prisma.user.findUnique({
@@ -115,6 +129,26 @@ class AuthService {
 				} else {
 					throw error
 				}
+			}
+
+			// Если SMS не отправилась, возвращаем ошибку, но все равно возвращаем код
+			// (код нужен для development режима и для отладки)
+			if (smsResult.status !== EStatus.sent) {
+				// Логируем код в консоль для отладки
+				if (process.env.NODE_ENV === 'development') {
+					console.log(`[DEV] Код верификации для ${normalizedPhone}: ${code}`)
+				}
+				return {
+					userId: user?.id,
+					error: 'sms_send_failed',
+					message: 'Не удалось отправить SMS. Попробуйте позже.',
+					code, // Возвращаем код даже при ошибке (для development режима)
+				}
+			}
+
+			// Логируем код в консоль для отладки в development режиме
+			if (process.env.NODE_ENV === 'development') {
+				console.log(`[DEV] Код верификации для ${normalizedPhone}: ${code}`)
 			}
 
 			return {
@@ -148,6 +182,8 @@ class AuthService {
 					console.error('Error logging SMS result:', logError)
 				}
 			}
+			// Пробрасываем ошибку дальше, чтобы она была обработана в authOptions
+			throw error
 		}
 	}
 

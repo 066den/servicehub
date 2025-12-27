@@ -1,6 +1,6 @@
 'use client'
 
-import ServiceForm from '@/components/executor/ServiceForm'
+import ServiceForm from '@/components/services/ServiceForm'
 
 const ServicePage = () => {
 	return <ServiceForm />

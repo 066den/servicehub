@@ -116,6 +116,7 @@ export const useProviderStore = create<ProviderStore>()(
 							toast.success('Профіль виконавця успішно створено')
 						} catch (error) {
 							let message = 'Помилка при створенні профіля виконавця'
+
 							if (error instanceof Error) {
 								message = error.message || message
 							}
@@ -351,7 +352,12 @@ export const useProviderStore = create<ProviderStore>()(
 
 					updateStaff: async (
 						id: number,
-						data: { phone?: string; position?: string; role?: string; status?: string },
+						data: {
+							phone?: string
+							position?: string
+							role?: string
+							status?: string
+						},
 						skipLoading = false
 					): Promise<StaffMember | null> => {
 						if (!skipLoading) {
@@ -435,9 +441,7 @@ export const useProviderStore = create<ProviderStore>()(
 							})
 
 							if (!data.success) {
-								throw new Error(
-									data.error || 'Failed to upload staff avatar'
-								)
+								throw new Error(data.error || 'Failed to upload staff avatar')
 							}
 
 							// Обновляем сотрудника в списке
@@ -482,9 +486,7 @@ export const useProviderStore = create<ProviderStore>()(
 							})
 
 							if (!data.success) {
-								throw new Error(
-									data.error || 'Failed to remove staff avatar'
-								)
+								throw new Error(data.error || 'Failed to remove staff avatar')
 							}
 
 							set({

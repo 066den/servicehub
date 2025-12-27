@@ -43,9 +43,9 @@ export interface DurationPickerProps
 const DEFAULT_UNIT_OPTIONS: DurationUnit[] = ['mins', 'hours', 'days']
 
 const UNIT_LABELS: Record<DurationUnit, string> = {
-	mins: 'Mins',
-	hours: 'Hours',
-	days: 'Days',
+	mins: 'Хвилин',
+	hours: 'Годин',
+	days: 'Днів',
 }
 
 // Конвертация из минут в выбранную единицу для отображения
@@ -56,13 +56,33 @@ const convertFromMinutes = (
 	if (minutes === null) return null
 	switch (unit) {
 		case 'hours':
-			return Math.round(minutes / 60)
+			return minutes / 60 // Сохраняем дробные значения
 		case 'days':
 			return Math.round(minutes / (60 * 24))
 		case 'mins':
 		default:
 			return minutes
 	}
+}
+
+// Форматирование значения для отображения (округляет до разумного количества знаков)
+const formatDisplayValue = (
+	value: number | null,
+	unit: DurationUnit
+): string => {
+	if (value === null) return ''
+
+	// Для часов округляем до 1 знака после запятой
+	// и убираем лишние нули в конце
+	if (unit === 'hours') {
+		// Округляем до 1 знака после запятой
+		const rounded = Math.round(value * 10) / 10
+		// Преобразуем в строку и убираем лишние нули в конце
+		return rounded.toString().replace(/\.?0+$/, '')
+	}
+
+	// Для минут и дней оставляем как есть (целые числа)
+	return value.toString()
 }
 
 // Конвертация из выбранной единицы в минуты для сохранения
@@ -73,7 +93,7 @@ const convertToMinutes = (
 	if (value === null) return null
 	switch (unit) {
 		case 'hours':
-			return Math.round(value * 60)
+			return value * 60 // Сохраняем дробные значения (3.5 часа = 210 минут)
 		case 'days':
 			return Math.round(value * 60 * 24)
 		case 'mins':
@@ -96,7 +116,7 @@ export const DurationPicker = React.forwardRef<
 			onUnitChange,
 			min = 1,
 			max,
-			step = 1,
+			step,
 			disabled = false,
 			errorMessage,
 			helperText,
@@ -133,6 +153,14 @@ export const DurationPicker = React.forwardRef<
 			() => convertFromMinutes(value, unit),
 			[value, unit]
 		)
+
+		// Форматированное значение для отображения в инпуте
+		const [inputValue, setInputValue] = React.useState<string>('')
+
+		// Обновляем inputValue при изменении displayValue (когда значение меняется извне)
+		React.useEffect(() => {
+			setInputValue(formatDisplayValue(displayValue, unit))
+		}, [displayValue, unit])
 
 		const numericDisplayValue = displayValue ?? 0
 
@@ -172,7 +200,8 @@ export const DurationPicker = React.forwardRef<
 
 		const handleDecrement = () => {
 			if (disabled) return
-			const newDisplayValue = Math.max(min, numericDisplayValue - step)
+			const currentStep = step ?? (unit === 'hours' ? 0.5 : 1)
+			const newDisplayValue = Math.max(min, numericDisplayValue - currentStep)
 			// Конвертируем обратно в минуты
 			const valueToConvert =
 				newDisplayValue === min && numericDisplayValue === min
@@ -186,9 +215,10 @@ export const DurationPicker = React.forwardRef<
 
 		const handleIncrement = () => {
 			if (disabled) return
+			const currentStep = step ?? (unit === 'hours' ? 0.5 : 1)
 			const newDisplayValue = max
-				? Math.min(max, numericDisplayValue + step)
-				: numericDisplayValue + step
+				? Math.min(max, numericDisplayValue + currentStep)
+				: numericDisplayValue + currentStep
 			// Конвертируем обратно в минуты
 			const newValueInMinutes = convertToMinutes(newDisplayValue, unit)
 			handleValueChange(newValueInMinutes)
@@ -196,14 +226,15 @@ export const DurationPicker = React.forwardRef<
 
 		const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 			if (disabled) return
-			const inputValue = e.target.value
+			const newInputValue = e.target.value
+			setInputValue(newInputValue) // Обновляем локальное состояние для немедленного отображения
 
-			if (inputValue === '') {
+			if (newInputValue === '') {
 				handleValueChange(null)
 				return
 			}
 
-			const numValue = Number(inputValue)
+			const numValue = Number(newInputValue)
 			if (!isNaN(numValue)) {
 				let finalDisplayValue = numValue
 				if (min !== undefined && numValue < min) {
@@ -220,16 +251,17 @@ export const DurationPicker = React.forwardRef<
 
 		const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
 			if (disabled) return
-			const inputValue = e.target.value
+			const inputValueStr = e.target.value
 
-			if (inputValue === '') {
+			if (inputValueStr === '') {
 				handleValueChange(null)
+				setInputValue('')
 				// Вызываем внешний onBlur если передан
 				externalOnBlur?.(e)
 				return
 			}
 
-			const numValue = Number(inputValue)
+			const numValue = Number(inputValueStr)
 			if (!isNaN(numValue)) {
 				let finalDisplayValue = numValue
 				if (min !== undefined && numValue < min) {
@@ -241,8 +273,12 @@ export const DurationPicker = React.forwardRef<
 				// Конвертируем обратно в минуты
 				const finalValueInMinutes = convertToMinutes(finalDisplayValue, unit)
 				handleValueChange(finalValueInMinutes)
+				// Форматируем значение после валидации
+				setInputValue(formatDisplayValue(finalDisplayValue, unit))
 			} else {
-				handleValueChange(convertToMinutes(min, unit))
+				const minValue = convertToMinutes(min, unit)
+				handleValueChange(minValue)
+				setInputValue(formatDisplayValue(min, unit))
 			}
 
 			// Вызываем внешний onBlur если передан
@@ -250,6 +286,9 @@ export const DurationPicker = React.forwardRef<
 		}
 
 		const hasError = !!errorMessage
+
+		// Определяем step по умолчанию в зависимости от единицы измерения
+		const defaultStep = step ?? (unit === 'hours' ? 0.5 : 1)
 
 		return (
 			<div className={cn('space-y-2', containerClassName)}>
@@ -276,13 +315,14 @@ export const DurationPicker = React.forwardRef<
 							ref={ref}
 							id={inputId}
 							name={name}
-							type='number'
-							value={displayValue ?? ''}
+							type='text'
+							inputMode='decimal'
+							value={inputValue}
 							onChange={handleInputChange}
 							onBlur={handleInputBlur}
 							min={min}
 							max={max}
-							step={step}
+							step={defaultStep}
 							disabled={disabled}
 							error={hasError}
 							errorMessage={errorMessage}

@@ -4,9 +4,9 @@ import { motion } from 'framer-motion'
 import { heroContentVariants } from '../ui/animate/variants'
 import { Button } from '../ui/button'
 import Link from 'next/link'
-import { useUserProfile } from '@/stores/auth/useUserProfile'
 import { useRouter } from 'next/navigation'
-import SearchBar from './SearchBar'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
+import { ROUTES } from '@/lib/constants'
 
 interface HeroSectionProps {
 	title?: string | null
@@ -22,7 +22,7 @@ const HeroSection = ({ title, description, image }: HeroSectionProps) => {
 	const router = useRouter()
 
 	return (
-		<div className='relative overflow-hidden md:aspect-[3/1] aspect-[2/1]'>
+		<div className='relative overflow-hidden md:aspect-[4/1] aspect-[2/1] bg-accent-gradient-light'>
 			{image && (
 				<div className='absolute inset-0 xl:blur-none blur-sm'>
 					<Image
@@ -39,10 +39,10 @@ const HeroSection = ({ title, description, image }: HeroSectionProps) => {
 
 			{title && (
 				<motion.section
-					className='absolute inset-0 flex items-center'
+					className='absolute inset-0 flex items-center justify-center'
 					variants={heroContentVariants}
 				>
-					<div className='max-w-3xl space-y-4 lg:space-y-6'>
+					<div className='flex flex-col items-center justify-center gap-4 lg:gap-6 max-w-3xl text-center'>
 						<motion.h1
 							className='text-primary'
 							initial={{ opacity: 0, y: 20 }}
@@ -70,7 +70,7 @@ const HeroSection = ({ title, description, image }: HeroSectionProps) => {
 							className='flex items-center gap-4'
 						>
 							<Button variant='accent' size='lg' asChild>
-								<Link href='/categories'>До каталогу</Link>
+								<Link href={ROUTES.CATELOG}>До каталогу</Link>
 							</Button>
 							{!user && (
 								<Button
@@ -82,15 +82,6 @@ const HeroSection = ({ title, description, image }: HeroSectionProps) => {
 								</Button>
 							)}
 						</motion.div>
-
-						{/* Мобильная версия поиска */}
-						<div className='lg:hidden flex-1 max-w-xs'>
-							<SearchBar />
-						</div>
-						{/* Десктопная версия поиска */}
-						<div className='hidden lg:block flex-1 max-w-2xl mx-4'>
-							<SearchBar />
-						</div>
 					</div>
 				</motion.section>
 			)}

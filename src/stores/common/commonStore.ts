@@ -10,6 +10,12 @@ import {
 import { toast } from 'sonner'
 import { apiRequest } from '@/lib/api'
 import { CommonStore, Stats } from './types'
+import { LocationData } from '@/types'
+
+export const DEFAULT_LOCATION: LocationData = {
+	city: 'Київ',
+	area: 'Київська область',
+}
 
 const persistOptions: PersistOptions<
 	CommonStore,
@@ -38,7 +44,10 @@ export const useCommonStore = create<CommonStore>()(
 				isLoading: false,
 				error: null,
 				lastStatsUpdate: 0,
-
+				commonLocation: null,
+				skipped: {
+					location: false,
+				},
 				actions: {
 					fetchStats: async (force = false) => {
 						const { lastStatsUpdate } = get()
@@ -85,6 +94,12 @@ export const useCommonStore = create<CommonStore>()(
 							lastStatsUpdate: 0,
 							isLoading: false,
 							error: null,
+						})
+					},
+
+					setCommonLocation: (location: LocationData | null) => {
+						set({
+							commonLocation: location || DEFAULT_LOCATION,
 						})
 					},
 				},

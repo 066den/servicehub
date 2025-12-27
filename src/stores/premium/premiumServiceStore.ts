@@ -21,7 +21,9 @@ interface PremiumServiceState {
 }
 
 interface PremiumServiceActions {
-	fetchPremiumServices: (force?: boolean) => Promise<ProviderPremiumService[] | null>
+	fetchPremiumServices: (
+		force?: boolean
+	) => Promise<ProviderPremiumService[] | null>
 	activatePremiumService: (
 		data: CreatePremiumServiceSchema
 	) => Promise<ProviderPremiumService | null>
@@ -128,7 +130,10 @@ export const usePremiumServiceStore = create<PremiumServiceStore>()(
 							}
 
 							const { premiumServices } = get()
-							const updatedServices = [...premiumServices, response.premiumService]
+							const updatedServices = [
+								...premiumServices,
+								response.premiumService,
+							]
 							const now = new Date()
 							const activeServices = updatedServices.filter(
 								service =>
@@ -173,4 +178,3 @@ export const usePremiumServiceStore = create<PremiumServiceStore>()(
 		devtoolsOptions
 	)
 )
-

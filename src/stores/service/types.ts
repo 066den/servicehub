@@ -1,5 +1,9 @@
 import { CreateServiceSchema, UpdateServiceSchema } from '@/lib/schemas'
 import { Category, Service, Subcategory } from '@/types'
+import type {
+	GetServicesParams,
+	ServiceWithRelations,
+} from '@/services/service/serviceTypes'
 
 export interface Type {
 	id: number
@@ -32,6 +36,19 @@ export interface ServiceState {
 	// Types
 	types: Type[]
 	lastTypesUpdate: number
+
+	// Public Services
+	publicServices: ServiceWithRelations[]
+	publicServicesPagination: {
+		total: number
+		page: number
+		limit: number
+		totalPages: number
+	}
+	publicServicesFilters: GetServicesParams | null
+	publicServicesIsLoading: boolean
+	publicServicesError: string | null
+	lastPublicServicesUpdate: number
 }
 
 export interface ServiceActions {
@@ -107,6 +124,17 @@ export interface ServiceActions {
 	deleteType: (id: number) => Promise<boolean>
 	clearTypes: () => void
 
+	// Public Services actions
+	fetchPublicServices: (
+		params: GetServicesParams,
+		force?: boolean
+	) => Promise<void>
+	setInitialPublicServices: (
+		data: import('@/services/service/serviceTypes').GetServicesResponse,
+		params: GetServicesParams
+	) => void
+	clearPublicServices: () => void
+
 	// Clear all
 	clearAll: () => void
 }
@@ -120,8 +148,8 @@ interface ProviderServiceState {
 }
 
 export interface ProviderServiceActions {
-	fetchServices: (force?: boolean) => Promise<Service[] | null>
-	fetchService: (id: number) => Promise<Service | null>
+	fetchServices: (force?: boolean) => Promise<void>
+	fetchService: (id: number) => Promise<void>
 	createService: (data: CreateServiceSchema) => Promise<Service | null>
 	updateService: (
 		id: number,
@@ -130,6 +158,9 @@ export interface ProviderServiceActions {
 	deleteService: (id: number) => Promise<boolean>
 	toggleActive: (id: number) => Promise<boolean>
 	toggleFeatured: (id: number) => Promise<boolean>
+	reorderServices: (
+		services: { id: number; order: number }[]
+	) => Promise<boolean>
 	clearServices: () => void
 }
 

@@ -81,6 +81,8 @@ export interface Executor {
 	firstName?: string
 	lastName?: string
 	avatar?: string
+	slug?: string
+	id?: number
 }
 
 export interface CompanyInfo {

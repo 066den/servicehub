@@ -1,23 +1,19 @@
 import Link from 'next/link'
-
+import { ROUTES } from '@/lib/constants'
+import { useTranslations } from 'next-intl'
 const Footer = () => {
+	const t = useTranslations()
 	return (
-		<footer className='bg-dark-gray py-10'>
+		<footer className='bg-gray-800 py-10'>
 			<div className='container'>
 				<div className='grid grid-cols-4 gap-10 mb-10'>
 					<div className='space-y-2.5'>
-						<h4 className='text-accent'>UslugiUA</h4>
-						<Link className='block text-light hover:text-white mb-2.5' href='#'>
+						<h4 className='text-accent'>{t('title')}</h4>
+						<Link
+							className='block text-light hover:text-white mb-2.5'
+							href={ROUTES.ABOUT_US}
+						>
 							Про нас
-						</Link>
-						<Link className='block text-light hover:text-white mb-2.5' href='#'>
-							Як це працює
-						</Link>
-						<Link className='block text-light hover:text-white mb-2.5' href='#'>
-							Блог
-						</Link>
-						<Link className='block text-light hover:text-white mb-2.5' href='#'>
-							Карьєра
 						</Link>
 					</div>
 

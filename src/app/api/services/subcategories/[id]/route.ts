@@ -160,9 +160,26 @@ export async function PUT(
 			)
 		}
 
+		const updateData: { name: string; slug?: string; icon?: string | null; description?: string | null; isActive?: boolean; category?: { connect: { id: number } } } = { name: validationResult.data.name }
+		if (validationResult.data.slug !== null && validationResult.data.slug !== undefined) {
+			updateData.slug = validationResult.data.slug
+		}
+		if (validationResult.data.icon !== undefined) {
+			updateData.icon = validationResult.data.icon
+		}
+		if (validationResult.data.description !== undefined) {
+			updateData.description = validationResult.data.description
+		}
+		if (validationResult.data.isActive !== undefined) {
+			updateData.isActive = validationResult.data.isActive
+		}
+		if (validationResult.data.categoryId !== undefined) {
+			updateData.category = { connect: { id: validationResult.data.categoryId } }
+		}
+
 		const subcategory = await prisma.subcategory.update({
 			where: { id },
-			data: validationResult.data,
+			data: updateData,
 		})
 
 		return NextResponse.json({ success: true, subcategory })

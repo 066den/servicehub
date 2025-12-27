@@ -43,7 +43,7 @@ export default async function RootLayout({
 				<div id='portal_root' />
 				<AuthProvider>
 					<NextIntlClientProvider>
-						<GoogleMapsProvider>
+						<GoogleMapsProvider loadOnMount={false}>
 							<main className='flex flex-col min-h-screen'>{children}</main>
 						</GoogleMapsProvider>
 						<Toaster position='top-center' richColors />

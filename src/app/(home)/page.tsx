@@ -1,5 +1,5 @@
 import HeroSection from '@/components/common/HeroSection'
-import HomeStats from '@/components/main/HomeStats'
+//import HomeStats from '@/components/main/HomeStats'
 
 const HomePage = () => {
 	return (
@@ -7,9 +7,9 @@ const HomePage = () => {
 			<HeroSection
 				title='Всі послуги в одному місці'
 				description='Знайдіть надійних фахівців для будь-яких завдань або запропонуйте свої послуги тисячам клієнтів'
-				image='/assets/images/main-hero-2-2.jpeg'
+				image='/assets/images/main-hero-3-1.webp'
 			/>
-			<HomeStats />
+			{/* <HomeStats /> */}
 			<section className='min-h-[80vh] flex items-center justify-center bg-background py-16'>
 				<div className='text-center max-w-4xl mx-auto px-6'>
 					{/* Main Heading */}

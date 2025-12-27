@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
+import { generateSlug, generateSlugWithId } from '@/utils/slug'
 
 export async function GET() {
 	const session = await getServerSession(authOptions)
@@ -37,7 +38,8 @@ export async function POST(req: Request) {
 	}
 
 	const body = await req.json().catch(() => ({}))
-	const validationResult = createProviderSchemaValidate(body)
+	const validationResult: ReturnType<typeof createProviderSchemaValidate> =
+		createProviderSchemaValidate(body)
 
 	if (!validationResult.success) {
 		console.log(
@@ -76,13 +78,65 @@ export async function POST(req: Request) {
 			data: { legalForm: 'ФОП' },
 		})
 
+		// Автоматически генерируем slug из businessName
+		// slug будет обновлен в формате slug-id после создания записи
+		const slug = generateSlug(validationResult.data.businessName) || undefined
+
 		const provider = await tx.provider.create({
 			data: {
-				...validationResult.data,
+				type: validationResult.data.type,
+				businessName: validationResult.data.businessName,
+				description: validationResult.data.description ?? undefined,
+				phone: validationResult.data.phone,
+				email: validationResult.data.email ?? undefined,
 				location: validationResult.data.location ?? undefined,
+				serviceAreas: validationResult.data.serviceAreas ?? undefined,
+				slug,
 				userId: Number(session.user.id),
 				companyInfoId: companyInfo.id,
+			} as Prisma.ProviderUncheckedCreateInput,
+			include: {
+				companyInfo: true,
 			},
+		})
+
+		// Обновляем slug в формате slug-id после создания
+		// Проверяем, что provider.id существует
+		if (!provider.id) {
+			throw new Error('Provider ID не был создан')
+		}
+
+		const finalSlug = generateSlugWithId(
+			validationResult.data.businessName,
+			provider.id
+		)
+
+		// Проверяем, что slug был сгенерирован правильно
+		if (!finalSlug || !finalSlug.includes(String(provider.id))) {
+			console.error('Ошибка генерации slug:', {
+				businessName: validationResult.data.businessName,
+				providerId: provider.id,
+				generatedSlug: finalSlug,
+			})
+			throw new Error('Помилка генерації slug')
+		}
+
+		// Проверяем уникальность slug (ID уже включен, поэтому должен быть уникальным)
+		// Но на всякий случай проверяем
+		const existingSlug = await tx.provider.findUnique({
+			where: { slug: finalSlug } as unknown as Prisma.ProviderWhereUniqueInput,
+		})
+
+		// Если slug уже занят другим профилем (что маловероятно с ID), используем его как есть
+		// так как ID уже включен в slug, он должен быть уникальным
+		const uniqueSlug =
+			existingSlug && existingSlug.id !== provider.id
+				? finalSlug // Оставляем как есть, ID гарантирует уникальность
+				: finalSlug
+
+		const updatedProvider = await tx.provider.update({
+			where: { id: provider.id },
+			data: { slug: uniqueSlug } as Prisma.ProviderUncheckedUpdateInput,
 			include: {
 				companyInfo: true,
 			},
@@ -96,7 +150,7 @@ export async function POST(req: Request) {
 			},
 		})
 
-		return provider
+		return updatedProvider
 	})
 
 	return NextResponse.json(result)
@@ -228,9 +282,46 @@ export async function PUT(req: Request) {
 			}
 		}
 
+		// Обработка slug
+		let slug = providerUpdateData.slug as string | undefined
+
+		// Если slug пустой, генерируем из businessName в формате slug-id
+		if (!slug && providerUpdateData.businessName) {
+			slug = generateSlugWithId(
+				providerUpdateData.businessName as string,
+				existingProvider.id
+			)
+		}
+
+		// Проверяем уникальность slug, если он указан
+		if (slug) {
+			const existingSlugProvider = await tx.provider.findUnique({
+				where: { slug } as unknown as Prisma.ProviderWhereUniqueInput,
+			})
+
+			if (
+				existingSlugProvider &&
+				existingSlugProvider.id !== existingProvider.id
+			) {
+				return NextResponse.json(
+					{
+						error: 'Slug вже зайнятий',
+						details: [
+							{
+								field: 'slug',
+								message: 'Цей slug вже використовується іншим профілем',
+							},
+						],
+					},
+					{ status: 400 }
+				)
+			}
+		}
+
 		// Формируем данные для обновления Provider
 		const finalProviderUpdateData: Prisma.ProviderUncheckedUpdateInput = {
 			...providerUpdateData,
+			slug,
 			location: providerUpdateData.location ?? undefined,
 			serviceAreas: providerUpdateData.serviceAreas ?? undefined,
 		}

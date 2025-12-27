@@ -39,9 +39,23 @@ export async function PUT(
 			)
 		}
 
+		const updateData: { name: string; slug?: string; icon?: string | null; description?: string | null; isActive?: boolean } = { name: validationResult.data.name }
+		if (validationResult.data.slug !== null && validationResult.data.slug !== undefined) {
+			updateData.slug = validationResult.data.slug
+		}
+		if (validationResult.data.icon !== undefined) {
+			updateData.icon = validationResult.data.icon
+		}
+		if (validationResult.data.description !== undefined) {
+			updateData.description = validationResult.data.description
+		}
+		if (validationResult.data.isActive !== undefined) {
+			updateData.isActive = validationResult.data.isActive
+		}
+
 		const category = await prisma.category.update({
 			where: { id },
-			data: validationResult.data,
+			data: updateData,
 		})
 
 		return NextResponse.json({ success: true, category })

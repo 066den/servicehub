@@ -56,22 +56,22 @@ const ServiceGallery = ({
 	) => {
 		const files = acceptedFiles
 		if (!serviceId) {
-		// Если услуга еще не создана, сохраняем файлы для загрузки позже
-		const newPhotos: GalleryPhoto[] = files.map(file => ({
-			file,
-			url: URL.createObjectURL(file),
-			isNew: true,
-		}))
-		const updatedPhotos = [...photos, ...newPhotos]
-		setPhotos(updatedPhotos)
-		onPhotosChange?.(
-			updatedPhotos.map(p => ({
-				id: p.id,
-				file: p.file,
-				url: p.url,
+			// Если услуга еще не создана, сохраняем файлы для загрузки позже
+			const newPhotos: GalleryPhoto[] = files.map(file => ({
+				file,
+				url: URL.createObjectURL(file),
+				isNew: true,
 			}))
-		)
-		return
+			const updatedPhotos = [...photos, ...newPhotos]
+			setPhotos(updatedPhotos)
+			onPhotosChange?.(
+				updatedPhotos.map(p => ({
+					id: p.id,
+					file: p.file,
+					url: p.url,
+				}))
+			)
+			return
 		}
 
 		// Валидация файлов
@@ -186,6 +186,7 @@ const ServiceGallery = ({
 							alt={`Фото ${index + 1}`}
 							fill
 							className='object-cover'
+							sizes='300px'
 						/>
 						<Button
 							type='button'
@@ -203,9 +204,9 @@ const ServiceGallery = ({
 				<Dropzone
 					onDrop={handleFilesSelect}
 					accept={{ 'image/*': ['.png', '.jpg', '.jpeg', '.webp'] }}
-					maxSize={10 * 1024 * 1024}
+					maxSize={5 * 1024 * 1024}
 					maxFiles={10}
-					className='aspect-square border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-blue-500 transition-colors cursor-pointer'
+					className='aspect-[16/9] border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-blue-500 transition-colors cursor-pointer'
 				>
 					<div className='text-center p-4'>
 						<Plus className='size-8 mx-auto mb-2 text-gray-400' />
@@ -226,4 +227,3 @@ const ServiceGallery = ({
 }
 
 export default ServiceGallery
-

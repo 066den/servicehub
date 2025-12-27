@@ -1,7 +1,5 @@
 import Logo from '../common/Logo'
 
-import { Progress } from '../ui/progress'
-
 export default function LoadingPage() {
 	return (
 		<div className='fixed inset-0 z-50 flex items-center justify-center bg-primary-gradient'>
@@ -14,7 +12,9 @@ export default function LoadingPage() {
 					</div>
 
 					{/* <LoadingSpinner color='accent' size='lg' /> */}
-					<Progress />
+					<div className='relative h-2 w-full overflow-hidden rounded-full bg-primary/20'>
+						<div className='bg-accent h-full rounded-full animate-progress-fill origin-left' />
+					</div>
 					{/* <div className='loading-dots'>
 						<div className='dot' />
 						<div className='dot' />
