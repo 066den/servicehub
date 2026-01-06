@@ -147,3 +147,46 @@ export async function generateUniqueSlug(
 
 	return slug
 }
+
+/**
+ * Генерирует уникальный slug для Provider с проверкой существования в БД
+ * Добавляет id только если slug занят
+ * @param prisma - экземпляр PrismaClient (или транзакция)
+ * @param baseText - исходный текст для генерации slug
+ * @param providerId - ID провайдера (используется только если slug занят)
+ * @param excludeId - ID записи, которую нужно исключить из проверки (для обновления)
+ * @returns уникальный slug
+ */
+export async function generateUniqueProviderSlug(
+	prisma:
+		| PrismaClient
+		| Omit<
+				PrismaClient,
+				'$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'
+		  >,
+	baseText: string,
+	providerId: number,
+	excludeId?: number
+): Promise<string> {
+	const baseSlug = generateSlug(baseText)
+	if (!baseSlug) {
+		// Если не удалось сгенерировать slug, используем формат с id
+		return `provider-${providerId}`
+	}
+
+	// Сначала проверяем базовый slug без id
+	const where: { slug: string; id?: { not: number } } = { slug: baseSlug }
+	if (excludeId) {
+		where.id = { not: excludeId }
+	}
+
+	const existing = await prisma.provider.findFirst({ where })
+
+	// Если slug свободен, возвращаем его без id
+	if (!existing) {
+		return baseSlug
+	}
+
+	// Если slug занят, добавляем id
+	return `${baseSlug}-${providerId}`
+}

@@ -126,7 +126,9 @@ export const useProviderStore = create<ProviderStore>()(
 						}
 					},
 
-					updateProvider: async (provider: UpdateProviderSchema) => {
+					updateProvider: async (
+						provider: UpdateProviderSchema
+					): Promise<string | undefined> => {
 						set({ isLoadingProvider: true })
 						const {
 							actions: { fetchProvider },
@@ -156,11 +158,16 @@ export const useProviderStore = create<ProviderStore>()(
 						set({ provider: updatedProvider })
 
 						try {
-							await apiRequestAuth('/api/user/provider', {
+							const response = await apiRequestAuth<{
+								success: boolean
+								provider: Executor
+								warning?: string
+							}>('/api/user/provider', {
 								method: 'PUT',
 								body: JSON.stringify(provider),
 							})
 							await fetchProvider(true)
+							return response.warning
 						} catch (error) {
 							set({ provider: currentProvider })
 							let message = 'Помилка при оновленні профіля виконавця'
@@ -168,6 +175,7 @@ export const useProviderStore = create<ProviderStore>()(
 								message = error.message || message
 							}
 							set({ providerError: message })
+							throw error
 						} finally {
 							set({ isLoadingProvider: false })
 						}

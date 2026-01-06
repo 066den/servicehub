@@ -7,9 +7,9 @@ export default function CatalogLayout({
 	children: React.ReactNode
 }) {
 	return (
-		<div>
+		<div className='flex flex-col min-h-screen'>
 			<HeaderWithCategories />
-			{children}
+			<main className='flex-1'>{children}</main>
 			<Footer />
 		</div>
 	)

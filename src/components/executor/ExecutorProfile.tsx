@@ -164,9 +164,12 @@ const ExecutorProfile = () => {
 		})
 
 		try {
-			await updateProvider(payload)
+			const warning = await updateProvider(payload)
 			setIsEditingSlug(false)
 			toast.success('Посилання на профіль оновлено')
+			if (warning) {
+				toast.warning(warning)
+			}
 		} catch (error) {
 			toast.error(
 				error instanceof Error
@@ -221,8 +224,11 @@ const ExecutorProfile = () => {
 		// @ts-expect-error - handleSubmit type inference issue with preprocess schemas
 		async (data: UpdateProviderSchema) => {
 			try {
-				await updateProvider(preparePayload(data))
+				const warning = await updateProvider(preparePayload(data))
 				toast.success('Профіль виконавця успішно оновлено')
+				if (warning) {
+					toast.warning(warning)
+				}
 			} catch (error) {
 				toast.error(
 					error instanceof Error

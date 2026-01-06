@@ -9,14 +9,16 @@ export default function UserLayout({
 	children: React.ReactNode
 }) {
 	return (
-		<div>
+		<div className='flex flex-col min-h-screen'>
 			<HeaderWithCategories />
-			<div className='container'>
-				<div className='grid grid-cols-[17.5rem_1fr] gap-6 py-6'>
-					<SidebarProfile />
-					<Card>{children}</Card>
+			<main className='flex-1'>
+				<div className='container'>
+					<div className='grid grid-cols-[17.5rem_1fr] gap-6 py-6'>
+						<SidebarProfile />
+						<Card>{children}</Card>
+					</div>
 				</div>
-			</div>
+			</main>
 			<Footer />
 		</div>
 	)

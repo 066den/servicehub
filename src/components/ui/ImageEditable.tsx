@@ -113,7 +113,7 @@ const ImageEditable = ({
 				accept={{ 'image/*': ['.png', '.jpg', '.jpeg', '.webp'] }}
 				maxSize={maxFileSize}
 				onError={handleError}
-				className={`relative w-full ${
+				className={`relative w-full border-0 ${
 					aspectRatio === ASPECT_RATIOS.SQUARE
 						? 'aspect-[1/1]'
 						: aspectRatio === ASPECT_RATIOS.LANDSCAPE
@@ -133,13 +133,23 @@ const ImageEditable = ({
 					<DropzoneEmptyState>
 						<div className='border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer w-full h-full flex flex-col items-center justify-center whitespace-normal'>
 							<div
-								className={`${size === 'small' ? 'text-2xl' : 'text-4xl'} mb-2`}
+								className={`${
+									size === 'small'
+										? 'text-2xl'
+										: size === 'medium'
+										? 'text-3xl'
+										: 'text-4xl'
+								}`}
 							>
 								📁
 							</div>
 							<div
 								className={`font-medium ${
-									size === 'small' ? 'text-xs' : 'text-base'
+									size === 'small'
+										? 'text-xs'
+										: size === 'medium'
+										? 'text-sm'
+										: 'text-base'
 								} text-gray-700 mb-1`}
 							>
 								{t('ImageEditable.dragDropOrClick')}

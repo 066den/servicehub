@@ -27,7 +27,7 @@ const AvatarCompany = ({
 }: Props) => {
 	const [content, setContent] = useState('')
 	const [bgColor, setBgColor] = useState('')
-	console.log(provider)
+
 	const { businessName, type, avatar, description } = provider
 
 	useEffect(() => {

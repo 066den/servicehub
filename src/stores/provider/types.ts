@@ -16,7 +16,7 @@ export interface ProviderState {
 export interface ProviderActions {
 	fetchProvider: (force?: boolean) => Promise<Executor | null>
 	createProvider: (provider: Executor) => void
-	updateProvider: (provider: UpdateProviderSchema) => void
+	updateProvider: (provider: UpdateProviderSchema) => Promise<string | undefined>
 	changeProviderType: (type: ChangeProviderTypeSchema['type']) => Promise<void>
 	uploadAvatar: (file: File) => Promise<void>
 	removeAvatar: () => Promise<void>

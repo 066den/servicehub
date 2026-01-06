@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
-import { generateSlug, generateSlugWithId } from '@/utils/slug'
+import { generateSlug, generateUniqueProviderSlug } from '@/utils/slug'
 
 export async function GET() {
 	const session = await getServerSession(authOptions)
@@ -78,9 +78,9 @@ export async function POST(req: Request) {
 			data: { legalForm: 'ФОП' },
 		})
 
-		// Автоматически генерируем slug из businessName
-		// slug будет обновлен в формате slug-id после создания записи
-		const slug = generateSlug(validationResult.data.businessName) || undefined
+		// Создаем provider сначала с временным slug
+		const tempSlug =
+			generateSlug(validationResult.data.businessName) || undefined
 
 		const provider = await tx.provider.create({
 			data: {
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
 				email: validationResult.data.email ?? undefined,
 				location: validationResult.data.location ?? undefined,
 				serviceAreas: validationResult.data.serviceAreas ?? undefined,
-				slug,
+				slug: tempSlug,
 				userId: Number(session.user.id),
 				companyInfoId: companyInfo.id,
 			} as Prisma.ProviderUncheckedCreateInput,
@@ -100,47 +100,29 @@ export async function POST(req: Request) {
 			},
 		})
 
-		// Обновляем slug в формате slug-id после создания
 		// Проверяем, что provider.id существует
 		if (!provider.id) {
 			throw new Error('Provider ID не был создан')
 		}
 
-		const finalSlug = generateSlugWithId(
+		// Генерируем уникальный slug (добавляет id только если slug занят)
+		const finalSlug = await generateUniqueProviderSlug(
+			tx,
 			validationResult.data.businessName,
 			provider.id
 		)
 
-		// Проверяем, что slug был сгенерирован правильно
-		if (!finalSlug || !finalSlug.includes(String(provider.id))) {
-			console.error('Ошибка генерации slug:', {
-				businessName: validationResult.data.businessName,
-				providerId: provider.id,
-				generatedSlug: finalSlug,
-			})
-			throw new Error('Помилка генерації slug')
-		}
-
-		// Проверяем уникальность slug (ID уже включен, поэтому должен быть уникальным)
-		// Но на всякий случай проверяем
-		const existingSlug = await tx.provider.findUnique({
-			where: { slug: finalSlug } as unknown as Prisma.ProviderWhereUniqueInput,
-		})
-
-		// Если slug уже занят другим профилем (что маловероятно с ID), используем его как есть
-		// так как ID уже включен в slug, он должен быть уникальным
-		const uniqueSlug =
-			existingSlug && existingSlug.id !== provider.id
-				? finalSlug // Оставляем как есть, ID гарантирует уникальность
-				: finalSlug
-
-		const updatedProvider = await tx.provider.update({
-			where: { id: provider.id },
-			data: { slug: uniqueSlug } as Prisma.ProviderUncheckedUpdateInput,
-			include: {
-				companyInfo: true,
-			},
-		})
+		// Обновляем slug только если он изменился
+		const updatedProvider =
+			finalSlug !== tempSlug
+				? await tx.provider.update({
+						where: { id: provider.id },
+						data: { slug: finalSlug } as Prisma.ProviderUncheckedUpdateInput,
+						include: {
+							companyInfo: true,
+						},
+				  })
+				: provider
 
 		// Обновляем роль пользователя
 		await tx.user.update({
@@ -284,11 +266,14 @@ export async function PUT(req: Request) {
 
 		// Обработка slug
 		let slug = providerUpdateData.slug as string | undefined
+		let slugWarning: string | undefined = undefined
 
-		// Если slug пустой, генерируем из businessName в формате slug-id
+		// Если slug пустой, генерируем из businessName (добавляет id только если slug занят)
 		if (!slug && providerUpdateData.businessName) {
-			slug = generateSlugWithId(
+			slug = await generateUniqueProviderSlug(
+				tx,
 				providerUpdateData.businessName as string,
+				existingProvider.id,
 				existingProvider.id
 			)
 		}
@@ -303,18 +288,10 @@ export async function PUT(req: Request) {
 				existingSlugProvider &&
 				existingSlugProvider.id !== existingProvider.id
 			) {
-				return NextResponse.json(
-					{
-						error: 'Slug вже зайнятий',
-						details: [
-							{
-								field: 'slug',
-								message: 'Цей slug вже використовується іншим профілем',
-							},
-						],
-					},
-					{ status: 400 }
-				)
+				// Если slug занят, не обновляем его и добавляем предупреждение
+				slug = existingProvider.slug ?? undefined // Оставляем текущий slug
+				slugWarning =
+					'Цей slug вже використовується іншим профілем. Slug не було оновлено.'
 			}
 		}
 
@@ -343,8 +320,22 @@ export async function PUT(req: Request) {
 			},
 		})
 
-		return updatedProvider
+		return { provider: updatedProvider, warning: slugWarning }
 	})
 
-	return NextResponse.json(result)
+	// Формируем ответ с предупреждением, если оно есть
+	const response: {
+		success: boolean
+		provider: typeof result.provider
+		warning?: string
+	} = {
+		success: true,
+		provider: result.provider,
+	}
+
+	if (result.warning) {
+		response.warning = result.warning
+	}
+
+	return NextResponse.json(response)
 }
