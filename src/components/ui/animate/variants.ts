@@ -32,6 +32,40 @@ export const containerVariants = {
 	visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
 }
 
+export const heroContainerVariants = {
+	hidden: {},
+	visible: {
+		transition: {
+			duration: 0.6,
+			staggerChildren: 0.2,
+		},
+	},
+}
+
+export const heroImageVariants = {
+	hidden: { opacity: 0, scale: 1.1 },
+	visible: {
+		opacity: 1,
+		scale: 1,
+		transition: {
+			duration: 0.8,
+			ease: [0.4, 0, 0.2, 1] as const,
+		},
+	},
+}
+
+export const heroContentVariants = {
+	hidden: { opacity: 0, y: 30 },
+	visible: {
+		opacity: 1,
+		y: 0,
+		transition: {
+			duration: 0.6,
+			ease: [0.4, 0, 0.2, 1] as const,
+		},
+	},
+}
+
 export const shakeVariants = {
 	light: {
 		x: [0, -5, 5, -5, 5, 0],

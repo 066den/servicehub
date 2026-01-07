@@ -1,7 +1,8 @@
 import { useTranslations } from 'next-intl'
 import Logo from '@/components/common/Logo'
-import '@/components/auth/auth.scss'
+//import '@/components/auth/auth.scss'
 import Link from 'next/link'
+import { CheckCircle, Home, Smartphone, ShieldCheck, Star } from 'lucide-react'
 
 export default function AuthLayout({
 	children,
@@ -10,36 +11,47 @@ export default function AuthLayout({
 }) {
 	const t = useTranslations('Auth')
 	return (
-		<div className='auth-content'>
-			<Link className='back-link' href='/'>
-				← На головну
+		<div className='flex flex-col items-center justify-center p-4 min-h-screen bg-secondary-gradient'>
+			<Link
+				className='fixed flex items-center gap-2 top-4 left-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/20 hover:translate-x-[-0.25rem] text-sm'
+				href='/'
+			>
+				<Home className='w-5 h-5' /> На головну
 			</Link>
-			<div className='auth-container'>
-				<div className='auth-visual'>
-					<Logo color='white' />
-					<h2>{t('authVisual.title')}</h2>
-					<p className='auth-visual-text'>{t('authVisual.subtitle')}</p>
+			<div className='grid grid-cols-2 bg-white max-w-5xl mx-auto rounded-lg overflow-hidden shadow-lg min-h-[37.5rem]'>
+				<div className='auth-visual relative flex flex-col items-center justify-center p-8 bg-primary-gradient text-white text-center'>
+					<Logo color='white' size='lg' withImage={false} />
+					<h3 className='mb-2'>{t('authVisual.title')}</h3>
+					<p className='text-xl font-medium mb-4'>{t('authVisual.subtitle')}</p>
 
-					<ul className='features-list'>
-						<li>
-							<div className='feature-icon'>✨</div>
+					<ul className='list-none relative'>
+						<li className='flex items-center gap-3 mb-2 opacity-90 text-lg'>
+							<div className='w-8 h-8 bg-white/20 rounded-full flex items-center justify-center'>
+								<CheckCircle className='size-5 text-accent' />
+							</div>
 							<span>Перевірені фахівці</span>
 						</li>
-						<li>
-							<div className='feature-icon'>🛡️</div>
+						<li className='flex items-center gap-3 mb-2 opacity-90 text-lg'>
+							<div className='w-8 h-8 bg-white/20 rounded-full flex items-center justify-center'>
+								<ShieldCheck className='size-5 text-accent' />
+							</div>
 							<span>Безпечні платежі</span>
 						</li>
-						<li>
-							<div className='feature-icon'>⭐</div>
+						<li className='flex items-center gap-3 mb-2 opacity-90 text-lg'>
+							<div className='w-8 h-8 bg-white/20 rounded-full flex items-center justify-center'>
+								<Star className='size-5 text-accent' />
+							</div>
 							<span>Система рейтингів</span>
 						</li>
-						<li>
-							<div className='feature-icon'>📱</div>
+						<li className='flex items-center gap-3 mb-2 opacity-90 text-lg'>
+							<div className='w-8 h-8 bg-white/20 rounded-full flex items-center justify-center'>
+								<Smartphone className='size-5 text-accent' />
+							</div>
 							<span>Зручний інтерфейс</span>
 						</li>
 					</ul>
 				</div>
-				<div className='auth-form'>{children}</div>
+				<div className='px-8 py-10 relative'>{children}</div>
 			</div>
 		</div>
 	)

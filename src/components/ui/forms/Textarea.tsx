@@ -1,5 +1,5 @@
 'use client'
-import classNames from 'classnames'
+import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { shakeVariants } from '../animate/variants'
 
@@ -80,11 +80,11 @@ const Textarea = ({
 	const showCounter = maxLength && maxLength > 0
 
 	return (
-		<div className={classNames('form-group', className)}>
+		<div className={cn('form-group', className)}>
 			{label && (
 				<label
 					htmlFor={fieldName}
-					className={classNames('form-label', { required })}
+					className={cn('form-label', required && 'required')}
 				>
 					{label}
 				</label>
@@ -96,9 +96,7 @@ const Textarea = ({
 			>
 				<textarea
 					id={fieldName}
-					className={classNames('form-input form-textarea', {
-						'is-invalid': hasError,
-					})}
+					className={cn('form-input form-textarea', hasError && 'is-invalid')}
 					name={fieldName}
 					value={fieldValue}
 					onChange={handleChange}

@@ -1,6 +1,6 @@
 'use client'
 import { FieldProps } from 'formik'
-import classNames from 'classnames'
+import { cn } from '@/lib/utils'
 
 type RadioProps = {
 	label: string
@@ -70,7 +70,7 @@ const Radio = ({
 	}
 
 	return (
-		<label className={classNames('radio-item', className, { error: hasError })}>
+		<label className={cn('radio-item', className, hasError && 'error')}>
 			<input
 				type='radio'
 				name={fieldName}

@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react'
 import { notificationVariants } from './animate/variants'
+import { cn } from '@/lib/utils'
 
 type Props = {
 	message: string
@@ -15,7 +16,13 @@ const Notification = ({ message, type }: Props) => {
 			initial='hidden'
 			animate='visible'
 			exit='hidden'
-			className={`${type}-message`}
+			className={cn(
+				'px-4 py-3 rounded-md border-l-4 mb-4',
+				type === 'error' &&
+					'bg-destructive/10 text-destructive border-destructive',
+				type === 'success' && 'bg-success/10 text-success border-success',
+				type === 'info' && 'bg-info/10 text-info border-info'
+			)}
 		>
 			{message}
 		</motion.div>

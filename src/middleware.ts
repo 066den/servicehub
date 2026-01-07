@@ -6,23 +6,40 @@ export default withAuth(
 		const token = request.nextauth.token
 		const { pathname } = request.nextUrl
 
-		// Приклад: доступ до /admin тільки для ADMIN
-		if (pathname.startsWith('/admin')) {
+		// Доступ до /admin тільки для ADMIN, кроме /admin/login
+		if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
 			if (!token || token.role !== 'ADMIN') {
-				return NextResponse.redirect(new URL('/', request.url))
+				return NextResponse.redirect(new URL('/admin/login', request.url))
 			}
 		}
 
 		// Логика для защищенных маршрутов
-		if (pathname.startsWith('/dashboard') || pathname.startsWith('/profile')) {
+		if (pathname.startsWith('/profile')) {
 			if (!token || !token.isVerified) {
-				return NextResponse.redirect(new URL('/auth/signin', request.url))
+				const callbackUrl = encodeURIComponent(pathname)
+				return NextResponse.redirect(
+					new URL(`/auth/signin?callbackUrl=${callbackUrl}`, request.url)
+				)
 			}
 		}
 
 		//Если пользователь авторизован и заходит на страницу входа
 		if (pathname.startsWith('/auth/signin') && token && token.isVerified) {
-			return NextResponse.redirect(new URL('/profile', request.url))
+			// Проверяем callbackUrl из query параметров
+			const callbackUrl = request.nextUrl.searchParams.get('callbackUrl')
+			const redirectUrl = callbackUrl
+				? decodeURIComponent(callbackUrl)
+				: '/profile'
+			return NextResponse.redirect(new URL(redirectUrl, request.url))
+		}
+
+		// Если админ авторизован и заходит на страницу входа админа
+		if (
+			pathname.startsWith('/admin/login') &&
+			token &&
+			token.role === 'ADMIN'
+		) {
+			return NextResponse.redirect(new URL('/admin', request.url))
 		}
 
 		return NextResponse.next()
@@ -32,16 +49,28 @@ export default withAuth(
 			authorized: ({ token, req }) => {
 				const { pathname } = req.nextUrl
 
+				// Публичные маршруты
 				if (
 					pathname.startsWith('/api/auth/') ||
 					pathname === '/' ||
-					pathname.startsWith('/auth')
+					pathname.startsWith('/auth') ||
+					pathname.startsWith('/admin/login')
 				) {
 					return true
 				}
 
 				// Защищенные маршруты требуют токен
-				return !!token
+				if (pathname.startsWith('/profile')) {
+					return !!token
+				}
+
+				// Админские маршруты - всегда разрешаем доступ в authorized
+				// Проверку роли делаем в middleware, чтобы контролировать редирект
+				if (pathname.startsWith('/admin')) {
+					return true
+				}
+
+				return true
 			},
 		},
 	}
