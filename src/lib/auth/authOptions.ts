@@ -67,7 +67,16 @@ export const authOptions: NextAuthOptions = {
 
 						// Если кода нет, это критическая ошибка
 						if (result?.error) {
-							throw new Error(result.error)
+							// Преобразуем коды ошибок в понятные сообщения
+							const errorMessage = 
+								result.error === 'rate_limit_phone'
+									? 'Слишком много запросов с этого номера. Подождите час.'
+									: result.error === 'rate_limit_ip'
+									? 'Слишком много запросов с вашего IP. Подождите час.'
+									: result.error === 'sms_send_failed'
+									? result.message || 'Не удалось отправить SMS. Попробуйте позже.'
+									: result.error
+							throw new Error(errorMessage)
 						}
 
 						throw new Error('Failed to send verification code')

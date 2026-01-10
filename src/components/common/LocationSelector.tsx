@@ -54,13 +54,26 @@ const LocationSelector = ({
 	const [location, setLocation] = useState<LocationData | null>(null)
 	const [isOpenModal, openModal, closeModal] = useFlag()
 	const hasTriedAutoLocation = useRef(false)
+	const autoLocationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+	const currentLocationRef = useRef<LocationData | null>(null)
+	const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+	const hasShownModalRef = useRef(false)
+
+	// Обертка для openModal, которая отмечает что модалка была показана
+	const openModalWithTracking = useCallback(() => {
+		hasShownModalRef.current = true
+		// Очищаем таймаут открытия модалки, если он еще не сработал
+		if (modalTimeoutRef.current) {
+			clearTimeout(modalTimeoutRef.current)
+			modalTimeoutRef.current = null
+		}
+		openModal()
+	}, [openModal])
 
 	// Загружаем Google Maps API заранее для быстрого открытия модалки
 	useEffect(() => {
 		loadMaps()
 	}, [loadMaps])
-	const autoLocationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-	const currentLocationRef = useRef<LocationData | null>(null)
 
 	// Обновляем ref при изменении currentLocation
 	useEffect(() => {
@@ -98,6 +111,12 @@ const LocationSelector = ({
 	}, [getCurrentLocation, setCommonLocation, isGeolocationSupported])
 
 	const handleSkip = useCallback(() => {
+		// Очищаем таймаут открытия модалки, если он еще не сработал
+		if (modalTimeoutRef.current) {
+			clearTimeout(modalTimeoutRef.current)
+			modalTimeoutRef.current = null
+		}
+
 		setLocation(null)
 		closeModal()
 
@@ -127,6 +146,12 @@ const LocationSelector = ({
 
 	const handleConfirm = useCallback(() => {
 		if (location) {
+			// Очищаем таймаут открытия модалки, если он еще не сработал
+			if (modalTimeoutRef.current) {
+				clearTimeout(modalTimeoutRef.current)
+				modalTimeoutRef.current = null
+			}
+
 			if (isAuthenticated && user) {
 				// Для авторизованных: сохраняем в профиль через updateUser
 				updateUser({
@@ -196,48 +221,96 @@ const LocationSelector = ({
 		}
 	}, [geolocationError, currentLocation, setCommonLocation])
 
-	// Очистка таймаута при размонтировании
+	// Очистка таймаутов при размонтировании
 	useEffect(() => {
 		return () => {
 			if (autoLocationTimeoutRef.current) {
 				clearTimeout(autoLocationTimeoutRef.current)
+			}
+			if (modalTimeoutRef.current) {
+				clearTimeout(modalTimeoutRef.current)
 			}
 		}
 	}, [])
 
 	// Логика показа модалки для авторизованных пользователей
 	useEffect(() => {
+		// Очищаем предыдущий таймаут
+		if (modalTimeoutRef.current) {
+			clearTimeout(modalTimeoutRef.current)
+			modalTimeoutRef.current = null
+		}
+
 		if (
 			isAuthenticated &&
 			user &&
 			!userLocation?.city &&
 			!userLocation?.skiped &&
-			!isLoading
+			!isLoading &&
+			!hasShownModalRef.current &&
+			!isOpenModal
 		) {
-			setTimeout(() => {
-				openModal()
+			modalTimeoutRef.current = setTimeout(() => {
+				if (!hasShownModalRef.current && !isOpenModal) {
+					openModalWithTracking()
+				}
 			}, 3000)
+		}
+
+		return () => {
+			if (modalTimeoutRef.current) {
+				clearTimeout(modalTimeoutRef.current)
+				modalTimeoutRef.current = null
+			}
 		}
 	}, [
 		userLocation?.skiped,
-		openModal,
+		openModalWithTracking,
 		isLoading,
 		userLocation,
 		user,
 		isAuthenticated,
+		isOpenModal,
 	])
 
 	// Логика показа модалки для неавторизованных пользователей
 	useEffect(() => {
-		if (!isAuthenticated && !commonLocation?.city && !isLoading) {
-			setTimeout(() => {
-				openModal()
+		// Очищаем предыдущий таймаут
+		if (modalTimeoutRef.current) {
+			clearTimeout(modalTimeoutRef.current)
+			modalTimeoutRef.current = null
+		}
+
+		if (
+			!isAuthenticated &&
+			!commonLocation?.city &&
+			!isLoading &&
+			!hasShownModalRef.current &&
+			!isOpenModal
+		) {
+			modalTimeoutRef.current = setTimeout(() => {
+				if (!hasShownModalRef.current && !isOpenModal) {
+					openModalWithTracking()
+				}
 			}, 3000)
 		}
-	}, [isAuthenticated, commonLocation?.city, openModal, isLoading])
+
+		return () => {
+			if (modalTimeoutRef.current) {
+				clearTimeout(modalTimeoutRef.current)
+				modalTimeoutRef.current = null
+			}
+		}
+	}, [isAuthenticated, commonLocation?.city, openModalWithTracking, isLoading, isOpenModal])
 
 	// Обработка закрытия модалки без выбора (для неавторизованных)
 	const handleModalClose = useCallback(() => {
+		// Очищаем таймаут открытия модалки, если он еще не сработал
+		if (modalTimeoutRef.current) {
+			clearTimeout(modalTimeoutRef.current)
+			modalTimeoutRef.current = null
+		}
+
 		if (!isAuthenticated && !location) {
 			// Если модалка закрывается без выбора - пытаемся получить геолокацию или подставляем Киев
 			setAutoLocation()
@@ -285,7 +358,7 @@ const LocationSelector = ({
 						onClick={e => {
 							e.preventDefault()
 							e.stopPropagation()
-							openModal()
+							openModalWithTracking()
 						}}
 						className={cn(
 							'flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors flex-shrink-0',
@@ -304,7 +377,7 @@ const LocationSelector = ({
 						onClick={e => {
 							e.preventDefault()
 							e.stopPropagation()
-							openModal()
+							openModalWithTracking()
 						}}
 						className={cn(
 							'flex items-center gap-2 px-4 py-2.5 hover:bg-gray-50 transition-colors flex-shrink-0',
@@ -365,7 +438,7 @@ const LocationSelector = ({
 					onClick={e => {
 						e.preventDefault()
 						e.stopPropagation()
-						openModal()
+						openModalWithTracking()
 					}}
 					size='md'
 					className='text-sm px-3'

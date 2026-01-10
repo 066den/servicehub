@@ -182,8 +182,14 @@ class AuthService {
 					console.error('Error logging SMS result:', logError)
 				}
 			}
-			// Пробрасываем ошибку дальше, чтобы она была обработана в authOptions
-			throw error
+			// Возвращаем объект с ошибкой вместо проброса исключения
+			// для более корректной обработки в authOptions
+			return {
+				error: error instanceof Error ? error.message : 'unknown_error',
+				message: error instanceof Error 
+					? error.message 
+					: 'Произошла ошибка при отправке кода. Попробуйте позже.',
+			}
 		}
 	}
 
