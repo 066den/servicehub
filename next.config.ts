@@ -1,8 +1,28 @@
 import type { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
+import path from 'path'
 
 const nextConfig: NextConfig = {
 	reactStrictMode: true,
+	images: {
+		remotePatterns: [
+			{
+				protocol: 'http',
+				hostname: 'localhost',
+				pathname: '/**',
+			},
+			{
+				protocol: 'http',
+				hostname: '127.0.0.1',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
+				hostname: '**',
+				pathname: '/uploads/**',
+			},
+		],
+	},
 	// Настройки для WebSocket
 	async rewrites() {
 		return [
@@ -11,6 +31,22 @@ const nextConfig: NextConfig = {
 				destination: '/api/socketio/:path*',
 			},
 		]
+	},
+	webpack: config => {
+		const srcPath = path.resolve(process.cwd(), 'src')
+		config.resolve = config.resolve || {}
+		config.resolve.alias = {
+			...config.resolve.alias,
+			'@': srcPath,
+		}
+		// Fix for Prisma client resolution
+		config.resolve.fallback = {
+			...config.resolve.fallback,
+			fs: false,
+			net: false,
+			tls: false,
+		}
+		return config
 	},
 }
 

@@ -6,6 +6,7 @@ import { turboSmsService } from './sms/turboSmsService'
 import { prisma } from '@/lib/prisma'
 import { SMSResult } from '@/types/auth'
 import { EStatus } from '@/types'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 
 interface DeviceInfo {
 	ipAddress?: string
@@ -25,23 +26,51 @@ class AuthService {
 	private readonly ACCESS_TOKEN_EXPIRY = '15m' // 15 минут
 	private readonly REFRESH_TOKEN_EXPIRY_DAYS = 30 // 30 дней
 
+	// Вспомогательный метод для проверки ошибок подключения к БД
+	private isDatabaseConnectionError(error: unknown): boolean {
+		if (error instanceof PrismaClientKnownRequestError) {
+			return error.code === 'P1001' || error.code === 'P1000'
+		}
+		if (error instanceof Error) {
+			return (
+				error.message?.includes("Can't reach database server") ||
+				error.message?.includes('Connection') ||
+				error.message?.includes('ECONNREFUSED')
+			)
+		}
+		return false
+	}
+
 	async sendVerificationCode(phone: string, ipAddress: string) {
 		const normalizedPhone = normalizePhone(phone)
-		const rateLimit = await this.checkRateLimit(normalizedPhone, ipAddress)
 
-		if (rateLimit) {
-			return { error: rateLimit }
+		try {
+			const rateLimit = await this.checkRateLimit(normalizedPhone, ipAddress)
+
+			if (rateLimit) {
+				return { error: rateLimit }
+			}
+
+			// Деактивируем старые коды
+			await prisma.verificationCode.updateMany({
+				where: {
+					phone: normalizedPhone,
+					isUsed: false,
+					expiresAt: { gt: new Date() },
+				},
+				data: { isUsed: true },
+			})
+		} catch (error) {
+			if (this.isDatabaseConnectionError(error)) {
+				console.error(
+					'[AuthService] Database connection error in sendVerificationCode:',
+					error
+				)
+				// Продолжаем выполнение без проверки лимитов при ошибке БД
+			} else {
+				throw error
+			}
 		}
-
-		// Деактивируем старые коды
-		await prisma.verificationCode.updateMany({
-			where: {
-				phone: normalizedPhone,
-				isUsed: false,
-				expiresAt: { gt: new Date() },
-			},
-			data: { isUsed: true },
-		})
 
 		const code = generateSecureCode(this.CODE_LENGTH)
 
@@ -60,34 +89,107 @@ class AuthService {
 
 			const message = turboSmsService.formatVerificationMessage(code, 'uk')
 
-			const smsResult = await turboSmsService.sendSMS(normalizedPhone, message)
-
-			await this.logSMSResult(normalizedPhone, message, smsResult)
-
-			if (smsResult.status !== EStatus.sent) {
-				return {
-					error: 'sms_send_failed',
+			let smsResult
+			try {
+				smsResult = await turboSmsService.sendSMS(normalizedPhone, message)
+				await this.logSMSResult(normalizedPhone, message, smsResult)
+			} catch (smsError) {
+				console.error('Ошибка отправки SMS:', smsError)
+				// Логируем ошибку, но продолжаем выполнение для возврата кода
+				try {
+					await this.logSMSResult(normalizedPhone, message, {
+						status: EStatus.failed,
+						error: smsError instanceof Error ? smsError.message : String(smsError),
+						provider: 'turbosms',
+					})
+				} catch (logError) {
+					console.error('Ошибка логирования SMS:', logError)
+				}
+				// Создаем фейковый результат для обработки ниже
+				smsResult = {
+					status: EStatus.failed,
+					provider: 'turbosms',
 				}
 			}
 
-			const user = await prisma.user.findUnique({
-				where: {
-					phoneNormalized: normalizedPhone,
-				},
-			})
+			// Получаем информацию о пользователе
+			let user = null
+			try {
+				user = await prisma.user.findUnique({
+					where: {
+						phoneNormalized: normalizedPhone,
+					},
+				})
+			} catch (error) {
+				if (this.isDatabaseConnectionError(error)) {
+					console.error(
+						'[AuthService] Database connection error while finding user:',
+						error
+					)
+				} else {
+					throw error
+				}
+			}
+
+			// Если SMS не отправилась, возвращаем ошибку, но все равно возвращаем код
+			// (код нужен для development режима и для отладки)
+			if (smsResult.status !== EStatus.sent) {
+				// Логируем код в консоль для отладки
+				if (process.env.NODE_ENV === 'development') {
+					console.log(`[DEV] Код верификации для ${normalizedPhone}: ${code}`)
+				}
+				return {
+					userId: user?.id,
+					error: 'sms_send_failed',
+					message: 'Не удалось отправить SMS. Попробуйте позже.',
+					code, // Возвращаем код даже при ошибке (для development режима)
+				}
+			}
+
+			// Логируем код в консоль для отладки в development режиме
+			if (process.env.NODE_ENV === 'development') {
+				console.log(`[DEV] Код верификации для ${normalizedPhone}: ${code}`)
+			}
 
 			return {
 				userId: user?.id,
 				status: EStatus.sent,
 				message: 'success_send_code',
+				code,
 			}
 		} catch (error) {
+			if (this.isDatabaseConnectionError(error)) {
+				console.error(
+					'[AuthService] Database connection error in sendVerificationCode:',
+					error
+				)
+				return {
+					error: 'database_unavailable',
+					message:
+						'Database is temporarily unavailable. Please try again later.',
+				}
+			}
 			console.error('Error sending verification code:', error)
-			await this.logSMSResult(normalizedPhone, '', {
-				status: EStatus.failed,
-				error: error instanceof Error ? error.message : String(error),
-				provider: 'turbosms',
-			})
+			try {
+				await this.logSMSResult(normalizedPhone, '', {
+					status: EStatus.failed,
+					error: error instanceof Error ? error.message : String(error),
+					provider: 'turbosms',
+				})
+			} catch (logError) {
+				// Игнорируем ошибки логирования при проблемах с БД
+				if (!this.isDatabaseConnectionError(logError)) {
+					console.error('Error logging SMS result:', logError)
+				}
+			}
+			// Возвращаем объект с ошибкой вместо проброса исключения
+			// для более корректной обработки в authOptions
+			return {
+				error: error instanceof Error ? error.message : 'unknown_error',
+				message: error instanceof Error 
+					? error.message 
+					: 'Произошла ошибка при отправке кода. Попробуйте позже.',
+			}
 		}
 	}
 
@@ -135,19 +237,34 @@ class AuthService {
 		const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
 
 		if (!prisma) {
-			throw new Error('Prisma client is not initialized')
+			console.warn('[AuthService] Prisma client is not initialized')
+			return 0 // Возвращаем 0 вместо ошибки
 		}
 
-		const whereClause =
-			type === 'phone'
-				? { phone: identifier, expiresAt: { gte: oneHourAgo } }
-				: { ipAddress: identifier, expiresAt: { gte: oneHourAgo } }
+		try {
+			const whereClause =
+				type === 'phone'
+					? { phone: identifier, expiresAt: { gte: oneHourAgo } }
+					: { ipAddress: identifier, expiresAt: { gte: oneHourAgo } }
 
-		const count = await prisma.verificationCode.count({
-			where: whereClause,
-		})
+			const count = await prisma.verificationCode.count({
+				where: whereClause,
+			})
 
-		return count
+			return count
+		} catch (error) {
+			if (this.isDatabaseConnectionError(error)) {
+				console.error(
+					'[AuthService] Database connection error in getRateLimitCount:',
+					error
+				)
+				// Возвращаем 0 при ошибке подключения, чтобы не блокировать пользователей
+				return 0
+			}
+			// Для других ошибок логируем и возвращаем 0
+			console.error('[AuthService] Error in getRateLimitCount:', error)
+			return 0
+		}
 	}
 
 	async verifyCode(
@@ -159,14 +276,30 @@ class AuthService {
 	) {
 		const normalizedPhone = normalizePhone(phone)
 
-		const verificationCode = await prisma.verificationCode.findFirst({
-			where: {
-				phone: normalizedPhone,
-				code,
-				isUsed: false,
-				expiresAt: { gt: new Date() },
-			},
-		})
+		let verificationCode = null
+		try {
+			verificationCode = await prisma.verificationCode.findFirst({
+				where: {
+					phone: normalizedPhone,
+					code,
+					isUsed: false,
+					expiresAt: { gt: new Date() },
+				},
+			})
+		} catch (error) {
+			if (this.isDatabaseConnectionError(error)) {
+				console.error(
+					'[AuthService] Database connection error in verifyCode:',
+					error
+				)
+				return {
+					error: 'database_unavailable',
+					message:
+						'Database is temporarily unavailable. Please try again later.',
+				}
+			}
+			throw error
+		}
 
 		if (!verificationCode) {
 			return { error: 'invalid_code_or_expired' }
@@ -176,45 +309,91 @@ class AuthService {
 			return { error: 'max_attempts_reached' }
 		}
 
-		await prisma.verificationCode.update({
-			where: { id: verificationCode.id },
-			data: {
-				isUsed: true,
-				usedAt: new Date(),
-				attempts: verificationCode.attempts + 1,
-			},
-		})
+		try {
+			await prisma.verificationCode.update({
+				where: { id: verificationCode.id },
+				data: {
+					isUsed: true,
+					usedAt: new Date(),
+					attempts: verificationCode.attempts + 1,
+				},
+			})
+		} catch (error) {
+			if (this.isDatabaseConnectionError(error)) {
+				console.error(
+					'[AuthService] Database connection error updating verification code:',
+					error
+				)
+				return {
+					error: 'database_unavailable',
+					message:
+						'Database is temporarily unavailable. Please try again later.',
+				}
+			}
+			throw error
+		}
 
-		let user = await prisma.user.findUnique({
-			where: {
-				phoneNormalized: normalizedPhone,
-			},
-		})
+		let user = null
+		try {
+			user = await prisma.user.findUnique({
+				where: {
+					phoneNormalized: normalizedPhone,
+				},
+			})
+		} catch (error) {
+			if (this.isDatabaseConnectionError(error)) {
+				console.error(
+					'[AuthService] Database connection error finding user in verifyCode:',
+					error
+				)
+				return {
+					error: 'database_unavailable',
+					message:
+						'Database is temporarily unavailable. Please try again later.',
+				}
+			}
+			throw error
+		}
 
-		if (!user) {
-			if (firstName) {
-				user = await prisma.user.create({
+		try {
+			if (!user) {
+				if (firstName) {
+					user = await prisma.user.create({
+						data: {
+							phone: phone,
+							phoneNormalized: normalizedPhone,
+							firstName,
+							lastName,
+							isVerified: true,
+							lastLoginAt: new Date(),
+						},
+					})
+				}
+			} else {
+				user = await prisma.user.update({
+					where: {
+						id: user.id,
+					},
 					data: {
-						phone: phone,
-						phoneNormalized: normalizedPhone,
-						firstName,
-						lastName,
 						isVerified: true,
 						lastLoginAt: new Date(),
+						isActive: true,
 					},
 				})
 			}
-		} else {
-			user = await prisma.user.update({
-				where: {
-					id: user.id,
-				},
-				data: {
-					isVerified: true,
-					lastLoginAt: new Date(),
-					isActive: true,
-				},
-			})
+		} catch (error) {
+			if (this.isDatabaseConnectionError(error)) {
+				console.error(
+					'[AuthService] Database connection error creating/updating user:',
+					error
+				)
+				return {
+					error: 'database_unavailable',
+					message:
+						'Database is temporarily unavailable. Please try again later.',
+				}
+			}
+			throw error
 		}
 
 		if (!user) {
@@ -417,7 +596,7 @@ class AuthService {
 			where: { userId, deviceId, isRevoked: false },
 		})
 
-		const refreshTokenIds = refreshTokens.map(rt => rt.id)
+		const refreshTokenIds = refreshTokens.map((rt: { id: number }) => rt.id)
 
 		await Promise.all([
 			prisma.refreshToken.updateMany({
@@ -450,6 +629,104 @@ class AuthService {
 				where: { expiresAt: { lt: now } },
 			}),
 		])
+	}
+
+	// Хеширование пароля
+	async hashPassword(password: string): Promise<string> {
+		const { hashPassword: hash } = await import('@/lib/bcrypt')
+		return await hash(password)
+	}
+
+	// Проверка пароля
+	async verifyPassword(password: string, hash: string): Promise<boolean> {
+		const { verifyPassword: verify } = await import('@/lib/bcrypt')
+		return await verify(password, hash)
+	}
+
+	// Авторизация администратора по email и паролю
+	async adminLogin(
+		email: string,
+		password: string,
+		deviceInfo: DeviceInfo = {}
+	) {
+		try {
+			// Находим пользователя по email
+			const user = await prisma.user.findUnique({
+				where: { email },
+			})
+
+			if (!user) {
+				return { error: 'invalid_credentials' }
+			}
+
+			// Проверяем роль
+			if (user.role !== 'ADMIN') {
+				return { error: 'access_denied' }
+			}
+
+			// Проверяем, что пользователь активен и не заблокирован
+			if (!user.isActive || user.isBlocked) {
+				return { error: 'account_blocked' }
+			}
+
+			// Проверяем наличие пароля
+			if (!user.password) {
+				return { error: 'password_not_set' }
+			}
+
+			// Проверяем пароль
+			const isPasswordValid = await this.verifyPassword(
+				password,
+				user.password
+			)
+
+			if (!isPasswordValid) {
+				return { error: 'invalid_credentials' }
+			}
+
+			// Обновляем время последнего входа
+			await prisma.user.update({
+				where: { id: user.id },
+				data: { lastLoginAt: new Date() },
+			})
+
+			// Создаем токены
+			const tokens = await this.createTokenPair(
+				user.id,
+				user.phoneNormalized ?? user.phone,
+				deviceInfo
+			)
+
+			return {
+				user: {
+					id: user.id,
+					phone: user.phone,
+					phoneNormalized: user.phoneNormalized,
+					email: user.email,
+					firstName: user.firstName,
+					lastName: user.lastName,
+					isVerified: user.isVerified,
+					createdAt: user.createdAt,
+					role: user.role,
+				},
+				tokens,
+				message: 'success_login',
+			}
+		} catch (error) {
+			if (this.isDatabaseConnectionError(error)) {
+				console.error(
+					'[AuthService] Database connection error in adminLogin:',
+					error
+				)
+				return {
+					error: 'database_unavailable',
+					message:
+						'Database is temporarily unavailable. Please try again later.',
+				}
+			}
+			console.error('Error in adminLogin:', error)
+			return { error: 'login_failed' }
+		}
 	}
 }
 

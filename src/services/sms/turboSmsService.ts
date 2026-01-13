@@ -1,6 +1,10 @@
 import axios from 'axios'
+import { config } from 'dotenv'
 import { EStatus } from '@/types'
 import { SMSResult } from '@/types/auth'
+
+// Загружаем переменные окружения при импорте модуля
+config({ path: '.env.local' })
 
 interface TurboSMSResponse {
 	success: boolean
@@ -243,8 +247,8 @@ class TurboSMSService {
 		language: 'uk' | 'ru' = 'uk'
 	): string {
 		const templates = {
-			uk: `Ваш код підтвердження для ServiceHub: ${code}. Дійсний 5 хвилин. Нікому не повідомляйте цей код.`,
-			ru: `Ваш код подтверждения для ServiceHub: ${code}. Действителен 5 минут. Никому не сообщайте этот код.`,
+			uk: `Ваш код підтвердження для UslugiUA: ${code}. Дійсний 5 хвилин. Нікому не повідомляйте цей код.`,
+			ru: `Ваш код подтверждения для UslugiUA: ${code}. Действителен 5 минут. Никому не сообщайте этот код.`,
 		}
 
 		return templates[language]

@@ -1,25 +1,34 @@
 'use client'
 
 import { useJsApiLoader } from '@react-google-maps/api'
-import { createContext, useContext, ReactNode } from 'react'
+import {
+	createContext,
+	useContext,
+	ReactNode,
+	useState,
+	useEffect,
+} from 'react'
 
-const libraries: 'places'[] = ['places']
+const libraries: ('places' | 'marker')[] = ['places', 'marker']
 
 interface GoogleMapsContextType {
 	isLoaded: boolean
+	loadMaps: () => void
 }
 
 const GoogleMapsContext = createContext<GoogleMapsContextType>({
 	isLoaded: false,
+	loadMaps: () => {},
 })
 
 export const useGoogleMaps = () => useContext(GoogleMapsContext)
 
-interface GoogleMapsProviderProps {
+interface GoogleMapsLoaderProps {
 	children: ReactNode
+	onLoadChange: (loaded: boolean) => void
 }
 
-export function GoogleMapsProvider({ children }: GoogleMapsProviderProps) {
+function GoogleMapsLoader({ children, onLoadChange }: GoogleMapsLoaderProps) {
 	const { isLoaded } = useJsApiLoader({
 		id: 'google-map-script',
 		googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY || '',
@@ -28,9 +37,46 @@ export function GoogleMapsProvider({ children }: GoogleMapsProviderProps) {
 		region: 'UA',
 	})
 
+	// Уведомляем родительский компонент об изменении состояния загрузки
+	useEffect(() => {
+		onLoadChange(isLoaded)
+	}, [isLoaded, onLoadChange])
+
+	return <>{children}</>
+}
+
+interface GoogleMapsProviderProps {
+	children: ReactNode
+	loadOnMount?: boolean
+}
+
+export function GoogleMapsProvider({
+	children,
+	loadOnMount = false,
+}: GoogleMapsProviderProps) {
+	const [shouldLoad, setShouldLoad] = useState(loadOnMount)
+	const [isLoaded, setIsLoaded] = useState(false)
+
+	const loadMaps = () => {
+		if (!shouldLoad) {
+			setShouldLoad(true)
+		}
+	}
+
 	return (
-		<GoogleMapsContext.Provider value={{ isLoaded }}>
-			{children}
+		<GoogleMapsContext.Provider
+			value={{
+				isLoaded,
+				loadMaps,
+			}}
+		>
+			{shouldLoad ? (
+				<GoogleMapsLoader onLoadChange={setIsLoaded}>
+					{children}
+				</GoogleMapsLoader>
+			) : (
+				children
+			)}
 		</GoogleMapsContext.Provider>
 	)
 }

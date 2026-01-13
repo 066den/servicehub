@@ -1,0 +1,21 @@
+{
+	"css.validate": false,
+	"scss.validate": false,
+	"css.lint.unknownAtRules": "ignore",
+	"scss.lint.unknownAtRules": "ignore",
+	"tailwindCSS.includeLanguages": {
+		"typescript": "typescript",
+		"typescriptreact": "typescriptreact",
+		"javascript": "javascript",
+		"javascriptreact": "javascriptreact"
+	},
+	"tailwindCSS.experimental.classRegex": [
+		["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+		["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+		["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+	],
+	"editor.quickSuggestions": {
+		"strings": true
+	},
+	"tailwindCSS.emmetCompletions": true
+}

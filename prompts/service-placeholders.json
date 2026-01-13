@@ -1,0 +1,285 @@
+[
+	{
+		"name": "Чоловіча стрижка",
+		"slug": "male-haircut",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for male haircut service. Soft pink to rose gradient background, centered barber pole icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Жіноча стрижка",
+		"slug": "female-haircut",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for female haircut service. Soft pink to rose gradient background, centered scissors icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Фарбування волосся",
+		"slug": "hair-coloring",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for hair coloring service. Soft pink to rose gradient background, centered paintbrush or color palette icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Укладка волосся",
+		"slug": "hair-styling",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for hair styling service. Soft pink to rose gradient background, centered hair dryer or styling tool icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Манікюр класичний",
+		"slug": "classic-manicure",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for classic manicure service. Soft pink to rose gradient background, centered nail polish bottle icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Педикюр",
+		"slug": "pedicure",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for pedicure service. Soft pink to rose gradient background, centered foot spa or foot icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Гель-лак",
+		"slug": "gel-polish",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for gel polish service. Soft pink to rose gradient background, centered sparkle or gem icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Чистка обличчя",
+		"slug": "face-cleaning",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for face cleaning service. Soft pink to rose gradient background, centered facial treatment or spa icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Пілінг",
+		"slug": "peeling",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for peeling service. Soft pink to rose gradient background, centered flower or skincare icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Доглядові процедури",
+		"slug": "skin-care",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for skincare procedures service. Soft pink to rose gradient background, centered skincare bottle or cream icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Релаксаційний масаж",
+		"slug": "relax-massage",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for relaxation massage service. Soft pink to rose gradient background, centered massage hands or spa icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Спортивний масаж",
+		"slug": "sport-massage",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for sports massage service. Soft pink to rose gradient background, centered dumbbell or fitness icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Антицелюлітний масаж",
+		"slug": "anti-cellulite",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for anti-cellulite massage service. Soft pink to rose gradient background, centered fire or treatment icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Лазерна епіляція",
+		"slug": "laser-epilation",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for laser epilation service. Soft pink to rose gradient background, centered laser beam or light icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Шугаринг",
+		"slug": "sugaring",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for sugaring service. Soft pink to rose gradient background, centered honey jar or sweet icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Воскова депіляція",
+		"slug": "waxing",
+		"categoryId": "beauty",
+		"prompt": "Minimalist square image placeholder for waxing service. Soft pink to rose gradient background, centered candle or wax icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Прибирання квартир",
+		"slug": "apartment-cleaning",
+		"categoryId": "cleaning",
+		"prompt": "Minimalist square image placeholder for apartment cleaning service. Soft blue to cyan gradient background, centered sponge or cleaning brush icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Генеральне прибирання",
+		"slug": "deep-cleaning",
+		"categoryId": "cleaning",
+		"prompt": "Minimalist square image placeholder for deep cleaning service. Soft blue to cyan gradient background, centered cleaning soap or deep clean icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Офісне прибирання",
+		"slug": "office-clean",
+		"categoryId": "cleaning",
+		"prompt": "Minimalist square image placeholder for office cleaning service. Soft blue to cyan gradient background, centered office building icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Сантехнічний ремонт",
+		"slug": "plumbing-repair",
+		"categoryId": "repair",
+		"prompt": "Minimalist square image placeholder for plumbing repair service. Soft orange to amber gradient background, centered shower or faucet icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Електромонтаж",
+		"slug": "electro-montage",
+		"categoryId": "repair",
+		"prompt": "Minimalist square image placeholder for electrical installation service. Soft orange to amber gradient background, centered light bulb or electrical plug icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Ремонт під ключ",
+		"slug": "full-renovation",
+		"categoryId": "repair",
+		"prompt": "Minimalist square image placeholder for full renovation service. Soft orange to amber gradient background, centered house or key icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Збірка меблів",
+		"slug": "furniture-assembly-type",
+		"categoryId": "home-services",
+		"prompt": "Minimalist square image placeholder for furniture assembly service. Soft green to teal gradient background, centered chair or furniture icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Дрібний електроремонт",
+		"slug": "small-electric-repair",
+		"categoryId": "home-services",
+		"prompt": "Minimalist square image placeholder for small electrical repair service. Soft green to teal gradient background, centered lightning bolt or electrical icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Діагностика авто",
+		"slug": "auto-diagnostics",
+		"categoryId": "auto",
+		"prompt": "Minimalist square image placeholder for car diagnostics service. Soft red to coral gradient background, centered wrench or car diagnostic icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Шиномонтаж",
+		"slug": "tire-change",
+		"categoryId": "auto",
+		"prompt": "Minimalist square image placeholder for tire service. Soft red to coral gradient background, centered tire or wheel icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Вантажні перевезення",
+		"slug": "cargo-transport",
+		"categoryId": "auto",
+		"prompt": "Minimalist square image placeholder for cargo transport service. Soft red to coral gradient background, centered truck or cargo icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Кур'єрська доставка",
+		"slug": "courier-delivery",
+		"categoryId": "delivery",
+		"prompt": "Minimalist square image placeholder for courier delivery service. Soft purple to indigo gradient background, centered package or delivery box icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Експрес-доставка",
+		"slug": "express-delivery-type",
+		"categoryId": "delivery",
+		"prompt": "Minimalist square image placeholder for express delivery service. Soft purple to indigo gradient background, centered lightning bolt or fast delivery icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Англійська мова",
+		"slug": "english",
+		"categoryId": "tutoring",
+		"prompt": "Minimalist square image placeholder for English language tutoring service. Soft yellow to gold gradient background, centered UK flag or book icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Математика",
+		"slug": "math",
+		"categoryId": "tutoring",
+		"prompt": "Minimalist square image placeholder for math tutoring service. Soft yellow to gold gradient background, centered division sign or calculator icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Портретна фотозйомка",
+		"slug": "portrait-photo",
+		"categoryId": "photo-video",
+		"prompt": "Minimalist square image placeholder for portrait photography service. Soft indigo to violet gradient background, centered camera icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Відеозйомка подій",
+		"slug": "event-video",
+		"categoryId": "photo-video",
+		"prompt": "Minimalist square image placeholder for event videography service. Soft indigo to violet gradient background, centered video camera icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Бухгалтерський супровід",
+		"slug": "accounting-service",
+		"categoryId": "business",
+		"prompt": "Minimalist square image placeholder for accounting service. Soft blue to navy gradient background, centered chart or calculator icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Юридичні консультації",
+		"slug": "legal-advice",
+		"categoryId": "business",
+		"prompt": "Minimalist square image placeholder for legal consultation service. Soft blue to navy gradient background, centered scales of justice icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Комп'ютерна допомога",
+		"slug": "pc-help",
+		"categoryId": "it",
+		"prompt": "Minimalist square image placeholder for computer help service. Soft teal to cyan gradient background, centered wrench or computer icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Ремонт смартфонів",
+		"slug": "phone-fix",
+		"categoryId": "it",
+		"prompt": "Minimalist square image placeholder for smartphone repair service. Soft teal to cyan gradient background, centered smartphone icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Вигул собак",
+		"slug": "dog-walking",
+		"categoryId": "pets",
+		"prompt": "Minimalist square image placeholder for dog walking service. Soft brown to beige gradient background, centered dog or paw print icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Грумінг собак",
+		"slug": "dog-grooming",
+		"categoryId": "pets",
+		"prompt": "Minimalist square image placeholder for dog grooming service. Soft brown to beige gradient background, centered scissors or grooming tool icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Няня для дітей",
+		"slug": "child-nanny",
+		"categoryId": "health-care",
+		"prompt": "Minimalist square image placeholder for child nanny service. Soft mint to green gradient background, centered teddy bear or child care icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Догляд за літніми",
+		"slug": "elder-care",
+		"categoryId": "health-care",
+		"prompt": "Minimalist square image placeholder for elder care service. Soft mint to green gradient background, centered elderly person or care icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Персональні тренування",
+		"slug": "personal-training",
+		"categoryId": "fitness",
+		"prompt": "Minimalist square image placeholder for personal training service. Soft orange to red gradient background, centered dumbbell or fitness icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Йога та медитація",
+		"slug": "yoga-type",
+		"categoryId": "fitness",
+		"prompt": "Minimalist square image placeholder for yoga and meditation service. Soft orange to red gradient background, centered yoga pose or meditation icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Організація свят",
+		"slug": "event-organization",
+		"categoryId": "events",
+		"prompt": "Minimalist square image placeholder for event organization service. Soft pink to magenta gradient background, centered party confetti or celebration icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Оренда апаратури",
+		"slug": "equipment-rental",
+		"categoryId": "events",
+		"prompt": "Minimalist square image placeholder for equipment rental service. Soft pink to magenta gradient background, centered speaker or audio equipment icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Оренда інструментів",
+		"slug": "tool-rental",
+		"categoryId": "rental",
+		"prompt": "Minimalist square image placeholder for tool rental service. Soft gray to slate gradient background, centered wrench or tool icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	},
+	{
+		"name": "Оренда авто",
+		"slug": "car-rental-type",
+		"categoryId": "rental",
+		"prompt": "Minimalist square image placeholder for car rental service. Soft gray to slate gradient background, centered car icon in thin line style, flat design, pastel colors, professional web interface style, 1:1 aspect ratio, 400x400px, no text"
+	}
+]
+

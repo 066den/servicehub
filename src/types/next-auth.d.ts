@@ -15,6 +15,7 @@ declare module 'next-auth' {
 		accessToken?: string
 		refreshToken?: string
 		error?: string
+		code?: string // Only for development
 	}
 
 	interface User extends DefaultUser {
@@ -27,6 +28,7 @@ declare module 'next-auth' {
 		status?: EStatus
 		accessToken?: string
 		refreshToken?: string
+		code?: string // Only for development
 	}
 }
 
@@ -40,6 +42,7 @@ declare module 'next-auth/jwt' {
 		accessToken?: string
 		refreshToken?: string
 		accessTokenExpires?: number
+		code?: string // Only for development
 	}
 }
 

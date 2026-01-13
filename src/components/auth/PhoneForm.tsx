@@ -1,36 +1,48 @@
 'use client'
 
-import { Field, Form, Formik } from 'formik'
 import { useTranslations } from 'next-intl'
-import * as Yup from 'yup'
-import InputPhone from '../ui/forms/InputPhone'
-import Button from '../ui/Button'
+import InputPhone, { VALID_PHONE_PATTERN } from '../ui/forms/InputPhone'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'motion/react'
-
 import Notification from '../ui/Notification'
 import { containerVariants } from '../ui/animate/variants'
-import { useAuthStore } from '@/stores/authStore'
+import { Button } from '../ui/button'
+import { useForm, useController } from 'react-hook-form'
+import { Smartphone } from 'lucide-react'
+import { useUserProfile } from '@/stores/auth/useUserProfile'
 
-const initialValues = {
-	phone: '',
+type FormData = {
+	phone: string
 }
 
 const PhoneForm = () => {
 	const t = useTranslations()
-	const { setPhone, sendCode, error } = useAuthStore()
+	const { error, isLoading, setPhone, sendCode } = useUserProfile()
+	const {
+		control,
+		handleSubmit,
+		formState: { isValid },
+	} = useForm<FormData>()
+
+	const {
+		field: { onChange, onBlur, value, name },
+	} = useController({
+		name: 'phone',
+		control,
+		rules: {
+			required: t('Form.phoneRequired'),
+			pattern: {
+				value: VALID_PHONE_PATTERN,
+				message: 'phoneInvalid',
+			},
+		},
+	})
 	const tMain = useTranslations()
 
-	const validationSchema = Yup.object().shape({
-		phone: Yup.string()
-			.required(t('Form.phoneRequired'))
-			.matches(/^\d{10}$/, t('Form.phoneFormat')),
+	const onSubmit = handleSubmit(async (data: FormData) => {
+		setPhone(data.phone)
+		await sendCode(data.phone)
 	})
-
-	const onSubmit = async (values: typeof initialValues) => {
-		setPhone(values.phone)
-		await sendCode(values.phone)
-	}
 
 	return (
 		<motion.div
@@ -39,45 +51,56 @@ const PhoneForm = () => {
 			animate='visible'
 			exit='hidden'
 		>
-			<h2 className='form-title'>{t('Auth.phoneForm.title')}</h2>
-			<p className='form-subtitle'>{t('Auth.phoneForm.subtitle')}</p>
+			<h3 className='text-primary-dark text-center mb-2'>
+				{t('Auth.phoneForm.title')}
+			</h3>
+			<p className='text-md text-secondary-foreground text-center mb-6'>
+				{t('Auth.phoneForm.subtitle')}
+			</p>
 			<AnimatePresence>
 				{error && <Notification message={t('Error.' + error)} type='error' />}
 			</AnimatePresence>
 
-			<Formik
-				initialValues={initialValues}
-				validationSchema={validationSchema}
-				onSubmit={onSubmit}
-			>
-				{({ isValid, dirty, isSubmitting }) => (
-					<Form>
-						<Field component={InputPhone} name='phone' autoComplete='off' />
-						<div className='info-message'>
-							<span>📱</span>
-							{t('Auth.phoneForm.info')}
-						</div>
+			<form onSubmit={onSubmit}>
+				<InputPhone
+					label={t('Auth.phoneForm.phone')}
+					required
+					value={value}
+					onChange={onChange}
+					onBlur={onBlur}
+					name={name}
+				/>
 
-						<Button
-							fullWidth
-							color='primary'
-							size='md'
-							type='submit'
-							disabled={isSubmitting || !isValid || !dirty}
-							className='mt-3 mb-4'
-						>
-							{t('Auth.phoneForm.getCode')}
-						</Button>
-						<div className='form-footer'>
-							{t('Auth.phoneForm.termsInfo', {
-								action: t('Auth.phoneForm.getCode'),
-							})}{' '}
-							<Link href='#'>{t('Auth.phoneForm.terms')}</Link> {tMain('And')}{' '}
-							<Link href='#'>{t('Auth.phoneForm.privacy')}</Link>.
-						</div>
-					</Form>
-				)}
-			</Formik>
+				<div className='flex items-center gap-2 text-primary bg-primary-light/5 rounded-md py-3 px-4 mb-4 text-sm border-l-4 border-primary mt-6'>
+					<Smartphone />
+					{t('Auth.phoneForm.info')}
+				</div>
+
+				<Button
+					size='lg'
+					fullWidth
+					type='submit'
+					disabled={!isValid}
+					loading={!!isLoading}
+					className='mt-6 mb-4'
+				>
+					{t('Auth.phoneForm.getCode')}
+				</Button>
+			</form>
+			<div className='text-center'>
+				<div className='text-xs text-muted-foreground leading-relaxed'>
+					{t('Auth.phoneForm.termsInfo', {
+						action: t('Auth.smsForm.confirm'),
+					})}{' '}
+					<Link href='#' className='text-primary hover:underline'>
+						{t('Auth.phoneForm.terms')}
+					</Link>{' '}
+					{tMain('And')}{' '}
+					<Link href='#' className='text-primary hover:underline'>
+						{t('Auth.phoneForm.privacy')}
+					</Link>
+				</div>
+			</div>
 		</motion.div>
 	)
 }

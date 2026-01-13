@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import classNames from 'classnames'
+import { cn } from '@/lib/utils'
 
 interface SelectOption {
 	value: string
@@ -209,7 +209,7 @@ const Select = ({
 	return (
 		<div className={`form-group ${className}`}>
 			{label && (
-				<label className={classNames('form-label', { required })}>
+									<label className={cn('form-label', required && 'required')}>
 					{label}
 				</label>
 			)}

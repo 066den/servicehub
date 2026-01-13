@@ -44,71 +44,15 @@ export interface SMSResult {
 	cost?: number
 }
 
-export interface AuthState {
-	// state
-	user: UserProfile | null
-	isLoading: boolean
-	error: string | null
-	isInitialized: boolean
-	// SMS flow
-	phone: string
-	step: 'phone' | 'code' | 'success'
-	codeSent: boolean
-	codeExpiresAt: Date | null
-
-	// user profile
-	isLoadingProfile: boolean
-	profileError: string | null
-	lastProfileUpdate: number
-
-	// Refresh token logic
-	isRefreshing: boolean
-	refreshError: string | null
-
-	resendCountdown: number
-	canResend: boolean
-	resendAttempts: number
-	lastCodeSentAt: number
-
-	// actions
-	setPhone: (phone: string) => void
-	sendCode: (phone: string) => Promise<void>
-	verifyCode: (
-		code: string,
-		firstName?: string,
-		lastName?: string
-	) => Promise<void>
-	logout: () => Promise<void>
-	clearError: () => void
-	setStep: (step: 'phone' | 'code' | 'success') => void
-
-	// user profile actions
-	fetchUserProfile: (force?: boolean) => Promise<UserProfile | null>
-	updateUser: (updates: Partial<UserProfile>) => Promise<void>
-	refreshUserProfile: () => Promise<void>
-
-	// Refresh token actions
-	refreshSession: () => Promise<boolean>
-	handleTokenExpiry: () => Promise<void>
-
-	// timer methods
-	startResendTimer: (seconds?: number) => void
-	stopResendTimer: () => void
-	resetResendTimer: () => void
-	canResendCode: () => boolean
-
-	// initialize
-	initialize: () => Promise<void>
-}
 export interface UserProfile {
 	id: number
 	phone: string
 	phoneNormalized: string
 	firstName?: string
 	lastName?: string
-	displayName: string
 	location?: LocationData
 	role?: Role
+	avatar?: string
 	isVerified: boolean
 	isActive: boolean
 	createdAt: string
@@ -125,19 +69,30 @@ export interface UserProfile {
 	}
 }
 
-export interface Provider {
+export interface Executor {
 	type: ProviderType
-	business_name?: string
-	company_info?: CompanyInfo
-	first_name?: string
-	last_name?: string
-	email?: string
+	businessName: string
+	description?: string
 	phone?: string
+	email?: string
+	location?: LocationData
+	serviceAreas?: unknown
+	companyInfo?: CompanyInfo
+	firstName?: string
+	lastName?: string
+	avatar?: string
+	slug?: string
+	id?: number
 }
 
 export interface CompanyInfo {
-	legal_name: string
-	registration_number?: string
-	tax_number?: string
-	legal_address?: string
+	legalForm?: string
+	registrationNumber?: string
+	taxNumber?: string
+	legalAddress?: string
+	bankDetails: Record<string, unknown>
+	certificates: Record<string, unknown>
+	foundedYear: number
+	licenses: Record<string, unknown>
+	website: string
 }

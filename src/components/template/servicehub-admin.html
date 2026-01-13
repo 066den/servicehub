@@ -1,0 +1,2948 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServiceHub - Адміністративна панель</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f8fafc;
+        }
+        
+        .container {
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            padding: 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            color: white;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #F59E0B;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        
+        .logo-icon::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        .admin-badge {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+        
+        .nav-section {
+            margin-bottom: 30px;
+        }
+        
+        .nav-title {
+            font-size: 0.8em;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 20px;
+            margin-bottom: 12px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #6b7280;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background: #f3f4f6;
+            color: #2563EB;
+            border-left-color: #2563EB;
+        }
+        
+        .nav-item.active {
+            background: #eff6ff;
+            color: #2563EB;
+            border-left-color: #2563EB;
+            font-weight: 500;
+        }
+        
+        .nav-icon {
+            font-size: 1.2em;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .nav-badge {
+            background: #ef4444;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            font-weight: 600;
+            margin-left: auto;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 0;
+            background: #f8fafc;
+            min-height: 100vh;
+            width: calc(100% - 280px);
+        }
+        
+        .top-bar {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .page-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #1e40af;
+        }
+        
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .notifications {
+            position: relative;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+            font-size: 1.2em;
+            color: #6b7280;
+        }
+        
+        .notifications:hover {
+            background: #f3f4f6;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+        }
+        
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .admin-avatar:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Content Area */
+        .content-area {
+            padding: 30px;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border-left: 4px solid #2563EB;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card.users { border-left-color: #2563EB; }
+        .stat-card.services { border-left-color: #10b981; }
+        .stat-card.orders { border-left-color: #f59e0b; }
+        .stat-card.revenue { border-left-color: #8b5cf6; }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: white;
+        }
+        
+        .stat-icon.users { background: #2563EB; }
+        .stat-icon.services { background: #10b981; }
+        .stat-icon.orders { background: #f59e0b; }
+        .stat-icon.revenue { background: #8b5cf6; }
+        
+        .stat-number {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .stat-change {
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        
+        .stat-change.positive {
+            color: #10b981;
+        }
+        
+        .stat-change.negative {
+            color: #ef4444;
+        }
+        
+        /* Charts and Activity */
+        .dashboard-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .chart-filters {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #2563EB;
+            color: white;
+            border-color: #2563EB;
+        }
+        
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 1.1em;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        /* Recent Activity */
+        .activity-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        
+        .activity-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .activity-icon.user { background: #2563EB; }
+        .activity-icon.service { background: #10b981; }
+        .activity-icon.order { background: #f59e0b; }
+        .activity-icon.payment { background: #8b5cf6; }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 3px;
+        }
+        
+        .activity-desc {
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        
+        .activity-time {
+            color: #9ca3af;
+            font-size: 0.8em;
+            text-align: right;
+        }
+        
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        
+        .table-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .table-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: #2563EB;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .data-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9em;
+            position: sticky;
+            top: 0;
+        }
+        
+        .data-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-badge.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-badge.blocked {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-badge.completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-badge.in-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-badge.cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .user-details {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 2px;
+        }
+        
+        .user-email {
+            color: #6b7280;
+            font-size: 0.85em;
+        }
+        
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .stars {
+            color: #f59e0b;
+        }
+        
+        .rating-text {
+            color: #6b7280;
+            font-size: 0.85em;
+        }
+        
+        /* Search and Filters */
+        .search-filters {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #2563EB;
+        }
+        
+        .filter-select {
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95em;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #2563EB;
+        }
+        
+        /* Alerts */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #2563EB;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 30px 0;
+        }
+        
+        .pagination-item {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .pagination-item:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        
+        .pagination-item.active {
+            background: #2563EB;
+            color: white;
+            border-color: #2563EB;
+        }
+        
+        /* Categories with subcategories */
+        .category-group {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .category-group:last-child {
+            border-bottom: none;
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .category-header:hover {
+            background: #f9fafb;
+        }
+        
+        .category-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .toggle-icon {
+            font-size: 0.8em;
+            color: #6b7280;
+            transition: transform 0.3s ease;
+            width: 16px;
+            text-align: center;
+        }
+        
+        .category-group.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .category-info {
+            flex: 1;
+        }
+        
+        .category-name {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #1f2937;
+            margin-bottom: 3px;
+        }
+        
+        .category-stats {
+            font-size: 0.85em;
+            color: #6b7280;
+        }
+        
+        .category-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .popularity-bar {
+            width: 80px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .popularity-text {
+            font-size: 0.8em;
+            color: #6b7280;
+            min-width: 30px;
+        }
+        
+        .subcategories-list {
+            background: #fafafa;
+            border-top: 1px solid #f3f4f6;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            max-height: 1000px;
+        }
+        
+        .category-group.collapsed .subcategories-list {
+            max-height: 0;
+            border-top: none;
+        }
+        
+        .subcategory-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px 20px 60px;
+            border-bottom: 1px solid #f3f4f6;
+            transition: all 0.3s ease;
+        }
+        
+        .subcategory-item:hover {
+            background: #f3f4f6;
+        }
+        
+        .subcategory-item:last-child {
+            border-bottom: none;
+        }
+        
+        .subcategory-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+        
+        .subcategory-icon {
+            font-size: 1.3em;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .subcategory-info {
+            flex: 1;
+        }
+        
+        .subcategory-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .subcategory-desc {
+            color: #6b7280;
+            font-size: 0.9em;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+        
+        .subcategory-stats {
+            color: #9ca3af;
+            font-size: 0.8em;
+        }
+        
+        .subcategory-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8em;
+        }
+        
+        /* Modal styles for adding subcategories */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .modal-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #1e40af;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #6b7280;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-close:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+        
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-input {
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #2563EB;
+        }
+        
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .form-select {
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .form-select:focus {
+            outline: none;
+            border-color: #2563EB;
+        }
+        
+        .icon-picker {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 10px;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .icon-option {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+        }
+        
+        .icon-option:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        
+        .icon-option.selected {
+            background: #eff6ff;
+            border-color: #2563EB;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                position: relative;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1001;
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+                background: none;
+                border: none;
+                font-size: 1.5em;
+                color: #2563EB;
+                cursor: pointer;
+            }
+            
+            .dashboard-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .content-area {
+                padding: 20px;
+            }
+            
+            .top-bar {
+                padding: 15px 20px;
+            }
+            
+            .search-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-input {
+                min-width: auto;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+        }
+        
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
+        }
+        
+        /* Ensure proper layout */
+        body {
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" onclick="closeMobileMenu()"></div>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    Service<div class="logo-icon"></div>Hub
+                </div>
+                <div class="admin-badge">Адміністратор</div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-title">Головне</div>
+                    <div class="nav-item active" onclick="showSection('dashboard')">
+                        <span class="nav-icon">📊</span>
+                        Головна панель
+                    </div>
+                    <div class="nav-item" onclick="showSection('analytics')">
+                        <span class="nav-icon">📈</span>
+                        Аналітика
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-title">Управління</div>
+                    <div class="nav-item" onclick="showSection('users')">
+                        <span class="nav-icon">👥</span>
+                        Користувачі
+                        <span class="nav-badge">23</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('services')">
+                        <span class="nav-icon">🛠️</span>
+                        Послуги
+                        <span class="nav-badge">5</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('orders')">
+                        <span class="nav-icon">📋</span>
+                        Замовлення
+                    </div>
+                    <div class="nav-item" onclick="showSection('payments')">
+                        <span class="nav-icon">💳</span>
+                        Платежі
+                    </div>
+                    <div class="nav-item" onclick="showSection('reviews')">
+                        <span class="nav-icon">⭐</span>
+                        Відгуки
+                        <span class="nav-badge">12</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-title">Налаштування</div>
+                    <div class="nav-item" onclick="showSection('categories')">
+                        <span class="nav-icon">📂</span>
+                        Категорії
+                    </div>
+                    <div class="nav-item" onclick="showSection('settings')">
+                        <span class="nav-icon">⚙️</span>
+                        Налаштування
+                    </div>
+                    <div class="nav-item" onclick="showSection('support')">
+                        <span class="nav-icon">💬</span>
+                        Підтримка
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                        ☰
+                    </button>
+                    <h1 class="page-title" id="page-title">Головна панель</h1>
+                </div>
+                <div class="admin-info">
+                    <div class="notifications" onclick="showNotifications()">
+                        🔔
+                        <div class="notification-badge"></div>
+                    </div>
+                    <div class="admin-avatar">АД</div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="section active">
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card users">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">1,247</div>
+                                    <div class="stat-label">Користувачі</div>
+                                    <div class="stat-change positive">+12% за місяць</div>
+                                </div>
+                                <div class="stat-icon users">👥</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card services">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">856</div>
+                                    <div class="stat-label">Активні послуги</div>
+                                    <div class="stat-change positive">+8% за місяць</div>
+                                </div>
+                                <div class="stat-icon services">🛠️</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card orders">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">2,834</div>
+                                    <div class="stat-label">Замовлення</div>
+                                    <div class="stat-change positive">+23% за місяць</div>
+                                </div>
+                                <div class="stat-icon orders">📋</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card revenue">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">₴2.4М</div>
+                                    <div class="stat-label">Виручка</div>
+                                    <div class="stat-change positive">+18% за місяць</div>
+                                </div>
+                                <div class="stat-icon revenue">💰</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Row -->
+                    <div class="dashboard-row">
+                        <!-- Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Статистика замовлень</h3>
+                                <div class="chart-filters">
+                                    <button class="filter-btn active">7 днів</button>
+                                    <button class="filter-btn">30 днів</button>
+                                    <button class="filter-btn">3 міс</button>
+                                </div>
+                            </div>
+                            <div class="chart-placeholder">
+                                📊 Графік буде тут (Chart.js або інша бібліотека)
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="activity-card">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Остання активність</h3>
+                            </div>
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-icon user">👤</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Новий користувач</div>
+                                        <div class="activity-desc">Марія Коваленко зареєструвалась</div>
+                                    </div>
+                                    <div class="activity-time">5 хв тому</div>
+                                </div>
+                                
+                                <div class="activity-item">
+                                    <div class="activity-icon service">🛠️</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Нова послуга</div>
+                                        <div class="activity-desc">Дизайн логотипу - очікує модерації</div>
+                                    </div>
+                                    <div class="activity-time">12 хв тому</div>
+                                </div>
+                                
+                                <div class="activity-item">
+                                    <div class="activity-icon order">📋</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Замовлення завершено</div>
+                                        <div class="activity-desc">Розробка сайту - ₴15,000</div>
+                                    </div>
+                                    <div class="activity-time">25 хв тому</div>
+                                </div>
+                                
+                                <div class="activity-item">
+                                    <div class="activity-icon payment">💳</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Платіж отримано</div>
+                                        <div class="activity-desc">Комісія з замовлення - ₴1,500</div>
+                                    </div>
+                                    <div class="activity-time">45 хв тому</div>
+                                </div>
+                                
+                                <div class="activity-item">
+                                    <div class="activity-icon user">👤</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Користувач заблокований</div>
+                                        <div class="activity-desc">Іван Петров - порушення правил</div>
+                                    </div>
+                                    <div class="activity-time">1 год тому</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="alert alert-info">
+                        <span>💡</span>
+                        У вас є 5 послуг, що очікують модерації та 12 нових відгуків для перевірки.
+                    </div>
+                </section>
+
+                <!-- Users Section -->
+                <section id="users" class="section">
+                    <div class="search-filters">
+                        <input type="text" class="search-input" placeholder="Пошук користувачів..." onkeyup="filterUsers(this.value)">
+                        <select class="filter-select" onchange="filterUsersByRole(this.value)">
+                            <option value="">Всі ролі</option>
+                            <option value="client">Клієнти</option>
+                            <option value="provider">Виконавці</option>
+                            <option value="admin">Адміністратори</option>
+                        </select>
+                        <select class="filter-select" onchange="filterUsersByStatus(this.value)">
+                            <option value="">Всі статуси</option>
+                            <option value="active">Активні</option>
+                            <option value="pending">Очікують</option>
+                            <option value="blocked">Заблоковані</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">Користувачі (1,247)</h3>
+                            <div class="table-actions">
+                                <button class="btn btn-outline" onclick="exportUsers()">📤 Експорт</button>
+                                <button class="btn btn-primary" onclick="addNewUser()">➕ Додати користувача</button>
+                            </div>
+                        </div>
+                        
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Користувач</th>
+                                    <th>Роль</th>
+                                    <th>Статус</th>
+                                    <th>Замовлення</th>
+                                    <th>Рейтинг</th>
+                                    <th>Дата реєстрації</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="user-avatar">ІП</div>
+                                            <div class="user-details">
+                                                <div class="user-name">Іван Петренко</div>
+                                                <div class="user-email">ivan@example.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Виконавець</td>
+                                    <td><span class="status-badge active">Активний</span></td>
+                                    <td>45</td>
+                                    <td>
+                                        <div class="rating">
+                                            <span class="stars">★★★★★</span>
+                                            <span class="rating-text">4.8</span>
+                                        </div>
+                                    </td>
+                                    <td>15.01.2024</td>
+                                    <td>
+                                        <button class="btn btn-outline" onclick="viewUser('1')">👁️</button>
+                                        <button class="btn btn-warning" onclick="blockUser('1')">🚫</button>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="user-avatar">МК</div>
+                                            <div class="user-details">
+                                                <div class="user-name">Марія Коваленко</div>
+                                                <div class="user-email">maria@example.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Клієнт</td>
+                                    <td><span class="status-badge active">Активний</span></td>
+                                    <td>12</td>
+                                    <td>
+                                        <div class="rating">
+                                            <span class="stars">★★★★★</span>
+                                            <span class="rating-text">4.9</span>
+                                        </div>
+                                    </td>
+                                    <td>20.02.2024</td>
+                                    <td>
+                                        <button class="btn btn-outline" onclick="viewUser('2')">👁️</button>
+                                        <button class="btn btn-warning" onclick="blockUser('2')">🚫</button>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="user-avatar">ОШ</div>
+                                            <div class="user-details">
+                                                <div class="user-name">Олексій Шевченко</div>
+                                                <div class="user-email">alex@example.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Виконавець</td>
+                                    <td><span class="status-badge pending">Очікує</span></td>
+                                    <td>0</td>
+                                    <td>
+                                        <div class="rating">
+                                            <span class="rating-text">Новий</span>
+                                        </div>
+                                    </td>
+                                    <td>30.07.2024</td>
+                                    <td>
+                                        <button class="btn btn-success" onclick="approveUser('3')">✅</button>
+                                        <button class="btn btn-danger" onclick="rejectUser('3')">❌</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="pagination">
+                            <div class="pagination-item disabled">‹</div>
+                            <div class="pagination-item active">1</div>
+                            <div class="pagination-item">2</div>
+                            <div class="pagination-item">3</div>
+                            <div class="pagination-item">...</div>
+                            <div class="pagination-item">42</div>
+                            <div class="pagination-item">›</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Services Section -->
+                <section id="services" class="section">
+                    <div class="search-filters">
+                        <input type="text" class="search-input" placeholder="Пошук послуг..." onkeyup="filterServices(this.value)">
+                        <select class="filter-select">
+                            <option value="">Всі категорії</option>
+                            <option value="web">Веб-розробка</option>
+                            <option value="design">Дизайн</option>
+                            <option value="marketing">Маркетинг</option>
+                            <option value="repair">Ремонт</option>
+                        </select>
+                        <select class="filter-select">
+                            <option value="">Всі статуси</option>
+                            <option value="active">Активні</option>
+                            <option value="pending">Очікують</option>
+                            <option value="rejected">Відхилені</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">Послуги (856)</h3>
+                            <div class="table-actions">
+                                <button class="btn btn-outline">📤 Експорт</button>
+                            </div>
+                        </div>
+                        
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Послуга</th>
+                                    <th>Категорія</th>
+                                    <th>Виконавець</th>
+                                    <th>Ціна</th>
+                                    <th>Статус</th>
+                                    <th>Замовлення</th>
+                                    <th>Рейтинг</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <div style="font-weight: 500;">Розробка веб-сайту</div>
+                                            <div style="color: #6b7280; font-size: 0.85em;">Landing page + CMS</div>
+                                        </div>
+                                    </td>
+                                    <td>IT та технології</td>
+                                    <td>Іван Петренко</td>
+                                    <td>₴15,000</td>
+                                    <td><span class="status-badge active">Активна</span></td>
+                                    <td>23</td>
+                                    <td>
+                                        <div class="rating">
+                                            <span class="stars">★★★★★</span>
+                                            <span class="rating-text">4.9</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-outline" onclick="editService('1')">✏️</button>
+                                        <button class="btn btn-warning" onclick="hideService('1')">👁️‍🗨️</button>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <div style="font-weight: 500;">Дизайн логотипу</div>
+                                            <div style="color: #6b7280; font-size: 0.85em;">Векторний логотип + фірмстиль</div>
+                                        </div>
+                                    </td>
+                                    <td>Дизайн</td>
+                                    <td>Марія Савченко</td>
+                                    <td>₴2,500</td>
+                                    <td><span class="status-badge pending">Очікує</span></td>
+                                    <td>0</td>
+                                    <td>
+                                        <span class="rating-text">Нова</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-success" onclick="approveService('2')">✅</button>
+                                        <button class="btn btn-danger" onclick="rejectService('2')">❌</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Orders Section -->
+                <section id="orders" class="section">
+                    <div class="search-filters">
+                        <input type="text" class="search-input" placeholder="Пошук замовлень..." onkeyup="filterOrders(this.value)">
+                        <select class="filter-select">
+                            <option value="">Всі статуси</option>
+                            <option value="pending">Очікують</option>
+                            <option value="in-progress">В роботі</option>
+                            <option value="completed">Завершені</option>
+                            <option value="cancelled">Скасовані</option>
+                        </select>
+                        <input type="date" class="filter-select" placeholder="Дата від">
+                        <input type="date" class="filter-select" placeholder="Дата до">
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">Замовлення (2,834)</h3>
+                            <div class="table-actions">
+                                <button class="btn btn-outline">📤 Експорт</button>
+                            </div>
+                        </div>
+                        
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Послуга</th>
+                                    <th>Клієнт</th>
+                                    <th>Виконавець</th>
+                                    <th>Сума</th>
+                                    <th>Статус</th>
+                                    <th>Створено</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#1247</td>
+                                    <td>Розробка веб-сайту</td>
+                                    <td>Марія Коваленко</td>
+                                    <td>Іван Петренко</td>
+                                    <td>₴15,000</td>
+                                    <td><span class="status-badge completed">Завершено</span></td>
+                                    <td>25.07.2024</td>
+                                    <td>
+                                        <button class="btn btn-outline" onclick="viewOrder('1247')">👁️</button>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td>#1246</td>
+                                    <td>Дизайн логотипу</td>
+                                    <td>Петро Іваненко</td>
+                                    <td>Марія Савченко</td>
+                                    <td>₴2,500</td>
+                                    <td><span class="status-badge in-progress">В роботі</span></td>
+                                    <td>28.07.2024</td>
+                                    <td>
+                                        <button class="btn btn-outline" onclick="viewOrder('1246')">👁️</button>
+                                        <button class="btn btn-warning" onclick="mediateOrder('1246')">⚖️</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Analytics Section -->
+                <section id="analytics" class="section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">₴2.4М</div>
+                                    <div class="stat-label">Загальна виручка</div>
+                                    <div class="stat-change positive">+18% за місяць</div>
+                                </div>
+                                <div class="stat-icon revenue">💰</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">₴240К</div>
+                                    <div class="stat-label">Комісійні</div>
+                                    <div class="stat-change positive">+15% за місяць</div>
+                                </div>
+                                <div class="stat-icon">📊</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">89%</div>
+                                    <div class="stat-label">Задоволеність</div>
+                                    <div class="stat-change positive">+2% за місяць</div>
+                                </div>
+                                <div class="stat-icon">😊</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">4.8</div>
+                                    <div class="stat-label">Середній рейтинг</div>
+                                    <div class="stat-change positive">+0.2 за місяць</div>
+                                </div>
+                                <div class="stat-icon">⭐</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Динаміка доходів</h3>
+                            <div class="chart-filters">
+                                <button class="filter-btn active">За рік</button>
+                                <button class="filter-btn">За квартал</button>
+                                <button class="filter-btn">За місяць</button>
+                            </div>
+                        </div>
+                        <div class="chart-placeholder">
+                            📈 Графік доходів за періоди
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">Налаштування платформи</h3>
+                        </div>
+                        
+                        <div style="padding: 30px;">
+                            <div style="margin-bottom: 40px;">
+                                <h4 style="color: #1f2937; margin-bottom: 20px;">Загальні налаштування</h4>
+                                
+                                <div style="margin-bottom: 25px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Комісія платформи (%)</label>
+                                    <input type="number" value="10" style="width: 200px; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                                </div>
+                                
+                                <div style="margin-bottom: 25px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Мінімальна сума замовлення (₴)</label>
+                                    <input type="number" value="100" style="width: 200px; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                                </div>
+                                
+                                <div style="margin-bottom: 25px;">
+                                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                        <input type="checkbox" checked style="width: 18px; height: 18px;">
+                                        <span>Автоматична модерація послуг</span>
+                                    </label>
+                                </div>
+                                
+                                <div style="margin-bottom: 25px;">
+                                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                        <input type="checkbox" checked style="width: 18px; height: 18px;">
+                                        <span>Email сповіщення адміністраторам</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 40px;">
+                                <h4 style="color: #1f2937; margin-bottom: 20px;">Платіжні налаштування</h4>
+                                
+                                <div style="margin-bottom: 25px;">
+                                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                        <input type="checkbox" checked style="width: 18px; height: 18px;">
+                                        <span>Приймати платежі через Monobank</span>
+                                    </label>
+                                </div>
+                                
+                                <div style="margin-bottom: 25px;">
+                                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                        <input type="checkbox" checked style="width: 18px; height: 18px;">
+                                        <span>Приймати платежі через PrivatBank</span>
+                                    </label>
+                                </div>
+                                
+                                <div style="margin-bottom: 25px;">
+                                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                        <input type="checkbox" style="width: 18px; height: 18px;">
+                                        <span>Приймати криптовалютні платежі</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="saveSettings()">💾 Зберегти налаштування</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Support Section -->
+                <section id="support" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">Звернення підтримки</h3>
+                            <div class="table-actions">
+                                <button class="btn btn-primary">📝 Нове звернення</button>
+                            </div>
+                        </div>
+                        
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Користувач</th>
+                                    <th>Тема</th>
+                                    <th>Пріоритет</th>
+                                    <th>Статус</th>
+                                    <th>Створено</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#SUP-001</td>
+                                    <td>Марія Коваленко</td>
+                                    <td>Проблема з платежем</td>
+                                    <td><span class="status-badge" style="background: #fee2e2; color: #991b1b;">Високий</span></td>
+                                    <td><span class="status-badge pending">Відкрито</span></td>
+                                    <td>30.07.2024</td>
+                                    <td>
+                                        <button class="btn btn-primary" onclick="replySupport('SUP-001')">💬 Відповісти</button>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td>#SUP-002</td>
+                                    <td>Іван Петренко</td>
+                                    <td>Питання про комісію</td>
+                                    <td><span class="status-badge" style="background: #fef3c7; color: #92400e;">Середній</span></td>
+                                    <td><span class="status-badge completed">Вирішено</span></td>
+                                    <td>29.07.2024</td>
+                                    <td>
+                                        <button class="btn btn-outline" onclick="viewSupport('SUP-002')">👁️ Переглянути</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Reviews Section -->
+                <section id="reviews" class="section">
+                    <div class="search-filters">
+                        <input type="text" class="search-input" placeholder="Пошук відгуків...">
+                        <select class="filter-select">
+                            <option value="">Всі рейтинги</option>
+                            <option value="5">5 зірок</option>
+                            <option value="4">4 зірки</option>
+                            <option value="3">3 зірки</option>
+                            <option value="2">2 зірки</option>
+                            <option value="1">1 зірка</option>
+                        </select>
+                        <select class="filter-select">
+                            <option value="">Всі статуси</option>
+                            <option value="pending">Очікують модерації</option>
+                            <option value="approved">Схвалені</option>
+                            <option value="rejected">Відхилені</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">Відгуки (1,523)</h3>
+                        </div>
+                        
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Відгук</th>
+                                    <th>Автор</th>
+                                    <th>Послуга</th>
+                                    <th>Рейтинг</th>
+                                    <th>Статус</th>
+                                    <th>Дата</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div style="max-width: 300px;">
+                                            "Відмінна робота! Сайт готовий точно в строк, всі побажання враховані..."
+                                        </div>
+                                    </td>
+                                    <td>Марія Коваленко</td>
+                                    <td>Розробка веб-сайту</td>
+                                    <td>
+                                        <div class="rating">
+                                            <span class="stars">★★★★★</span>
+                                            <span class="rating-text">5.0</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-badge pending">Модерація</span></td>
+                                    <td>30.07.2024</td>
+                                    <td>
+                                        <button class="btn btn-success" onclick="approveReview('1')">✅</button>
+                                        <button class="btn btn-danger" onclick="rejectReview('1')">❌</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Categories Section -->
+                <section id="categories" class="section">
+                    <div class="search-filters">
+                        <input type="text" class="search-input" placeholder="Пошук категорій та типів робіт..." onkeyup="filterCategories(this.value)">
+                        <select class="filter-select" onchange="filterCategoriesByType(this.value)">
+                            <option value="">Всі рівні</option>
+                            <option value="category">Тільки категорії</option>
+                            <option value="subcategory">Тільки типи робіт</option>
+                        </select>
+                        <select class="filter-select" onchange="filterCategoriesByStatus(this.value)">
+                            <option value="">Всі статуси</option>
+                            <option value="active">Активні</option>
+                            <option value="hidden">Приховані</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">Категорії та типи робіт</h3>
+                            <div class="table-actions">
+                                <button class="btn btn-outline" onclick="expandAllCategories()">📂 Розгорнути всі</button>
+                                <button class="btn btn-outline" onclick="collapseAllCategories()">📁 Згорнути всі</button>
+                                <button class="btn btn-primary" onclick="addCategory()">➕ Додати категорію</button>
+                            </div>
+                        </div>
+                        
+                        <div style="padding: 0;">
+                            <!-- IT та технології -->
+                            <div class="category-group" data-category="it">
+                                <div class="category-header" onclick="toggleCategory('it')">
+                                    <div class="category-toggle">
+                                        <span class="toggle-icon">▼</span>
+                                        <span style="font-size: 1.5em; margin-right: 10px;">💻</span>
+                                        <div class="category-info">
+                                            <div class="category-name">IT та технології</div>
+                                            <div class="category-stats">234 послуги • 12 типів робіт</div>
+                                        </div>
+                                    </div>
+                                    <div class="category-actions">
+                                        <div class="popularity-bar">
+                                            <div style="width: 85%; height: 100%; background: #10b981; border-radius: 4px;"></div>
+                                        </div>
+                                        <span class="popularity-text">85%</span>
+                                        <span class="status-badge active">Активна</span>
+                                        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); addSubcategory('it')">➕ Тип роботи</button>
+                                        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); editCategory('it')">✏️</button>
+                                        <button class="btn btn-warning btn-sm" onclick="event.stopPropagation(); hideCategory('it')">👁️‍🗨️</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategories-list" id="subcategories-it">
+                                    <div class="subcategory-item">
+                                        <div class="subcategory-content">
+                                            <span class="subcategory-icon">🌐</span>
+                                            <div class="subcategory-info">
+                                                <div class="subcategory-name">Веб-розробка</div>
+                                                <div class="subcategory-desc">Створення сайтів, веб-застосунків, лендінгів</div>
+                                                <div class="subcategory-stats">89 послуг • Середня ціна: ₴12,500</div>
+                                            </div>
+                                        </div>
+                                        <div class="subcategory-actions">
+                                            <span class="status-badge active">Активний</span>
+                                            <button class="btn btn-outline btn-sm" onclick="editSubcategory('it', 'web-dev')">✏️</button>
+                                            <button class="btn btn-warning btn-sm" onclick="hideSubcategory('it', 'web-dev')">👁️‍🗨️</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteSubcategory('it', 'web-dev')">🗑️</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="subcategory-item">
+                                        <div class="subcategory-content">
+                                            <span class="subcategory-icon">📱</span>
+                                            <div class="subcategory-info">
+                                                <div class="subcategory-name">Мобільна розробка</div>
+                                                <div class="subcategory-desc">iOS, Android застосунки, кросплатформна розробка</div>
+                                                <div class="subcategory-stats">45 послуг • Середня ціна: ₴18,750</div>
+                                            </div>
+                                        </div>
+                                        <div class="subcategory-actions">
+                                            <span class="status-badge active">Активний</span>
+                                            <button class="btn btn-outline btn-sm" onclick="editSubcategory('it', 'mobile-dev')">✏️</button>
+                                            <button class="btn btn-warning btn-sm" onclick="hideSubcategory('it', 'mobile-dev')">👁️‍🗨️</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteSubcategory('it', 'mobile-dev')">🗑️</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="subcategory-item">
+                                        <div class="subcategory-content">
+                                            <span class="subcategory-icon">🛠️</span>
+                                            <div class="subcategory-info">
+                                                <div class="subcategory-name">DevOps та адміністрування</div>
+                                                <div class="subcategory-desc">Налаштування серверів, CI/CD, хмарні сервіси</div>
+                                                <div class="subcategory-stats">23 послуги • Середня ціна: ₴8,900</div>
+                                            </div>
+                                        </div>
+                                        <div class="subcategory-actions">
+                                            <span class="status-badge active">Активний</span>
+                                            <button class="btn btn-outline btn-sm" onclick="editSubcategory('it', 'devops')">✏️</button>
+                                            <button class="btn btn-warning btn-sm" onclick="hideSubcategory('it', 'devops')">👁️‍🗨️</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteSubcategory('it', 'devops')">🗑️</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="subcategory-item">
+                                        <div class="subcategory-content">
+                                            <span class="subcategory-icon">🔐</span>
+                                            <div class="subcategory-info">
+                                                <div class="subcategory-name">Кібербезпека</div>
+                                                <div class="subcategory-desc">Аудит безпеки, пентестінг, захист даних</div>
+                                                <div class="subcategory-stats">12 послуг • Середня ціна: ₴15,400</div>
+                                            </div>
+                                        </div>
+                                        <div class="subcategory-actions">
+                                            <span class="status-badge active">Активний</span>
+                                            <button class="btn btn-outline btn-sm" onclick="editSubcategory('it', 'security')">✏️</button>
+                                            <button class="btn btn-warning btn-sm" onclick="hideSubcategory('it', 'security')">👁️‍🗨️</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteSubcategory('it', 'security')">🗑️</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Дизайн -->
+                            <div class="category-group" data-category="design">
+                                <div class="category-header" onclick="toggleCategory('design')">
+                                    <div class="category-toggle">
+                                        <span class="toggle-icon">▼</span>
+                                        <span style="font-size: 1.5em; margin-right: 10px;">🎨</span>
+                                        <div class="category-info">
+                                            <div class="category-name">Дизайн</div>
+                                            <div class="category-stats">189 послуг • 8 типів робіт</div>
+                                        </div>
+                                    </div>
+                                    <div class="category-actions">
+                                        <div class="popularity-bar">
+                                            <div style="width: 72%; height: 100%; background: #2563EB; border-radius: 4px;"></div>
+                                        </div>
+                                        <span class="popularity-text">72%</span>
+                                        <span class="status-badge active">Активна</span>
+                                        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); addSubcategory('design')">➕ Тип роботи</button>
+                                        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); editCategory('design')">✏️</button>
+                                        <button class="btn btn-warning btn-sm" onclick="event.stopPropagation(); hideCategory('design')">👁️‍🗨️</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategories-list" id="subcategories-design">
+                                    <div class="subcategory-item">
+                                        <div class="subcategory-content">
+                                            <span class="subcategory-icon">🖼️</span>
+                                            <div class="subcategory-info">
+                                                <div class="subcategory-name">Графічний дизайн</div>
+                                                <div class="subcategory-desc">Логотипи, банери, поліграфія, ілюстрації</div>
+                                                <div class="subcategory-stats">67 послуг • Середня ціна: ₴3,200</div>
+                                            </div>
+                                        </div>
+                                        <div class="subcategory-actions">
+                                            <span class="status-badge active">Активний</span>
+                                            <button class="btn btn-outline btn-sm" onclick="editSubcategory('design', 'graphic')">✏️</button>
+                                            <button class="btn btn-warning btn-sm" onclick="hideSubcategory('design', 'graphic')">👁️‍🗨️</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteSubcategory('design', 'graphic')">🗑️</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="subcategory-item">
+                                        <div class="subcategory-content">
+                                            <span class="subcategory-icon">📐</span>
+                                            <div class="subcategory-info">
+                                                <div class="subcategory-name">UI/UX дизайн</div>
+                                                <div class="subcategory-desc">Дизайн інтерфейсів, користувацький досвід</div>
+                                                <div class="subcategory-stats">43 послуги • Середня ціна: ₴8,500</div>
+                                            </div>
+                                        </div>
+                                        <div class="subcategory-actions">
+                                            <span class="status-badge active">Активний</span>
+                                            <button class="btn btn-outline btn-sm" onclick="editSubcategory('design', 'uiux')">✏️</button>
+                                            <button class="btn btn-warning btn-sm" onclick="hideSubcategory('design', 'uiux')">👁️‍🗨️</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteSubcategory('design', 'uiux')">🗑️</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="subcategory-item">
+                                        <div class="subcategory-content">
+                                            <span class="subcategory-icon">🏢</span>
+                                            <div class="subcategory-info">
+                                                <div class="subcategory-name">Брендинг</div>
+                                                <div class="subcategory-desc">Фірмовий стиль, айдентика, нейминг</div>
+                                                <div class="subcategory-stats">29 послуг • Середня ціна: ₴12,800</div>
+                                            </div>
+                                        </div>
+                                        <div class="subcategory-actions">
+                                            <span class="status-badge active">Активний</span>
+                                            <button class="btn btn-outline btn-sm" onclick="editSubcategory('design', 'branding')">✏️</button>
+                                            <button class="btn btn-warning btn-sm" onclick="hideSubcategory('design', 'branding')">👁️‍🗨️</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteSubcategory('design', 'branding')">🗑️</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Ремонт та будівництво -->
+                            <div class="category-group" data-category="repair">
+                                <div class="category-header" onclick="toggleCategory('repair')">
+                                    <div class="category-toggle">
+                                        <span class="toggle-icon">▼</span>
+                                        <span style="font-size: 1.5em; margin-right: 10px;">🔧</span>
+                                        <div class="category-info">
+                                            <div class="category-name">Ремонт та будівництво</div>
+                                            <div class="category-stats">156 послуг • 6 типів робіт</div>
+                                        </div>
+                                    </div>
+                                    <div class="category-actions">
+                                        <div class="popularity-bar">
+                                            <div style="width: 68%; height: 100%; background: #f59e0b; border-radius: 4px;"></div>
+                                        </div>
+                                        <span class="popularity-text">68%</span>
+                                        <span class="status-badge active">Активна</span>
+                                        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); addSubcategory('repair')">➕ Тип роботи</button>
+                                        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); editCategory('repair')">✏️</button>
+                                        <button class="btn btn-warning btn-sm" onclick="event.stopPropagation(); hideCategory('repair')">👁️‍🗨️</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategories-list" id="subcategories-repair">
+                                    <div class="subcategory-item">
+                                        <div class="subcategory-content">
+                                            <span class="subcategory-icon">🚿</span>
+                                            <div class="subcategory-info">
+                                                <div class="subcategory-name">Сантехнічні роботи</div>
+                                                <div class="subcategory-desc">Встановлення, ремонт сантехніки, заміна труб</div>
+                                                <div class="subcategory-stats">54 послуги • Середня ціна: ₴1,800</div>
+                                            </div>
+                                        </div>
+                                        <div class="subcategory-actions">
+                                            <span class="status-badge active">Активний</span>
+                                            <button class="btn btn-outline btn-sm" onclick="editSubcategory('repair', 'plumbing')">✏️</button>
+                                            <button class="btn btn-warning btn-sm" onclick="hideSubcategory('repair', 'plumbing')">👁️‍🗨️</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteSubcategory('repair', 'plumbing')">🗑️</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="subcategory-item">
+                                        <div class="subcategory-content">
+                                            <span class="subcategory-icon">⚡</span>
+                                            <div class="subcategory-info">
+                                                <div class="subcategory-name">Електричні роботи</div>
+                                                <div class="subcategory-desc">Електромонтаж, ремонт проводки, встановлення світла</div>
+                                                <div class="subcategory-stats">38 послуг • Середня ціна: ₴2,100</div>
+                                            </div>
+                                        </div>
+                                        <div class="subcategory-actions">
+                                            <span class="status-badge active">Активний</span>
+                                            <button class="btn btn-outline btn-sm" onclick="editSubcategory('repair', 'electrical')">✏️</button>
+                                            <button class="btn btn-warning btn-sm" onclick="hideSubcategory('repair', 'electrical')">👁️‍🗨️</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteSubcategory('repair', 'electrical')">🗑️</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="subcategory-item">
+                                        <div class="subcategory-content">
+                                            <span class="subcategory-icon">🏠</span>
+                                            <div class="subcategory-info">
+                                                <div class="subcategory-name">Оздоблювальні роботи</div>
+                                                <div class="subcategory-desc">Поклейка шпалер, малярні роботи, плитка</div>
+                                                <div class="subcategory-stats">34 послуги • Середня ціна: ₴4,500</div>
+                                            </div>
+                                        </div>
+                                        <div class="subcategory-actions">
+                                            <span class="status-badge active">Активний</span>
+                                            <button class="btn btn-outline btn-sm" onclick="editSubcategory('repair', 'finishing')">✏️</button>
+                                            <button class="btn btn-warning btn-sm" onclick="hideSubcategory('repair', 'finishing')">👁️‍🗨️</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteSubcategory('repair', 'finishing')">🗑️</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Payments Section -->
+                <section id="payments" class="section">
+                    <div class="search-filters">
+                        <input type="text" class="search-input" placeholder="Пошук платежів...">
+                        <select class="filter-select">
+                            <option value="">Всі типи</option>
+                            <option value="commission">Комісії</option>
+                            <option value="payout">Виплати</option>
+                            <option value="refund">Повернення</option>
+                        </select>
+                        <input type="date" class="filter-select" placeholder="Дата від">
+                        <input type="date" class="filter-select" placeholder="Дата до">
+                    </div>
+
+                    <div class="stats-grid" style="margin-bottom: 30px;">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">₴240К</div>
+                                    <div class="stat-label">Комісії за місяць</div>
+                                    <div class="stat-change positive">+15% за місяць</div>
+                                </div>
+                                <div class="stat-icon revenue">💰</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">₴1.8М</div>
+                                    <div class="stat-label">Виплати виконавцям</div>
+                                    <div class="stat-change positive">+18% за місяць</div>
+                                </div>
+                                <div class="stat-icon orders">📋</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">₴24К</div>
+                                    <div class="stat-label">Повернення</div>
+                                    <div class="stat-change negative">-5% за місяць</div>
+                                </div>
+                                <div class="stat-icon">🔄</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number">2.1%</div>
+                                    <div class="stat-label">Рівень повернень</div>
+                                    <div class="stat-change positive">-0.3% за місяць</div>
+                                </div>
+                                <div class="stat-icon">📊</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">Транзакції (15,247)</h3>
+                            <div class="table-actions">
+                                <button class="btn btn-outline">📤 Експорт</button>
+                            </div>
+                        </div>
+                        
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Тип</th>
+                                    <th>Користувач</th>
+                                    <th>Замовлення</th>
+                                    <th>Сума</th>
+                                    <th>Комісія</th>
+                                    <th>Дата</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#PAY-1247</td>
+                                    <td>Комісія</td>
+                                    <td>Іван Петренко</td>
+                                    <td>#1247</td>
+                                    <td>₴15,000</td>
+                                    <td>₴1,500</td>
+                                    <td>30.07.2024</td>
+                                    <td><span class="status-badge completed">Завершено</span></td>
+                                </tr>
+                                
+                                <tr>
+                                    <td>#PAY-1246</td>
+                                    <td>Виплата</td>
+                                    <td>Марія Савченко</td>
+                                    <td>#1246</td>
+                                    <td>₴2,250</td>
+                                    <td>₴250</td>
+                                    <td>29.07.2024</td>
+                                    <td><span class="status-badge pending">Обробка</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked nav item
+            event.target.closest('.nav-item').classList.add('active');
+            
+            // Update page title
+            const titles = {
+                'dashboard': 'Головна панель',
+                'analytics': 'Аналітика',
+                'users': 'Користувачі',
+                'services': 'Послуги',
+                'orders': 'Замовлення',
+                'payments': 'Платежі',
+                'reviews': 'Відгуки',
+                'categories': 'Категорії',
+                'settings': 'Налаштування',
+                'support': 'Підтримка'
+            };
+            
+            document.getElementById('page-title').textContent = titles[sectionId] || 'ServiceHub Admin';
+            
+            // Close mobile menu if open
+            closeMobileMenu();
+        }
+        
+        // Mobile menu functions
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+        
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+        }
+        
+        // User management functions
+        function viewUser(userId) {
+            showMessage('info', `Перегляд користувача ID: ${userId}`);
+        }
+        
+        function blockUser(userId) {
+            if (confirm('Ви впевнені, що хочете заблокувати цього користувача?')) {
+                showMessage('success', `Користувач ID: ${userId} заблокований`);
+                // Here would be API call to block user
+            }
+        }
+        
+        function approveUser(userId) {
+            showMessage('success', `Користувач ID: ${userId} схвалений`);
+        }
+        
+        function rejectUser(userId) {
+            if (confirm('Ви впевнені, що хочете відхилити цього користувача?')) {
+                showMessage('warning', `Користувач ID: ${userId} відхилений`);
+            }
+        }
+        
+        function addNewUser() {
+            showMessage('info', 'Відкриття форми додавання нового користувача...');
+        }
+        
+        function exportUsers() {
+            showMessage('success', 'Експорт користувачів розпочато. Файл буде готовий через кілька хвилин.');
+        }
+        
+        // Service management functions
+        function editService(serviceId) {
+            showMessage('info', `Редагування послуги ID: ${serviceId}`);
+        }
+        
+        function hideService(serviceId) {
+            showMessage('warning', `Послуга ID: ${serviceId} прихована`);
+        }
+        
+        function approveService(serviceId) {
+            showMessage('success', `Послуга ID: ${serviceId} схвалена`);
+        }
+        
+        function rejectService(serviceId) {
+            if (confirm('Ви впевнені, що хочете відхилити цю послугу?')) {
+                showMessage('warning', `Послуга ID: ${serviceId} відхилена`);
+            }
+        }
+        
+        // Order management functions
+        function viewOrder(orderId) {
+            showMessage('info', `Перегляд замовлення: ${orderId}`);
+        }
+        
+        function mediateOrder(orderId) {
+            showMessage('info', `Початок медіації для замовлення: ${orderId}`);
+        }
+        
+        // Review management functions
+        function approveReview(reviewId) {
+            showMessage('success', `Відгук ID: ${reviewId} схвалений`);
+        }
+        
+        function rejectReview(reviewId) {
+            if (confirm('Ви впевнені, що хочете відхилити цей відгук?')) {
+                showMessage('warning', `Відгук ID: ${reviewId} відхилений`);
+            }
+        }
+        
+        // Category management functions
+        function addCategory() {
+            const name = prompt('Введіть назву нової категорії:');
+            if (name) {
+                const icon = prompt('Введіть емодзі для категорії:', '📂');
+                showMessage('success', `Категорія "${name}" додана з іконкою ${icon}`);
+                // Here would be API call to add category
+            }
+        }
+        
+        function editCategory(categoryId) {
+            showMessage('info', `Редагування категорії: ${categoryId}`);
+            // Here would open edit modal
+        }
+        
+        function hideCategory(categoryId) {
+            if (confirm('Ви впевнені, що хочете приховати цю категорію? Всі послуги в ній також будуть приховані.')) {
+                showMessage('warning', `Категорія ${categoryId} прихована`);
+            }
+        }
+        
+        // Subcategory management functions
+        function addSubcategory(categoryId) {
+            showSubcategoryModal(categoryId);
+        }
+        
+        function editSubcategory(categoryId, subcategoryId) {
+            showMessage('info', `Редагування типу роботи: ${subcategoryId} в категорії ${categoryId}`);
+            // Here would open edit modal with current data
+        }
+        
+        function hideSubcategory(categoryId, subcategoryId) {
+            if (confirm('Ви впевнені, що хочете приховати цей тип роботи?')) {
+                showMessage('warning', `Тип роботи ${subcategoryId} приховано`);
+            }
+        }
+        
+        function deleteSubcategory(categoryId, subcategoryId) {
+            if (confirm('Ви впевнені, що хочете видалити цей тип роботи? Всі послуги цього типу будуть переміщені в загальну категорію.')) {
+                showMessage('success', `Тип роботи ${subcategoryId} видалено`);
+            }
+        }
+        
+        // Category toggle functions
+        function toggleCategory(categoryId) {
+            const categoryGroup = document.querySelector(`[data-category="${categoryId}"]`);
+            categoryGroup.classList.toggle('collapsed');
+        }
+        
+        function expandAllCategories() {
+            document.querySelectorAll('.category-group').forEach(group => {
+                group.classList.remove('collapsed');
+            });
+            showMessage('info', 'Всі категорії розгорнуто');
+        }
+        
+        function collapseAllCategories() {
+            document.querySelectorAll('.category-group').forEach(group => {
+                group.classList.add('collapsed');
+            });
+            showMessage('info', 'Всі категорії згорнуто');
+        }
+        
+        // Modal functions
+        function showSubcategoryModal(categoryId) {
+            const modalHtml = `
+                <div class="modal active" id="subcategory-modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Додати тип роботи</h3>
+                            <button class="modal-close" onclick="closeModal('subcategory-modal')">×</button>
+                        </div>
+                        
+                        <form class="modal-form" onsubmit="saveSubcategory(event, '${categoryId}')">
+                            <div class="form-group">
+                                <label class="form-label">Назва типу роботи</label>
+                                <input type="text" class="form-input" name="name" placeholder="Наприклад: Веб-розробка" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Опис</label>
+                                <textarea class="form-input form-textarea" name="description" placeholder="Короткий опис того, що включає цей тип роботи"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Іконка</label>
+                                <div class="icon-picker" id="icon-picker">
+                                    <div class="icon-option selected" data-icon="🌐">🌐</div>
+                                    <div class="icon-option" data-icon="📱">📱</div>
+                                    <div class="icon-option" data-icon="💻">💻</div>
+                                    <div class="icon-option" data-icon="🛠️">🛠️</div>
+                                    <div class="icon-option" data-icon="🔐">🔐</div>
+                                    <div class="icon-option" data-icon="📊">📊</div>
+                                    <div class="icon-option" data-icon="🎨">🎨</div>
+                                    <div class="icon-option" data-icon="🖼️">🖼️</div>
+                                    <div class="icon-option" data-icon="📐">📐</div>
+                                    <div class="icon-option" data-icon="🏢">🏢</div>
+                                    <div class="icon-option" data-icon="🚿">🚿</div>
+                                    <div class="icon-option" data-icon="⚡">⚡</div>
+                                    <div class="icon-option" data-icon="🏠">🏠</div>
+                                    <div class="icon-option" data-icon="🔧">🔧</div>
+                                    <div class="icon-option" data-icon="📝">📝</div>
+                                    <div class="icon-option" data-icon="💡">💡</div>
+                                    <div class="icon-option" data-icon="🎯">🎯</div>
+                                    <div class="icon-option" data-icon="📈">📈</div>
+                                    <div class="icon-option" data-icon="💼">💼</div>
+                                    <div class="icon-option" data-icon="📷">📷</div>
+                                    <div class="icon-option" data-icon="🎵">🎵</div>
+                                    <div class="icon-option" data-icon="🏋️">🏋️</div>
+                                    <div class="icon-option" data-icon="📚">📚</div>
+                                    <div class="icon-option" data-icon="✈️">✈️</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Мінімальна ціна (₴)</label>
+                                <input type="number" class="form-input" name="min_price" placeholder="500" min="0">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Статус</label>
+                                <select class="form-select" name="status">
+                                    <option value="active">Активний</option>
+                                    <option value="hidden">Прихований</option>
+                                </select>
+                            </div>
+                            
+                            <div class="modal-actions">
+                                <button type="button" class="btn btn-outline" onclick="closeModal('subcategory-modal')">Скасувати</button>
+                                <button type="submit" class="btn btn-primary">Створити</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Add icon picker functionality
+            document.querySelectorAll('.icon-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.icon-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+        }
+        
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function saveSubcategory(event, categoryId) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const selectedIcon = document.querySelector('.icon-option.selected').dataset.icon;
+            
+            const subcategoryData = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                icon: selectedIcon,
+                min_price: formData.get('min_price'),
+                status: formData.get('status'),
+                category_id: categoryId
+            };
+            
+            console.log('Створення підкатегорії:', subcategoryData);
+            
+            showMessage('success', `Тип роботи "${subcategoryData.name}" додано до категорії ${categoryId}`);
+            closeModal('subcategory-modal');
+            
+            // Here would be API call to save subcategory
+            // Then refresh the categories list
+        }
+        
+        // Filter functions for categories
+        function filterCategories(searchTerm) {
+            const categoryGroups = document.querySelectorAll('.category-group');
+            
+            categoryGroups.forEach(group => {
+                const categoryName = group.querySelector('.category-name').textContent.toLowerCase();
+                const subcategoryNames = Array.from(group.querySelectorAll('.subcategory-name'))
+                    .map(el => el.textContent.toLowerCase());
+                
+                const matches = categoryName.includes(searchTerm.toLowerCase()) ||
+                    subcategoryNames.some(name => name.includes(searchTerm.toLowerCase()));
+                
+                group.style.display = matches ? 'block' : 'none';
+            });
+            
+            console.log('Пошук категорій:', searchTerm);
+        }
+        
+        function filterCategoriesByType(type) {
+            const categoryGroups = document.querySelectorAll('.category-group');
+            
+            categoryGroups.forEach(group => {
+                if (type === '') {
+                    group.style.display = 'block';
+                } else if (type === 'category') {
+                    group.style.display = 'block';
+                    // Hide subcategories
+                    group.querySelectorAll('.subcategory-item').forEach(item => {
+                        item.style.display = 'none';
+                    });
+                } else if (type === 'subcategory') {
+                    group.style.display = 'block';
+                    // Show only subcategories
+                    group.querySelectorAll('.subcategory-item').forEach(item => {
+                        item.style.display = 'flex';
+                    });
+                }
+            });
+            
+            console.log('Фільтр по типу:', type);
+        }
+        
+        function filterCategoriesByStatus(status) {
+            console.log('Фільтр по статусу:', status);
+            // Here would be filtering logic based on status
+        }
+        
+        // Support functions
+        function replySupport(ticketId) {
+            showMessage('info', `Відповідь на звернення: ${ticketId}`);
+        }
+        
+        function viewSupport(ticketId) {
+            showMessage('info', `Перегляд звернення: ${ticketId}`);
+        }
+        
+        // Settings functions
+        function saveSettings() {
+            showMessage('success', 'Налаштування збережено успішно!');
+        }
+        
+        // Notifications
+        function showNotifications() {
+            showMessage('info', 'Сповіщення:\n• 5 нових користувачів\n• 3 послуги на модерації\n• 12 нових відгуків\n• 1 спірне замовлення');
+        }
+        
+        // Search and filter functions
+        function filterUsers(searchTerm) {
+            console.log('Пошук користувачів:', searchTerm);
+            // Here would be filtering logic
+        }
+        
+        function filterUsersByRole(role) {
+            console.log('Фільтр по ролі:', role);
+        }
+        
+        function filterUsersByStatus(status) {
+            console.log('Фільтр по статусу:', status);
+        }
+        
+        function filterServices(searchTerm) {
+            console.log('Пошук послуг:', searchTerm);
+        }
+        
+        function filterOrders(searchTerm) {
+            console.log('Пошук замовлень:', searchTerm);
+        }
+        
+        // Message system
+        function showMessage(type, text, duration = 5000) {
+            // Remove existing messages
+            const existingMessages = document.querySelectorAll('.admin-message');
+            existingMessages.forEach(msg => msg.remove());
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `admin-message alert alert-${type}`;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                max-width: 400px;
+                animation: slideIn 0.3s ease;
+                cursor: pointer;
+            `;
+            
+            const icons = {
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️',
+                'info': '💡'
+            };
+            
+            messageDiv.innerHTML = `
+                <span>${icons[type] || '💡'}</span>
+                ${text.replace(/\n/g, '<br>')}
+                <span style="float: right; margin-left: 15px; font-weight: bold;">×</span>
+            `;
+            
+            messageDiv.onclick = () => messageDiv.remove();
+            document.body.appendChild(messageDiv);
+            
+            // Auto remove
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, duration);
+        }
+        
+        // Chart filter functions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers for chart filters
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from siblings
+                    this.parentNode.querySelectorAll('.filter-btn').forEach(sibling => {
+                        sibling.classList.remove('active');
+                    });
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    console.log('Фільтр графіка:', this.textContent);
+                });
+            });
+            
+            // Auto-update stats (demo)
+            setInterval(() => {
+                const statNumbers = document.querySelectorAll('.stat-number');
+                statNumbers.forEach(stat => {
+                    if (Math.random() < 0.02) { // 2% chance to update
+                        const currentValue = parseInt(stat.textContent.replace(/[^\d]/g, ''));
+                        const change = Math.floor(Math.random() * 5) - 2;
+                        const newValue = Math.max(0, currentValue + change);
+                        
+                        if (stat.textContent.includes('₴')) {
+                            if (stat.textContent.includes('М')) {
+                                stat.textContent = `₴${(newValue / 1000000).toFixed(1)}М`;
+                            } else if (stat.textContent.includes('К')) {
+                                stat.textContent = `₴${Math.floor(newValue / 1000)}К`;
+                            } else {
+                                stat.textContent = `₴${newValue.toLocaleString()}`;
+                            }
+                        } else if (stat.textContent.includes('.')) {
+                            stat.textContent = (newValue / 10).toFixed(1);
+                        } else if (stat.textContent.includes('%')) {
+                            stat.textContent = newValue + '%';
+                        } else {
+                            stat.textContent = newValue.toLocaleString();
+                        }
+                    }
+                });
+            }, 5000);
+            
+            // Add slide in animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey) {
+                const shortcuts = {
+                    '1': 'dashboard',
+                    '2': 'users',
+                    '3': 'services',
+                    '4': 'orders',
+                    '5': 'analytics',
+                    '6': 'settings'
+                };
+                
+                if (shortcuts[e.key]) {
+                    e.preventDefault();
+                    showSection(shortcuts[e.key]);
+                }
+            }
+            
+            // ESC to close mobile menu
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
+        });
+        
+        // Responsive handler
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 1024) {
+                closeMobileMenu();
+            }
+        });
+        
+        // Performance monitoring
+        let pageLoadTime = performance.now();
+        window.addEventListener('load', function() {
+            pageLoadTime = performance.now() - pageLoadTime;
+            console.log(`Адмін панель завантажена за ${pageLoadTime.toFixed(2)}мс`);
+        });
+        
+        // Auto-save drafts (for forms)
+        function autosaveDraft(formId, data) {
+            try {
+                localStorage.setItem(`servicehub_admin_draft_${formId}`, JSON.stringify({
+                    data: data,
+                    timestamp: Date.now()
+                }));
+            } catch (error) {
+                console.warn('Не вдалося зберегти чернетку:', error);
+            }
+        }
+        
+        // Restore drafts
+        function restoreDraft(formId) {
+            try {
+                const draft = localStorage.getItem(`servicehub_admin_draft_${formId}`);
+                if (draft) {
+                    const parsed = JSON.parse(draft);
+                    // Check if draft is not older than 24 hours
+                    if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+                        return parsed.data;
+                    } else {
+                        localStorage.removeItem(`servicehub_admin_draft_${formId}`);
+                    }
+                }
+            } catch (error) {
+                console.warn('Не вдалося відновити чернетку:', error);
+            }
+            return null;
+        }
+        
+        // Bulk actions
+        function selectAll(checkboxes) {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        }
+        
+        function deselectAll(checkboxes) {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
+        
+        function bulkAction(action, selectedIds) {
+            if (selectedIds.length === 0) {
+                showMessage('warning', 'Оберіть принаймні один елемент');
+                return;
+            }
+            
+            const actions = {
+                'delete': 'видалити',
+                'block': 'заблокувати',
+                'approve': 'схвалити',
+                'reject': 'відхилити'
+            };
+            
+            if (confirm(`Ви впевнені, що хочете ${actions[action]} ${selectedIds.length} елементів?`)) {
+                showMessage('success', `Дія "${actions[action]}" виконана для ${selectedIds.length} елементів`);
+            }
+        }
+        
+        // Error boundary
+        window.addEventListener('error', function(e) {
+            console.error('Admin panel error:', e.error);
+            showMessage('error', 'Сталася помилка. Спробуйте оновити сторінку.');
+        });
+        
+        // Demo notification
+        setTimeout(() => {
+            showMessage('info', 'Ласкаво просимо в адміністративну панель ServiceHub! 🎉');
+        }, 1000);
+    </script>
+</body>
+</html>

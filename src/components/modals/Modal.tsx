@@ -1,15 +1,13 @@
 'use client'
 import { ReactNode } from 'react'
 import Portal from './Portal'
-import Button from '../ui/Button'
-import IconSvg from '../ui/IconSvg'
+import { Button } from '../ui/button'
 import { NoneToVoidFunction } from '@/@types/global'
 import { overlayVariants, modalVariants } from '../ui/animate/variants'
-import { AnimatePresence, motion } from 'motion/react'
-import classNames from 'classnames'
-
-import './Modal.scss'
+import { AnimatePresence, motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
+import { X } from 'lucide-react'
 
 type Props = {
 	children: ReactNode
@@ -20,8 +18,10 @@ type Props = {
 	footer?: ReactNode
 	onClose?: NoneToVoidFunction
 	className?: string
+	classNameContent?: string
 	headerColor?: 'default' | 'primary'
 	position?: 'center' | 'top'
+	size?: 'sm' | 'md' | 'lg'
 }
 
 const Modal = ({
@@ -35,6 +35,8 @@ const Modal = ({
 	className,
 	headerColor = 'default',
 	position = 'center',
+	size = 'md',
+	classNameContent,
 }: Props) => {
 	useBodyScrollLock(isOpen)
 
@@ -42,15 +44,18 @@ const Modal = ({
 		if (header || title) {
 			return (
 				<div
-					className={classNames(
-						'modal-header',
+					className={cn(
+						'px-8 py-4',
 						className,
-						`header-${headerColor}`
+						'border-b border-gray-100',
+						headerColor === 'primary' && 'bg-primary text-white'
 					)}
 				>
 					{header}
-					{title && <div className='modal-title'>{title}</div>}
-					{subtitle && <div className='modal-subtitle'>{subtitle}</div>}
+					{title && (
+						<div className='text-xl font-semibold text-gray-800'>{title}</div>
+					)}
+					{subtitle && <div className='text-gray-600 mt-1'>{subtitle}</div>}
 				</div>
 			)
 		}
@@ -61,14 +66,17 @@ const Modal = ({
 			<AnimatePresence>
 				{isOpen && (
 					<div
-						className={classNames('modal', `modal-${position}`)}
+						className={cn(
+							'fixed inset-0 z-[150] py-4 px-2 flex justify-center items-center',
+							{ 'items-start': position === 'top' }
+						)}
 						role='dialog'
 						aria-modal='true'
 						tabIndex={-1}
 					>
 						<motion.div
 							onClick={onClose}
-							className='modal-overlay'
+							className='fixed inset-0 bg-black/50 backdrop-blur-sm -z-10'
 							variants={overlayVariants}
 							initial='hidden'
 							animate='visible'
@@ -79,24 +87,29 @@ const Modal = ({
 							initial='hidden'
 							animate='visible'
 							exit='exit'
-							className='modal-content'
+							className={cn(
+								'relative flex flex-col bg-white rounded-xl shadow-2xl w-full max-h-[95vh]',
+								{
+									'max-w-[26rem]': size === 'sm',
+									'max-w-[31.25rem]': size === 'md',
+									'max-w-[56.25rem]': size === 'lg',
+								}
+							)}
 						>
 							<Button
-								round
-								color='translucent'
-								size='sm'
-								ariaLabel='Close'
-								className='modal-close'
+								variant='ghost'
+								size='round'
+								withoutTransform
+								aria-label='Close'
 								onClick={onClose}
+								className='absolute top-3 right-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100'
 							>
-								<IconSvg name='close' />
+								<X size={20} />
 							</Button>
 							{renderHeader()}
-							<div className='modal-body'>
+							<div className={cn('px-8 py-6 flex-1', classNameContent)}>
 								{children}
-								{footer && (
-									<div className='modal-actions-container'>{footer}</div>
-								)}
+								{footer && <div className='pt-7'>{footer}</div>}
 							</div>
 						</motion.div>
 					</div>

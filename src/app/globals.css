@@ -1,0 +1,371 @@
+/* @import '../styles/_variables.scss'; */
+/* @import '../styles/_common.scss'; */
+
+@custom-variant dark (&:is(.dark *));
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		/* Основные цвета */
+		--background: 210 40% 98%; /* #f8fafc */
+		--foreground: 222.2 84% 4.9%;
+		--card: 0 0% 100%;
+		--card-foreground: 222.2 84% 4.9%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 222.2 84% 4.9%;
+
+		/* Primary цвета */
+		--primary: 221.2 83.2% 53.3%; /* #2563EB */
+		--primary-foreground: 210 40% 98%;
+		--primary-dark: 221.2 83.2% 45.1%; /* #1d4ed8 */
+		--primary-hsl: hsl(221.2 83.2% 53.3%);
+		--primary-dark-hsl: hsl(221.2 83.2% 45.1%);
+		--primary-light: 262.1 83.3% 57.8%; /* #8b5cf6 */
+		--primary-gradient: linear-gradient(
+			135deg,
+			hsl(221.2 83.2% 53.3%),
+			hsl(221.2 83.2% 45.1%)
+		);
+		--secondary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+		--primary-gradient-light: linear-gradient(
+			135deg,
+			hsl(270, 100%, 98.04%),
+			hsl(268.7, 100%, 95.49%)
+		);
+
+		/* Secondary цвета */
+		--secondary: 220 9% 46%;
+		--secondary-foreground: 215 25% 27%; /* #64748b */
+		--color-secondary-hover: 210 40% 88.2%; /* #e2e8f0 */
+		--color-secondary-shadow: 220 9% 46% / 0.4;
+
+		/* Accent цвета */
+		--accent: 38 92% 50%; /* #F59E0B */
+		--accent-foreground: 210 40% 98%;
+		--accent-dark: 38 92% 42.5%; /* #d97706 */
+		--accent-gradient-light: linear-gradient(
+			to bottom right,
+			hsl(var(--primary) / 0.15),
+			transparent,
+			hsl(var(--accent) / 0.15)
+		);
+		/* Muted цвета */
+		--muted: 210 40% 96%;
+		--muted-foreground: 215.4 16.3% 46.9%;
+
+		/* Success цвета */
+		--success: 160 84% 39%; /* #10B981 */
+		--success-foreground: 210 40% 98%;
+		--success-light: 160 84% 94.1%; /* #f0fdf4 */
+
+		/* Destructive/Error цвета */
+		--destructive: 0 84.2% 60.2%; /* #EF4444 */
+		--destructive-foreground: 210 40% 98%;
+		/*--error: 0 84.2% 60.2%;  #EF4444 */
+		--destructive-dark: 0 84.2% 52.2%; /* #dc2626 */
+		--destructive-light: 0 84.2% 94.1%; /* #fef2f2 */
+
+		/* Border и Input цвета */
+		--border: 214.3 31.8% 91.4%;
+		--input: 0 0% 98%; /* #fafafa */
+		--ring: 221.2 83.2% 53.3%;
+		--radius: 0.75rem;
+
+		/* Цвета из _variables.scss, которые используются в проекте */
+		--color-text: 222.2 84% 4.9%; /* #1f2937 */
+		--color-text-light: 210 40% 84.7%; /* #d1d5db */
+		--color-text-secondary: 215 25% 27%; /* #64748b */
+		--color-text-tertiary: 215 25% 22.1%; /* #374151 */
+		--color-text-title: 222.2 84% 4.9%; /* #1f2937 */
+
+		/* Black и White */
+		--color-black: 0 0% 2.7%; /* #070708 */
+		--color-white: 0 0% 100%; /* #ffffff */
+		--color-footer-background: 222.2 84% 4.9%;
+
+		/* Input специфичные цвета */
+		--color-input-background: 0 0% 98%; /* #fafafa */
+		--color-input-border: 214.3 31.8% 91.4%; /* #e5e7eb */
+		--color-input-placeholder: 215 25% 27%; /* #9ca3af */
+
+		/* Theme background цвета */
+
+		--background-gradient-secondary: linear-gradient(
+			135deg,
+			#667eea 0%,
+			#764ba2 100%
+		);
+		--color-avatar-background: var(--theme-background-color-primary);
+
+		/* Links */
+		--color-links: 215 25% 27%; /* #64748b */
+
+		/* Opacity цвета */
+		--color-opacity-primary-10: 221.2 83.2% 53.3% / 0.1;
+		--color-opacity-primary-15: 221.2 83.2% 53.3% / 0.15;
+		--color-opacity-primary-20: 221.2 83.2% 53.3% / 0.2;
+		--color-opacity-primary-30: 221.2 83.2% 53.3% / 0.3;
+
+		--color-opacity-white-10: 0 0% 100% / 0.1;
+		--color-opacity-white-20: 0 0% 100% / 0.2;
+		--color-opacity-white-30: 0 0% 100% / 0.3;
+		--color-opacity-white-95: 0 0% 100% / 0.95;
+
+		--color-opacity-black-10: 0 0% 2.7% / 0.1;
+		--color-opacity-black-15: 0 0% 2.7% / 0.15;
+		--color-opacity-black-20: 0 0% 2.7% / 0.2;
+		--color-opacity-black-06: 0 0% 2.7% / 0.06;
+
+		--color-opacity-input-border-15: 214.3 31.8% 91.4% / 0.15;
+		--color-opacity-error-10: 0 84.2% 60.2% / 0.1;
+
+		/* Shadow цвета */
+		--color-primary-shadow: 221.2 83.2% 53.3% / 0.3;
+		--color-accent-shadow: 38 92% 50% / 0.3;
+		--color-default-shadow: 0 0% 0% / 0.1;
+
+		/* Border radius */
+		--border-radius-default: 1rem;
+		--border-radius-default-bigger: 1.25rem;
+
+		/* Transitions */
+		--hover-transition: all 0.3s ease;
+		--spacing: 0.25rem;
+	}
+
+	.dark {
+		--background: 222.2 84% 4.9%;
+		--foreground: 210 40% 98%;
+		--card: 222.2 84% 4.9%;
+		--card-foreground: 210 40% 98%;
+		--popover: 222.2 84% 4.9%;
+		--popover-foreground: 210 40% 98%;
+
+		/* Primary цвета */
+		--primary: 217.2 91.2% 59.8%;
+		--primary-foreground: 222.2 84% 4.9%;
+		--primary-hover: 217.2 91.2% 51.8%;
+		--primary-light: 262.1 83.3% 67.8%;
+		--primary-dark: 217.2 91.2% 45.1%;
+
+		/* Secondary цвета */
+		--secondary: 217.2 32.6% 17.5%;
+		--secondary-foreground: 210 40% 84.7%; /* #d1d5db - светлый цвет для темного фона */
+		--color-secondary-hover: 217.2 32.6% 25.5%; /* #475569 */
+		--color-secondary-shadow: 217.2 32.6% 17.5% / 0.3;
+
+		/* Accent цвета */
+		--accent: 38 92% 50%; /* #F59E0B */
+		--accent-foreground: 210 40% 98%;
+		--accent-dark: 38 92% 42.5%;
+
+		/* Muted цвета */
+		--muted: 217.2 32.6% 17.5%;
+		--muted-foreground: 215 20.2% 65.1%;
+
+		/* Success цвета */
+		--success: 160 84% 39%; /* #10B981 */
+		--success-foreground: 210 40% 98%;
+		--success-light: 160 84% 94.1%;
+
+		/* Destructive/Error цвета */
+		--destructive: 0 62.8% 30.6%; /* #EF4444 */
+		--destructive-foreground: 210 40% 98%;
+		--error: 0 62.8% 30.6%;
+		--error-hover: 0 62.8% 22.6%;
+		--error-light: 0 62.8% 94.1%;
+
+		/* Border и Input цвета */
+		--border: 217.2 32.6% 17.5%;
+		--input: 217.2 32.6% 17.5%;
+		--ring: 224.3 76.3% 94.1%;
+
+		/* Sidebar цвета для темной темы */
+		--sidebar-background: 240 5.9% 10%;
+		--sidebar-foreground: 240 4.8% 95.9%;
+		--sidebar-primary: 0 0% 98%;
+		--sidebar-primary-foreground: 240 5.9% 10%;
+		--sidebar-accent: 240 3.7% 15.9%;
+		--sidebar-accent-foreground: 240 4.8% 95.9%;
+		--sidebar-border: 240 3.7% 15.9%;
+		--sidebar-ring: 217.2 91.2% 59.8%;
+
+		/* Цвета для темной темы */
+		--color-text: 210 40% 98%; /* #f8fafc */
+		--color-text-light: 215 25% 27%; /* #94a3b8 */
+		--color-text-secondary: 210 40% 84.7%; /* #d1d5db */
+		--color-text-tertiary: 210 40% 96.1%; /* #f1f5f9 */
+		--color-text-title: 210 40% 98%; /* #f8fafc */
+
+		/* Gray цвета для темной темы */
+		--color-light-gray: 222.2 84% 4.9%; /* #1f2937 */
+		--color-light-gray-hover: 215 25% 22.1%; /* #374151 */
+		--color-gray: 210 40% 84.7%; /* #d1d5db */
+		--color-dark-gray: 210 40% 98%; /* #f8fafc */
+
+		/* Input специфичные цвета для темной темы */
+		--color-input-background: 215 25% 22.1%; /* #374151 */
+		--color-input-border: 215 25% 27%; /* #4b5563 */
+		--color-input-placeholder: 210 40% 84.7%; /* #d1d5db */
+
+		/* Theme background цвета для темной темы */
+		--theme-background-color: 222.2 84% 4.9%; /* #1f2937 */
+		--theme-background-color-primary: linear-gradient(135deg, #1e40af, #1e3a8a);
+		--theme-background-color-light: linear-gradient(135deg, #1e293b, #334155);
+		--theme-background-color-secondary: linear-gradient(
+			135deg,
+			#4c1d95,
+			#581c87
+		);
+
+		/* Links для темной темы */
+		--color-links: 210 40% 84.7%; /* #d1d5db */
+	}
+}
+
+@layer base {
+	* {
+		@apply border-border outline-ring/50;
+		scrollbar-width: thin;
+		scrollbar-color: var(--theme-background-color-secondary) transparent;
+	}
+
+	body {
+		@apply bg-background text-foreground;
+		scrollbar-gutter: stable both-edges;
+	}
+
+	body.no-scroll {
+		overflow: hidden;
+	}
+
+	/* Учет sticky header при автоматической прокрутке */
+	html {
+		scroll-behavior: smooth;
+	}
+
+	/* Добавляем отступ для элементов, к которым может быть прокрутка */
+	[id],
+	[data-radix-scroll-area-viewport],
+	[data-radix-focus-guard] {
+		scroll-margin-top: 80px; /* Примерная высота header + отступ */
+	}
+
+	::-webkit-scrollbar {
+		width: 4px;
+		height: 4px;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background-color: var(--theme-background-color-secondary);
+		border-radius: 4px;
+	}
+
+	::-webkit-scrollbar-track {
+		background-color: transparent;
+	}
+
+	h1 {
+		@apply font-plus-jakarta-sans font-bold text-6xl;
+	}
+
+	h2 {
+		@apply font-semibold text-4xl;
+	}
+
+	h2 strong {
+		@apply font-medium text-accent;
+	}
+
+	h3,
+	h4,
+	h5,
+	h6 {
+		@apply font-semibold;
+	}
+
+	h3 {
+		@apply text-3xl;
+	}
+
+	h4 {
+		@apply text-2xl;
+	}
+
+	section {
+		@apply container mx-auto px-4;
+	}
+}
+
+@layer utilities {
+	.font-plus-jakarta-sans {
+		font-family: var(--font-plus-jakarta-sans), sans-serif;
+	}
+}
+
+@layer components {
+	/* Float animation for auth visual */
+	@keyframes float {
+		0%,
+		100% {
+			transform: translateY(0px) rotate(0deg);
+		}
+		50% {
+			transform: translateY(-20px) rotate(180deg);
+		}
+	}
+
+	/* Range slider styles */
+	.slider::-webkit-slider-thumb {
+		appearance: none;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: hsl(var(--primary));
+		cursor: pointer;
+		box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+		transition: all 0.2s ease;
+	}
+
+	.slider::-webkit-slider-thumb:hover {
+		transform: scale(1.1);
+		box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+	}
+
+	.slider::-moz-range-thumb {
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: hsl(var(--primary));
+		cursor: pointer;
+		border: none;
+		box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+		transition: all 0.2s ease;
+	}
+
+	.slider::-moz-range-thumb:hover {
+		transform: scale(1.1);
+		box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+	}
+}
+
+.auth-visual ::after {
+	content: '';
+	position: absolute;
+	top: -50%;
+	right: -50%;
+	width: 160%;
+	height: 160%;
+	background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="1" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="1" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+	animation: float 20s ease-in-out infinite;
+}
+
+/* CROP - Croppie styles */
+
+/* Градиенты */
+.custom-primary-gradient {
+	background: var(--primary-gradient);
+}
